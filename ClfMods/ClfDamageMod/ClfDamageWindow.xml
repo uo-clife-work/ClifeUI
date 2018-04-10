@@ -1,0 +1,406 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+
+	<Windows>
+
+		<!-- ListRow Template: Default size -->
+		<Window name="ClfDamageListRowTemplate_default" movable="false">
+			<Size>
+				<AbsPoint x="560" y="29" />
+			</Size>
+
+			<Windows>
+
+				<FullResizeImage name="$parentBg" alpha="0.25" inherits="UO_Simple_Black_Background"  layer="background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent"/>
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="$parent"/>
+					</Anchors>
+				</FullResizeImage>
+
+				<Button name="$parentCheck" inherits="UO_Default_Check_Button">
+					<Anchors>
+						<Anchor point="left" relativePoint="left" relativeTo="">
+							<AbsPoint x="3" y="0"/>
+						</Anchor>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onMobileCheckBtn" />
+					</EventHandlers>
+				</Button>
+
+				<Label name="$parentCount" font="MyriadPro_10" maxchars="4" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="36" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="20" y="-2"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+
+				<Label name="$parentName" font="Classic_std_19" maxchars="30" textalign="left" handleinput="true">
+					<Size>
+						<AbsPoint x="165" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="30" y="4"/>
+						</Anchor>
+					</Anchors>
+
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onMobileNameBtn"/>
+						<EventHandler event="OnMouseOver" function="ClfDamageWindow.onMobileNameBtnOver"/>
+						<EventHandler event="OnMouseOverEnd" function="ClfDamageWindow.onMobileNameBtnOverEnd"/>
+					</EventHandlers>
+				</Label>
+
+				<Label name="$parentHealth" font="MyriadPro_14" maxchars="10" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="48" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentName">
+							<AbsPoint x="13" y="-1"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentHit" font="MyriadPro_14" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="40" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentHealth">
+							<AbsPoint x="14" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentMinutes" font="MyriadPro_14" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="60" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentHit">
+							<AbsPoint x="12" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentAvg" font="MyriadPro_14" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="60" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentMinutes">
+							<AbsPoint x="14" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentTotal" font="Arial_Black_16" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="80" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentAvg">
+							<AbsPoint x="10" y="-1"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+			</Windows>
+
+		</Window><!-- /ClfDamageListRowTemplate_default -->
+
+
+		<!-- ListRow Template: Middle size -->
+		<Window name="ClfDamageListRowTemplate_middle" movable="false">
+			<Size>
+				<AbsPoint x="365" y="29" />
+			</Size>
+
+			<Windows>
+
+				<FullResizeImage name="$parentBg" alpha="0.25" inherits="UO_Simple_Black_Background"  layer="background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent"/>
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="$parent"/>
+					</Anchors>
+				</FullResizeImage>
+
+				<Button name="$parentCheck" inherits="UO_Default_Check_Button">
+					<Anchors>
+						<Anchor point="left" relativePoint="left" relativeTo="">
+							<AbsPoint x="3" y="0"/>
+						</Anchor>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onMobileCheckBtn" />
+					</EventHandlers>
+				</Button>
+
+				<Label name="$parentCount" font="MyriadPro_10" maxchars="4" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="36" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="20" y="-2"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentName" font="Classic_std_19" maxchars="30" textalign="left" handleinput="true">
+					<Size>
+						<AbsPoint x="165" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="30" y="4"/>
+						</Anchor>
+					</Anchors>
+
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onMobileNameBtn"/>
+						<EventHandler event="OnMouseOver" function="ClfDamageWindow.onMobileNameBtnOver"/>
+						<EventHandler event="OnMouseOverEnd" function="ClfDamageWindow.onMobileNameBtnOverEnd"/>
+					</EventHandlers>
+				</Label>
+
+				<Label name="$parentMinutes" font="MyriadPro_14" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="60" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentName">
+							<AbsPoint x="12" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentTotal" font="Arial_Black_16" maxchars="64" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="80" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentMinutes">
+							<AbsPoint x="10" y="-1"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+			</Windows>
+
+		</Window><!-- /ClfDamageListRowTemplate_middle -->
+
+
+		<!-- CheckBox Template -->
+		<Window name="ClfDamageWindowCheckTemplate" layer="popup">
+			<Size>
+				<AbsPoint x="170" y="20"/>
+			</Size>
+
+			<Windows>
+
+				<!-- CheckBox -->
+				<Button name="$parentCheck" inherits="UO_Default_Check_Button" layer="overlay">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onCheckBtn" />
+					</EventHandlers>
+				</Button>
+
+				<Label name="$parentLabel" font="MyriadPro_14" maxchars="60" textalign="left" autoresizewidth="true">
+					<Size>
+						<AbsPoint x="140" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="right" relativePoint="left" relativeTo="$parentCheck">
+							<AbsPoint x="5" y="-4"/>
+						</Anchor>
+					</Anchors>
+					<Color r="210" g="215" b="220" />
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.onCheckBtn" />
+					</EventHandlers>
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfDamageWindowCheckTemplate -->
+
+
+
+		<!-- MAIN WINDOW -->
+		<Window name="ClfDamageWindow" movable="true">
+			<Size>
+				<AbsPoint x="560" y="410"/>
+			</Size>
+
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" relativeTo="">
+					<AbsPoint x="20" y="100"/>
+				</Anchor>
+			</Anchors>
+
+			<EventHandlers>
+				<EventHandler event="OnInitialize" function="ClfDamageWindow.initialize"/>
+				<EventHandler event="OnShutdown" function="ClfDamageWindow.shutdown"/>
+<!--				<EventHandler event="OnUpdate" function="ClfDamageWindow.onUpdateWindow"/>-->
+			</EventHandlers>
+
+			<Windows>
+				<!-- General Window Settings -->
+				<FullResizeImage name="$parentBackground" alpha="0.48" inherits="UO_Default_Black_Background"  layer="background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo=""/>
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo=""/>
+					</Anchors>
+				</FullResizeImage>
+
+				<!-- Toggle Button -->
+				<Button name="$parentToggle" backgroundtexture="Swirl_Button" highlighttexture="Swirl_Button" layer="popup">
+					<Size>
+						<AbsPoint x="20" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parentTitleBar" />
+					</Anchors>
+					<TexCoords>
+						<Normal         x="0" y="0" />
+						<NormalHighlit  x="0" y="23" />
+						<Pressed        x="0" y="23" />
+						<PressedHighlit x="0" y="23" />
+						<Disabled       x="0" y="23" />
+					</TexCoords>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.toggle"/>
+					</EventHandlers>
+				</Button>
+
+				<!-- Setting -->
+				<Window name="$parentSetting" layer="popup">
+					<Size>
+						<AbsPoint x="560" y="30"/>
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parentTitleBar">
+							<AbsPoint x="30" y="0"/>
+						</Anchor>
+					</Anchors>
+
+					<Windows>
+
+						<!-- Down Arrow Button -->
+						<Button name="$parentDown" texture="UO_Core" layer="popup">
+							<Size>
+								<AbsPoint x="21" y="27" />
+							</Size>
+							<TexCoords>
+								<Normal         texture="UO_Core" x="210" y="338" />
+								<NormalHighlit  texture="UO_Core" x="234" y="338" />
+								<Pressed        texture="UO_Core" x="234" y="338" />
+							</TexCoords>
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfDamageWindow.showSettings"/>
+							</EventHandlers>
+						</Button>
+
+						<!-- Up Arrow Button -->
+						<Button name="$parentUp" inherits="UpArrow" texture="UO_Core" layer="popup">
+							<Size>
+								<AbsPoint x="21" y="27" />
+							</Size>
+							<TexCoords>
+								<Normal         texture="UO_Core" x="164" y="338" />
+								<NormalHighlit  texture="UO_Core" x="186" y="338" />
+								<Pressed        texture="UO_Core" x="186" y="338" />
+							</TexCoords>
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfDamageWindow.hideSettings"/>
+							</EventHandlers>
+						</Button>
+
+						<!-- Setting Menu Block -->
+						<Window name="$parentMenu">
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="-18" y="24"/>
+								</Anchor>
+							</Anchors>
+							<Windows>
+
+								<FullResizeImage name="$parentBG" alpha="0.95" inherits="UO_Default_Black_Background"  layer="background">
+									<Anchors>
+										<Anchor point="topleft" relativePoint="topleft"/>
+										<Anchor point="bottomright" relativePoint="bottomright"/>
+									</Anchors>
+								</FullResizeImage>
+
+								<!-- Setting Menu -->
+								<Window name="$parentCtt"></Window>
+
+							</Windows>
+						</Window>
+
+					</Windows>
+				</Window>
+
+				<!-- Close Button -->
+				<Button name="$parentClose" inherits="UO_Default_Close_Button" layer="popup">
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright" relativeTo="$parentTitleBar"/>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfDamageWindow.closeWindow"/>
+					</EventHandlers>
+				</Button>
+
+				<!-- Title bar -->
+				<HorizontalResizeImage name="$parentTitleBar" inherits="UO_Default_Title_Bar" handleinput="true">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="topright" relativePoint="topright" />
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnRButtonUp" function="ClfDamageWindow.hide" />
+					</EventHandlers>
+				</HorizontalResizeImage>
+
+				<!-- Title -->
+				<Label name="$parentTitle" font="Arial_Black_14" maxchars="256" textalign="center" handleinput="false" layer="popup">
+					<Size>
+						<AbsPoint x="215" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="25" y="1" />
+						</Anchor>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-25" y="1" />
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<!-- Damages List -->
+				<window name="$parentList">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="26" />
+						</Anchor>
+						<Anchor point="bottomright" relativePoint="bottomright">
+							<AbsPoint x="0" y="-25" />
+						</Anchor>
+					</Anchors>
+				</window>
+
+			</Windows>
+		</Window><!-- /ClfDamageWindow -->
+
+	</Windows>
+</Interface>

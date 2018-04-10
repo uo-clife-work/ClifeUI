@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Assets>
+		<!--  *************** Examples ***************  -->
+		<!-- <Font name="font_arialblack12" face="Arial Black" file="fonts/ariblk.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false"/> -->
+		<!-- <Font name="font_arialblack16" face="Arial Black" file="fonts/ariblk.ttf" height="16" texsize="512" antialias="true" hinting="true" autohinting="true" outline="false" shadow="true" shadowsize="1" /> -->
+		<!--  ****************************************  -->
+
+		<Font name="MgenPlus_8"  face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_9"  face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_10" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_11" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_12" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_13" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_14" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_15" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_16" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_17" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_18" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_19" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MgenPlus_20" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+
+		<Font name="MgenPlus_Shadow_8"  face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_9"  face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_10" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_11" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_12" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_13" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_14" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_15" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_16" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_17" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_18" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_19" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MgenPlus_Shadow_20" face="Mgen+" file="fonts/mgenplus-2cp-medium.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+
+		<Font name="Classic_8"  face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_9"  face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_10" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_11" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_12" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_13" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_14" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_15" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_16" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_17" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_18" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_19" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_20" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_21" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_22" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_23" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="23" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="Classic_24" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="24" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+
+		<Font name="Classic_std_8"  face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_9"  face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_10" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_11" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_12" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_13" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_14" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_15" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_16" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_17" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_18" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_19" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_20" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_21" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_22" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_23" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="23" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Classic_std_24" face="UoClassic" file="fonts/CLF-UoClassic.ttf" height="24" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+
+		<Font name="MyriadPro_8"  face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_9"  face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_10" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_11" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_12" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_13" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_14" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_15" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_16" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_17" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_18" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_19" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="MyriadPro_20" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+
+		<Font name="MyriadPro_Shadow_8"  face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="8" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_9"  face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="9" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_10" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_11" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_12" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_13" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_14" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_15" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_16" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_17" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_18" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_19" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+		<Font name="MyriadPro_Shadow_20" face="Genkaku" file="fonts/SourceHanSans-Medium.otf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="true"/>
+
+		<Font name="Arial_Black_10" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_11" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_12" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_13" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_14" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_15" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_16" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_17" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_18" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_19" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_20" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_21" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+		<Font name="Arial_Black_22" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="false" outline="false" shadow="false"/>
+
+		<Font name="Arial_Black_Shadow_8"  face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="8" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_9"  face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="9" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_10" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_11" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_12" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_13" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_14" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_15" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_16" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_17" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_18" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_19" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_20" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_21" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+		<Font name="Arial_Black_Shadow_22" face="Arial Black" file="fonts/mgenplus-2cp-heavy.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="true"/>
+
+<!--
+		<Font name="avatar_10" face="avatar" file="fonts/avatar.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_11" face="avatar" file="fonts/avatar.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_12" face="avatar" file="fonts/avatar.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_13" face="avatar" file="fonts/avatar.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_14" face="avatar" file="fonts/avatar.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_15" face="avatar" file="fonts/avatar.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_16" face="avatar" file="fonts/avatar.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_17" face="avatar" file="fonts/avatar.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_18" face="avatar" file="fonts/avatar.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_19" face="avatar" file="fonts/avatar.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_20" face="avatar" file="fonts/avatar.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_21" face="avatar" file="fonts/avatar.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+		<Font name="avatar_22" face="avatar" file="fonts/avatar.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="true" outline="true" shadow="false" bold="false"/>
+
+		<Font name="avatar_std_10" face="avatar" file="fonts/avatar.ttf" height="10" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_11" face="avatar" file="fonts/avatar.ttf" height="11" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_12" face="avatar" file="fonts/avatar.ttf" height="12" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_13" face="avatar" file="fonts/avatar.ttf" height="13" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_14" face="avatar" file="fonts/avatar.ttf" height="14" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_15" face="avatar" file="fonts/avatar.ttf" height="15" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_16" face="avatar" file="fonts/avatar.ttf" height="16" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_17" face="avatar" file="fonts/avatar.ttf" height="17" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_18" face="avatar" file="fonts/avatar.ttf" height="18" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_19" face="avatar" file="fonts/avatar.ttf" height="19" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_20" face="avatar" file="fonts/avatar.ttf" height="20" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_21" face="avatar" file="fonts/avatar.ttf" height="21" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+		<Font name="avatar_std_22" face="avatar" file="fonts/avatar.ttf" height="22" texsize="256" antialias="true" hinting="false" autohinting="true" outline="false" shadow="false" bold="false"/>
+-->
+
+	</Assets>
+</Interface>

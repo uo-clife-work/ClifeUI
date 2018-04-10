@@ -1,0 +1,102 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- Template: EventHandle Window -->
+		<Window name="ClfActionsWindow" handleinput="false" layer="background">
+			<Size>
+				<AbsPoint x="0" y="0"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+			</Anchors>
+		</Window>
+
+
+		<!-- Distance Window -->
+		<Window name="ClfDistanceWindow" handleinput="false" layer="secondary">
+			<Size>
+				<AbsPoint x="70" y="20"/>
+			</Size>
+			<Anchors>
+				<Anchor point="bottom" relativePoint="top">
+					<AbsPoint x="0" y="0" />
+				</Anchor>
+			</Anchors>
+
+			<Windows>
+				<Label name="$parentNum" font="Arial_Black_Shadow_16" maxchars="256" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="32" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="18" />
+						</Anchor>
+					</Anchors>
+					<Color r="200" g="245" b="255" />
+				</Label>
+
+				<Label name="$parentLabel" font="Arial_Black_Shadow_12" maxchars="256" textalign="leftcenter" handleinput="false" layer="background">
+					<Size>
+						<AbsPoint x="100" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeTo="$parentNum">
+							<AbsPoint x="0" y="0" />
+						</Anchor>
+					</Anchors>
+					<Color r="200" g="200" b="210" />
+				</Label>
+			</Windows>
+		</Window>
+
+
+		<!-- Target Distance Check Window -->
+		<Window name="ClfDelayTarget" handleinput="false">
+			<Size>
+				<AbsPoint x="220" y="20"/>
+			</Size>
+
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ClfActions.DelayTargetWinUpdate" />
+			</EventHandlers>
+
+			<Windows>
+				<Label name="$parentLabel" font="Arial_Black_Shadow_12" maxchars="256" textalign="center" handleinput="false" layer="default">
+					<Size>
+						<AbsPoint x="220" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="top" relativePoint="top">
+							<AbsPoint x="0" y="18" />
+						</Anchor>
+					</Anchors>
+					<Color r="200" g="200" b="210" />
+				</Label>
+			</Windows>
+		</Window>
+
+
+		<!-- AFK Window -->
+		<Window name="ClfAFKmodeWin" handleinput="false">
+			<Size>
+				<AbsPoint x="70" y="20"/>
+			</Size>
+
+			<Windows>
+				<Label name="$parentLabel" font="Arial_Black_Shadow_12" maxchars="256" textalign="center" handleinput="false" layer="default">
+					<Size>
+						<AbsPoint x="70" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="top" relativePoint="top">
+							<AbsPoint x="0" y="18" />
+						</Anchor>
+					</Anchors>
+					<Color r="200" g="200" b="210" />
+				</Label>
+			</Windows>
+		</Window>
+
+	</Windows>
+</Interface>
