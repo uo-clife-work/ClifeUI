@@ -1,0 +1,2 @@
+# Display .mod as xml
+*.mod linguist-language=xml
