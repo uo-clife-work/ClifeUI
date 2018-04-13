@@ -1,0 +1,112 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- GChat Main Window -->
+		<Window name="ClfGChatWindow" layer="" movable="true" sticky="false">
+			<Size>
+				<AbsPoint x="250" y="64"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft">
+					<AbsPoint x="100" y="100"/>
+				</Anchor>
+			</Anchors>
+			<EventHandlers>
+				<EventHandler event="OnInitialize" function="ClfChat.onGChatWinInitialize"/>
+				<EventHandler event="OnShutdown" function="ClfChat.onGChatWinShutdown"/>
+				<EventHandler event="OnLButtonDblClk" function="ClfChat.onGChatWinDblClick" />
+			</EventHandlers>
+
+			<Windows>
+
+				<!-- BG -->
+				<FullResizeImage name="$parentFrame" inherits="UO_Simple_Frame" layer="background" frameonly="false">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+					<TintColor r="120" g="130" b="160" />
+				</FullResizeImage>
+
+				<!-- Indicator Button -->
+				<button name="$parentBtn" font="Arial_Black_14" maxchars="3" textalign="top">
+					<Size>
+						<AbsPoint x="80" y="22" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="6" y="6"/>
+						</Anchor>
+					</Anchors>
+					<TextColors>
+						<Normal             r="219" g="219" b="234" />
+						<NormalHighlit      r="255" g="255" b="255" />
+					</TextColors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfChat.onStatusBtn" />
+					</EventHandlers>
+				</button>
+
+				<!-- Indicator BG -->
+				<DynamicImage name="$parentBtnBG" alpha="0.85" inherits="Clf_GcBgColorTemplate" layer="">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parentBtn" />
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="$parentBtn" />
+					</Anchors>
+					<TintColor r="112" g="112" b="126" />
+				</DynamicImage>
+
+				<!-- Active Friend Count -->
+				<Label name="$parentFrActNum" font="Arial_Black_14" maxchars="3" textalign="left">
+					<Size>
+						<AbsPoint x="60" y="14" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="93" y="6"/>
+						</Anchor>
+					</Anchors>
+					<Color r="112" g="112" b="126" />
+				</Label>
+
+				<!-- Friend Name : given latest msg  -->
+				<Label name="$parentFrName" font="Arial_Black_Shadow_12" maxchars="25" textalign="left">
+					<Size>
+						<AbsPoint x="115" y="14" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="132" y="8"/>
+						</Anchor>
+					</Anchors>
+					<Color r="202" g="202" b="217" />
+				</Label>
+
+				<!-- Message  -->
+				<Label name="$parentMsg" font="MgenPlus_12" maxchars="255" textalign="left" wordwrap="true">
+					<Size>
+						<AbsPoint x="240" y="22" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="6" y="30"/>
+						</Anchor>
+					</Anchors>
+					<Color r="218" g="218" b="234" />
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfGChatWindow -->
+
+
+		<DynamicImage name="Clf_GcBgColorTemplate" texture="CC_Widgets" layer="background">
+			<Size>
+				<AbsPoint x="80" y="22" />
+			</Size>
+			<TexCoords x="502" y="306" />
+			<TexDims   x="45" y="45" />
+			<TintColor r="115" g="203" b="255" />
+		</DynamicImage>
+
+	</Windows>
+</Interface>
