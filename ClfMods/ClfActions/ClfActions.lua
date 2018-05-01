@@ -884,6 +884,44 @@ function ClfActions.p_organizebagTargetReceived()
 end
 
 
+-- ユーザー設定 → オプション → ターゲット自動攻撃（戦闘モード中） の設定を切り替える
+function ClfActions.toggleAlwaysAttack( silent )
+	local atk = not SystemData.Settings.GameOptions.alwaysAttack
+	SystemData.Settings.GameOptions.alwaysAttack = atk
+	UserSettingsChanged()
+
+	if ( not silent ) then
+		local str
+		local hue
+		if ( atk ) then
+			str = L"ON"
+			hue = 1152
+		else
+			str = L"OFF"
+			hue = 150
+		end
+		WindowUtils.SendOverheadText( L"AlwaysAttack: " .. str, hue, true )
+	end
+end
+
+
+-- ユーザー設定 → オプション → ターゲット自動攻撃（戦闘モード中） の設定を有効にする
+function ClfActions.enableAlwaysAttack()
+	if ( not SystemData.Settings.GameOptions.alwaysAttack ) then
+		ClfActions.toggleAlwaysAttack( true )
+	end
+end
+
+
+-- ユーザー設定 → オプション → ターゲット自動攻撃（戦闘モード中） の設定を無効にする
+function ClfActions.disableAlwaysAttack()
+	if ( SystemData.Settings.GameOptions.alwaysAttack ) then
+		ClfActions.toggleAlwaysAttack( true )
+	end
+end
+
+
+
 
 function ClfActions.toggleAFKmode()
 	ClfActions.AFKmode = not ClfActions.AFKmode

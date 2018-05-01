@@ -514,7 +514,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 			end
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
-			local sec = mathMin( ClfDamageMod.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( ClfUtil.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then
@@ -628,7 +628,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
 
-			local sec = mathMin( ClfDamageMod.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( ClfUtil.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then

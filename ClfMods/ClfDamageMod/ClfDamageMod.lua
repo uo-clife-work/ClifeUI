@@ -30,8 +30,6 @@ ClfDamageMod.Damages = {}
 ClfDamageMod.DamagedMobCount = 0
 ClfDamageMod.LastUpdate = 0
 
-ClfDamageMod.DAY_IN_SECONDS = 24 * 60 * 60
-
 -- オリジナルの DamageWindow.Init を保持する変数
 ClfDamageMod.DamageInit_org = nil
 
@@ -366,15 +364,6 @@ function ClfDamageMod.setSticky( id, enable )
 end
 
 
-function ClfDamageMod.tableElemn( t )
-	local n = 0
-	for v in pairs( t ) do
-		n = n + 1
-	end
-	return n
-end
-
-
 -- ダメージのデータを整理する（不要になったデータを間引く）
 function ClfDamageMod.cleanData()
 	local time = Interface.Clock.Timestamp
@@ -383,7 +372,7 @@ function ClfDamageMod.cleanData()
 	-- 整理した後に残すデータ数の最小値
 	local minLen = ClfDamageWindow and ClfDamageWindow.LIST_ROW_MAX or 10
 	-- 現在のデータ長
-	local dataLen = ClfDamageMod.tableElemn( damages )
+	local dataLen = ClfUtil.tableElemn( damages )
 	if ( dataLen <= minLen ) then
 		return
 	end
@@ -465,23 +454,6 @@ function ClfDamageMod.getPetsName()
 		end
 	end
 	return pets
-end
-
-
--- タイムスタンプから、JSTでの 時、分、秒 の配列を返す
-function ClfDamageMod.getTimeArrByTimestamp( timestamp )
-	if ( timestamp and timestamp > 0 ) then
-		local dis = 86400
-		local his = 3600
-		-- 冗長な計算になっているが、timestampにそのまま加算すると正常な値が返ってこない事が多い為
-		local time = ( timestamp % dis + 32400 ) % dis
-		local floor = math.floor
-		local h = floor( time / his )
-		local m = floor( time % his / 60 )
-		local s = floor( time % 60 )
-
-		return { h, m, s }
-	end
 end
 
 
@@ -577,8 +549,8 @@ function ClfDamageMod.addEntryDamageLog()
 	local towstring = towstring
 	local wstringFormat = wstring.format
 	local wstringGsub = wstring.gsub
-	local DAY_IN_SECONDS = ClfDamageMod.DAY_IN_SECONDS
-	local getTimeArrByTimestamp = ClfDamageMod.getTimeArrByTimestamp
+	local DAY_IN_SECONDS = ClfUtil.DAY_IN_SECONDS
+	local getTimeArrByTimestamp = ClfUtil.getTimeArrByTimestamp
 	local pairsByTime = ClfDamageMod.pairsByTime
 
 	local i = 0
