@@ -15,6 +15,7 @@
 				<EventHandler event="OnInitialize" function="ClfChat.onGChatWinInitialize"/>
 				<EventHandler event="OnShutdown" function="ClfChat.onGChatWinShutdown"/>
 				<EventHandler event="OnLButtonDblClk" function="ClfChat.onGChatWinDblClick" />
+				<EventHandler event="OnRButtonUp" function="ClfChat.onGChatWinRbtnUp" />
 			</EventHandlers>
 
 			<Windows>
@@ -57,16 +58,19 @@
 				</DynamicImage>
 
 				<!-- Active Friend Count -->
-				<Label name="$parentFrActNum" font="Arial_Black_14" maxchars="3" textalign="left">
+				<Label name="$parentFrActNum" font="Arial_Black_14" maxchars="3" textalign="center">
 					<Size>
-						<AbsPoint x="60" y="14" />
+						<AbsPoint x="42" y="14" />
 					</Size>
 					<Anchors>
 						<Anchor point="topleft" relativePoint="topleft">
-							<AbsPoint x="93" y="6"/>
+							<AbsPoint x="90" y="6"/>
 						</Anchor>
 					</Anchors>
 					<Color r="112" g="112" b="126" />
+					<EventHandlers>
+						<EventHandler event="OnMouseOver" function="ClfChat.onFrNumBtnOver"/>
+					</EventHandlers>
 				</Label>
 
 				<!-- Friend Name : given latest msg  -->
@@ -93,6 +97,9 @@
 						</Anchor>
 					</Anchors>
 					<Color r="218" g="218" b="234" />
+					<EventHandlers>
+						<EventHandler event="OnMouseOver" function="ClfChat.onMsgOver"/>
+					</EventHandlers>
 				</Label>
 
 			</Windows>

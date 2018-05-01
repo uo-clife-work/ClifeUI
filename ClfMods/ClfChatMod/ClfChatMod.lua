@@ -48,7 +48,7 @@ function ClfChat.onGChatWinInitialize()
 
 	ClfChat.setBtnFlasg()
 	ClfChat.setActiveFriendCount()
-	ClfChat.setLastMsg()
+	ClfChat.setLastMsg( true )
 end
 
 
@@ -77,7 +77,8 @@ function ClfChat.onGChatWinShutdown()
 end
 
 
-ClfChat.LastGChatData = nil
+
+ClfChat.GChatDatas = {}
 
 -- ** EventHandle: SystemData.Events.TEXT_ARRIVED
 function ClfChat.onTextAlive()
@@ -87,12 +88,13 @@ function ClfChat.onTextAlive()
 			if ( not wstring.find( SourceName, L"->", 2, true ) ) then
 				local Clock = Interface.Clock
 				time = towstring( Clock.h ) .. L":" .. wstring.format( L"%02d", Clock.m )
-				ClfChat.LastGChatData = {
+				local data = {
 					time = time,
 					name = SystemData.SourceName,
 					text = SystemData.Text,
 				}
-				ClfChat.setLastMsg()
+				ClfChat.GChatDatas[ #ClfChat.GChatDatas + 1 ] = data
+				ClfChat.setLastMsg( false )
 			end
 		end
 	end
@@ -100,15 +102,16 @@ end
 
 
 -- 最新のメッセージを表示
-function ClfChat.setLastMsg()
+function ClfChat.setLastMsg( clearMsg )
 	local window = ClfChat.GChatWinName
 	local nameLabel = window .. "FrName"
 	local msgLabel = window .. "Msg"
 	local name = L"---"
 	local msg = L""
-	local data = ClfChat.LastGChatData
+	local datas = ClfChat.GChatDatas
 
-	if ( data ) then
+	if ( not clearMsg and datas and #datas > 0 ) then
+		local data = datas[ #datas ]
 		msg = data.text or msg
 		if ( data.text and data.time ) then
 			msg = L"[" .. data.time .. L"]" .. data.text
@@ -139,15 +142,19 @@ end
 
 
 ClfChat.ActiveFriendNum = nil
+ClfChat.ActiveFriendNames = {}
 
 -- オンラインのフレンド数をカウントして表示
 function ClfChat.setActiveFriendCount()
 	local presenceList = WindowData.GChatPresenceList
+	local nameList = WindowData.GChatNameList
 	local num = 0
 	local active = WindowData.GChat.GC_SHOW_CHAT
+	ClfChat.ActiveFriendNames = {}
 	for i = 1, #presenceList do
 		if ( active == presenceList[ i ] ) then
 			num = num + 1
+			ClfChat.ActiveFriendNames[ #ClfChat.ActiveFriendNames + 1 ] = nameList[ i ]
 		end
 	end
 
@@ -165,7 +172,8 @@ function ClfChat.setActiveFriendCount()
 end
 
 
--- ** EventHandle: ClfActionsWindow OnLButtonDblClk
+-- ** EventHandle: ClfGChatWindow OnLButtonDblClk
+-- グローバルチャットウィンドウを表示
 function ClfChat.onGChatWinDblClick()
 	local win = "GChatRoster"
 	if( not DoesWindowExist( win ) ) then
@@ -174,9 +182,63 @@ function ClfChat.onGChatWinDblClick()
 	end
 end
 
+-- ** EventHandle: ClfGChatWindow OnRButtonUp
+-- 最新メッセージの表示をクリア
+function ClfChat.onGChatWinRbtnUp()
+	ClfChat.setLastMsg( true )
+end
 
--- ** EventHandle: ClfActionsWindowBtn OnLButtonUp
+
+-- ** EventHandle: ClfGChatWindowBtn OnLButtonUp
+-- GChatオンライン・オフライン切り替え
 function ClfChat.onStatusBtn()
 	BroadcastEvent( SystemData.Events.TOGGLE_GLOBAL_CHAT_PRESENCE )
+end
+
+
+-- ** EventHandle: ClfGChatWindowFrActNum OnMouseOver
+-- オンラインのフレンド名をツールチップで表示
+function ClfChat.onFrNumBtnOver()
+	if ( not ClfChat.ActiveFriendNum or ClfChat.ActiveFriendNum < 1 ) then
+		return
+	end
+	local buttonName = SystemData.ActiveWindow.name
+	local font = "Arial_Black_14"
+	local text = towstring( table.concat( ClfChat.ActiveFriendNames, "\n" ) .. "\n" )
+
+	Tooltips.CreateTextOnlyTooltip( buttonName, text )
+	Tooltips.SetTooltipFont( 1, 1, font, 16 )
+	Tooltips.SetTooltipAlpha( 0.95 )
+	Tooltips.Finalize()
+	Tooltips.AnchorTooltip( Tooltips.ANCHOR_WINDOW_RIGHT )
+end
+
+
+-- ** EventHandle: ClfGChatWindowMsg OnMouseOver
+-- 最新10件までのメッセージをツールチップで表示
+function ClfChat.onMsgOver()
+	local datas = ClfChat.GChatDatas
+	local len = #datas
+	if ( not datas or len < 1 ) then
+		return
+	end
+	local buttonName = SystemData.ActiveWindow.name
+	local stIdx = math.max( 1, len - 9 )
+
+	local count = 0
+	local op = L""
+	for i = len, stIdx, -1 do
+		local data = datas[ i ]
+		op = op .. L"--  " .. data.name .. L"  ---------\n" ..
+		towstring( i ) .. L". [" .. data.time .. L"] " .. data.text .. L"\n\n"
+
+	end
+
+	local Tooltips = Tooltips
+	Tooltips.CreateTextOnlyTooltip( buttonName, op )
+	Tooltips.SetTooltipFont( 1, 1, "MgenPlus_14", 18 )
+	Tooltips.SetTooltipAlpha( 0.95 )
+	Tooltips.Finalize()
+	Tooltips.AnchorTooltip( Tooltips.ANCHOR_WINDOW_BOTTOM )
 end
 
