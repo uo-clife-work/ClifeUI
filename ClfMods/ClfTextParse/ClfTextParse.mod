@@ -3,7 +3,7 @@
 	<UiMod name="ClfTextParse" version="1.0" date="02/26/2018">
 
 		<Author name="uo.clife.work" />
-		<Description text="https://uo.clife.work/about-my-ui_mods-and-macros/" />
+		<Description text="https://uo.clife.work/uosa-custom-ui-clifeui/" />
 
 		<Files>
 			<File name="ClfTextParse.lua" />

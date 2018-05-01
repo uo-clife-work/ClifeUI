@@ -3,7 +3,7 @@
 	<UiMod name="ClfFontsMod" version="1.1" date="04/10/2018">
 
 		<Author name="uo.clife.work" />
-		<Description text="https://uo.clife.work/about-my-ui_mods-and-macros/" />
+		<Description text="https://uo.clife.work/uosa-custom-ui-clifeui/" />
 
 		<Files>
 			<File name="ClfFontsMod.lua" />
