@@ -921,6 +921,64 @@ function ClfActions.disableAlwaysAttack()
 end
 
 
+--[[
+* バックパック第一階層にある一番大きいゴールドをターゲットする
+* @param  {boolean} [ascend = false]  オプション - これを指定すると一番小さいゴールドをターゲットする
+]]--
+function ClfActions.targetGold( ascend )
+	local backpackId = ContainerWindow.PlayerBackpack
+	if ( not backpackId or backpackId < 1 ) then
+		return
+	end
+
+	local cont = WindowData.ContainerWindow[ backpackId ]
+	if ( not cont ) then
+		return
+	end
+
+	local GOLD_TYPE = 3821
+	local GOLD_HUE = 0
+	local numItems = cont.numItems
+	local items = cont.ContainedItems
+	local targId = nil
+	local qt
+	local sFunc
+	if ( ascend ) then
+		qt = math.huge
+		sFunc = function( quantity, id )
+			if ( quantity and quantity < qt ) then
+				targId = id
+				qt = quantity
+			end
+		end
+	else
+		qt = 0
+		sFunc = function( quantity, id )
+			if ( quantity and quantity > qt ) then
+				targId = id
+				qt = quantity
+			end
+		end
+	end
+
+	for i = 1, numItems do
+		local item = items[ i ]
+		local id = item and item.objectId
+		if ( id and id > 0 ) then
+			RegisterWindowData( WindowData.ObjectInfo.Type, id )
+			local data = WindowData.ObjectInfo[ id ]
+			if ( data and data.objectType == GOLD_TYPE and data.hueId == GOLD_HUE ) then
+				sFunc( data.quantity, id )
+			end
+			UnregisterWindowData( WindowData.ObjectInfo.Type, id )
+		end
+	end
+
+	if ( targId ) then
+		HandleSingleLeftClkTarget( targId )
+	end
+end
+
 
 
 function ClfActions.toggleAFKmode()
