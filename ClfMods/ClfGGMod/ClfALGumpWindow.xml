@@ -1,0 +1,854 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+
+	<Windows>
+
+		<!-- MAIN WINDOW -->
+		<Window name="ClfAnimalLoreWindow" movable="true">
+			<Size>
+				<AbsPoint x="530" y="100"/>
+			</Size>
+
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft">
+					<AbsPoint x="20" y="100"/>
+				</Anchor>
+			</Anchors>
+
+			<EventHandlers>
+				<EventHandler event="OnInitialize" function="ClfALGumpWindow.initialize"/>
+				<EventHandler event="OnShutdown" function="ClfALGumpWindow.shutdown"/>
+				<EventHandler event="OnRButtonUp" function="ClfALGumpWindow.contract" />
+			</EventHandlers>
+
+			<Windows>
+				<!-- BG -->
+				<FullResizeImage name="$parentBG" alpha="0.55" inherits="UO_Default_Black_Background" layer="background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+				</FullResizeImage>
+
+				<!-- Expand Button -->
+				<Button name="$parentExpand" inherits="UO_Default_Spring_Button" layer="popup">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parentTitleBar"/>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.expand"/>
+					</EventHandlers>
+				</Button>
+
+				<!-- Close Button -->
+				<Button name="$parentClose" inherits="UO_Default_Close_Button" layer="popup">
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright" relativeTo="$parentTitleBar"/>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.hide"/>
+					</EventHandlers>
+				</Button>
+
+
+				<!-- Title bar -->
+				<HorizontalResizeImage name="$parentTitleBar" inherits="UO_Default_Title_Bar" handleinput="true">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="topright" relativePoint="topright" />
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnRButtonUp" function="ClfALGumpWindow.hide" />
+					</EventHandlers>
+				</HorizontalResizeImage>
+
+				<!-- Title -->
+				<Label name="$parentTitle" inherits="UO_Default_Label_Color" font="Arial_Black_15" maxchars="256" textalign="center" handleinput="false" layer="overlay">
+					<Size>
+						<AbsPoint x="480" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="25" y="1" />
+						</Anchor>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-25" y="17" />
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<!-- Sticky CheckBox -->
+				<Button name="$parentCheck" inherits="UO_Default_Check_Button" layer="overlay">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="15" y="39"/>
+						</Anchor>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onStickyCheckBtn" />
+					</EventHandlers>
+				</Button>
+
+				<!-- content header -->
+				<Window name="$parentHeader" layer="popup">
+					<Size>
+						<AbsPoint x="475" y="45"/>
+					</Size>
+
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="40" y="35"/>
+						</Anchor>
+					</Anchors>
+
+					<Windows>
+
+						<ComboBox name="$parentMobCombo" inherits="Clf_Combo_Box">
+							<Anchor point="topleft" relativePoint="topleft" >
+								<AbsPoint x="0" y="0" />
+							</Anchor>
+
+							<EventHandlers>
+								<EventHandler event="OnSelChanged" function="ClfALGumpWindow.onSelectMobCombo" />
+							</EventHandlers>
+						</ComboBox>
+
+						<Label name="$parentFidelity" font="MyriadPro_12" maxchars="6" textalign="left" handleinput="false">
+							<Size>
+								<AbsPoint x="80" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="topright" relativePoint="topleft"  relativeTo="$parentMobCombo">
+									<AbsPoint x="5" y="4"/>
+								</Anchor>
+							</Anchors>
+						</Label>
+
+
+						<Label name="$parentPetProgress" font="MyriadPro_12" maxchars="60" textalign="left" handleinput="false">
+							<Size>
+								<AbsPoint x="250" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="bottomleft" relativePoint="topleft"  relativeTo="$parentMobCombo">
+									<AbsPoint x="3" y="1"/>
+								</Anchor>
+							</Anchors>
+							<Color r="210" g="215" b="220" />
+						</Label>
+
+
+						<Window name="$parentHue">
+							<Size>
+								<AbsPoint x="142" y="24" />
+							</Size>
+							<Anchors>
+								<Anchor point="topright" relativePoint="topright">
+									<AbsPoint x="0" y="1"/>
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onHueBtnLUp" />
+								<EventHandler event="OnLButtonDblClk" function="ClfALGumpWindow.onHueBtnLDbl" />
+								<EventHandler event="OnMouseOver" function="ClfALGumpWindow.onHueBtnOver"/>
+								<EventHandler event="OnMouseOverEnd" function="ClfALGumpWindow.onHueBtnOverEnd"/>
+							</EventHandlers>
+
+							<Windows>
+
+								<DynamicImage name="$parentBG" alpha="0.65" inherits="Clf_AlBgColorTemplate">
+									<Size>
+										<AbsPoint x="142" y="24" />
+									</Size>
+									<Anchors>
+										<Anchor point="topright" relativePoint="topright">
+											<AbsPoint x="0" y="0"/>
+										</Anchor>
+									</Anchors>
+								</DynamicImage>
+
+								<DynamicImage name="$parentImage" texture="ClfTexMonotoneGradient" handleinput="false">
+									<Size>
+										<AbsPoint x="20" y="20" />
+									</Size>
+									<Anchors>
+										<Anchor point="topleft" relativePoint="topleft">
+											<AbsPoint x="2" y="2"/>
+										</Anchor>
+									</Anchors>
+								</DynamicImage>
+
+								<Label name="$parentName" font="Arial_Black_12" maxchars="64" textalign="center" handleinput="false">
+									<Size>
+										<AbsPoint x="120" y="20" />
+									</Size>
+									<Anchors>
+										<Anchor point="topleft" relativePoint="topleft">
+											<AbsPoint x="22" y="-1"/>
+										</Anchor>
+									</Anchors>
+								</Label>
+
+							</Windows>
+						</Window>
+
+
+						<Window name="$parentCloseOrg">
+
+							<Size>
+								<AbsPoint x="200" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="bottomright" relativePoint="bottomright">
+									<AbsPoint x="0" y="0" />
+								</Anchor>
+							</Anchors>
+
+							<Windows>
+
+								<Button name="$parentCheck" inherits="UO_Default_Check_Button" layer="overlay">
+									<Anchors>
+										<Anchor point="bottomright" relativePoint="bottomright">
+											<AbsPoint x="0" y="0"/>
+										</Anchor>
+									</Anchors>
+									<EventHandlers>
+										<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onCloseOrgCheckBtn" />
+									</EventHandlers>
+								</Button>
+
+								<Label name="$parentLabel" font="MyriadPro_11" maxchars="30" textalign="right" handleinput="false">
+									<Size>
+										<AbsPoint x="140" y="16" />
+									</Size>
+									<Anchors>
+										<Anchor point="bottomright" relativePoint="bottomright" >
+											<AbsPoint x="-23" y="-2"/>
+										</Anchor>
+									</Anchors>
+									<Color r="210" g="215" b="220" />
+								</Label>
+
+							</Windows>
+						</Window>
+
+					</Windows>
+				</Window><!-- /content header -->
+
+				<Window name="$parentSpacer">
+					<Size>
+						<AbsPoint x="500" y="1"/>
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentHeader">
+							<AbsPoint x="-25" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Window>
+
+				<!-- Status contents -->
+				<Window name="$parentStatus" layer="popup">
+					<Size>
+						<AbsPoint x="500" y="20"/>
+					</Size>
+
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentSpacer">
+							<AbsPoint x="0" y="15"/>
+						</Anchor>
+					</Anchors>
+
+					<Windows>
+
+						<Button name="$parentBtnExpand" inherits="UO_Default_Plus_Button" texturescale="0.85" layer="overlay">
+							<Size>
+								<AbsPoint x="22" y="22" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="1" />
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onStatusExpandBtn" />
+							</EventHandlers>
+
+						</Button>
+
+						<Button name="$parentBtnContract" inherits="UO_Default_Minus_Button" texturescale="0.85" layer="overlay">
+							<Size>
+								<AbsPoint x="22" y="22" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="1" />
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onStatusContractBtn" />
+							</EventHandlers>
+						</Button>
+
+						<Label name="$parentTitle" font="Arial_Black_14" maxchars="64" textalign="left" autoresizewidth="true" handleinput="true">
+							<Size>
+								<AbsPoint x="500" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="25" y="0"/>
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnMouseOver" function="ClfALGumpWindow.onStatusTitleOver"/>
+							</EventHandlers>
+						</Label>
+
+
+						<Label name="$parentPetSlot" font="Arial_Black_14" maxchars="64" textalign="right" handleinput="false">
+							<Size>
+								<AbsPoint x="200" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="292" y="-12"/>
+								</Anchor>
+							</Anchors>
+						</Label>
+
+
+						<!-- Status List Wrapper -->
+						<Window name="$parentList">
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="25"/>
+								</Anchor>
+							</Anchors>
+
+							<Size>
+								<AbsPoint x="500" y="190"/>
+							</Size>
+							<Windows>
+
+								<Window name="$parentUpr">
+									<Size>
+										<AbsPoint x="500" y="40"/>
+									</Size>
+									<Anchors>
+										<Anchor point="topleft" relativePoint="topleft">
+											<AbsPoint x="0" y="0"/>
+										</Anchor>
+									</Anchors>
+								</Window>
+
+								<Window name="$parentLwr">
+									<Size>
+										<AbsPoint x="500" y="40"/>
+									</Size>
+									<Anchors>
+										<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentUpr">
+											<AbsPoint x="0" y="10"/>
+										</Anchor>
+									</Anchors>
+								</Window>
+
+								<Window name="$parentRegist">
+									<Size>
+										<AbsPoint x="500" y="80"/>
+									</Size>
+									<Anchors>
+										<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentLwr">
+											<AbsPoint x="0" y="10"/>
+										</Anchor>
+									</Anchors>
+								</Window>
+
+								<Window name="$parentDamage">
+									<Size>
+										<AbsPoint x="500" y="10"/>
+									</Size>
+									<Anchors>
+										<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentRegist">
+											<AbsPoint x="0" y="10"/>
+										</Anchor>
+									</Anchors>
+									<Windows>
+
+										<Label name="$parentTitle" font="Arial_Black_12" maxchars="10" textalign="bottomleft">
+											<Size>
+												<AbsPoint x="63" y="10" />
+											</Size>
+											<Anchors>
+												<Anchor point="topleft" relativePoint="topleft">
+													<AbsPoint x="0" y="-4"/>
+												</Anchor>
+											</Anchors>
+										</Label>
+
+										<Label name="$parentBaseval" font="MgenPlus_12" maxchars="10" textalign="bottomleft">
+											<Size>
+												<AbsPoint x="100" y="10" />
+											</Size>
+											<Anchors>
+												<Anchor point="topright" relativePoint="topleft"  relativeTo="$parentTitle" />
+											</Anchors>
+										</Label>
+
+										<Window name="$parentGauge">
+											<Size>
+												<AbsPoint x="380" y="10"/>
+											</Size>
+
+											<Anchors>
+												<Anchor point="topleft" relativePoint="topleft">
+													<AbsPoint x="120" y="0"/>
+												</Anchor>
+											</Anchors>
+
+										</Window>
+
+									</Windows>
+								</Window>
+
+							</Windows>
+						</Window>
+
+					</Windows>
+				</Window><!-- /Status contents -->
+
+				<!-- Skill contents -->
+				<Window name="$parentSkill" layer="popup">
+
+					<Size>
+						<AbsPoint x="500" y="20"/>
+					</Size>
+
+
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="topleft" relativeTo="$parentStatus">
+							<AbsPoint x="0" y="15"/>
+						</Anchor>
+					</Anchors>
+
+					<Windows>
+
+						<Button name="$parentBtnExpand" inherits="UO_Default_Plus_Button" texturescale="0.85" layer="overlay">
+							<Size>
+								<AbsPoint x="22" y="22" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="1" />
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onSkillExpandBtn" />
+							</EventHandlers>
+
+						</Button>
+
+						<Button name="$parentBtnContract" inherits="UO_Default_Minus_Button" texturescale="0.85" layer="overlay">
+							<Size>
+								<AbsPoint x="22" y="22" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="1" />
+								</Anchor>
+							</Anchors>
+
+							<EventHandlers>
+								<EventHandler event="OnLButtonUp" function="ClfALGumpWindow.onSkillContractBtn" />
+							</EventHandlers>
+						</Button>
+
+						<Label name="$parentTitle" font="Arial_Black_14" maxchars="64" textalign="left" handleinput="true">
+							<Size>
+								<AbsPoint x="500" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="25" y="0"/>
+								</Anchor>
+							</Anchors>
+						</Label>
+
+						<!-- Skill List Wrapper -->
+						<Window name="$parentList">
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="25"/>
+								</Anchor>
+							</Anchors>
+							<Windows>
+
+							</Windows>
+						</Window>
+
+					</Windows>
+				</Window><!-- /Skill contents -->
+
+
+			</Windows>
+
+		</Window><!-- /ClfAnimalLoreWindow -->
+
+
+		<!-- ****** TEMPLATE ****** -->
+
+		<!-- Status Label Template -->
+		<Window name="ClfALTmplateStatusExt">
+			<Size>
+				<AbsPoint x="160" y="40" />
+			</Size>
+
+			<Windows>
+				<!-- BG -->
+				<DynamicImage name="$parentBG" alpha="0.35" inherits="Clf_AlBgColorTemplate">
+					<Size>
+						<AbsPoint x="50" y="40" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+					</Anchors>
+				</DynamicImage>
+				<!-- BG2 -->
+				<FullResizeImage name="$parentBG2" alpha="0.45" inherits="UO_Simple_Black_Background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="50" y="0"/>
+						</Anchor>
+						<Anchor point="bottomright" relativePoint="bottomright">
+							<AbsPoint x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FullResizeImage>
+
+				<Label name="$parentTitle" font="Arial_Black_14" maxchars="10" textalign="center" handleinput="false">
+					<Size>
+						<AbsPoint x="50" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentValue" font="MyriadPro_14" maxchars="20" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="92" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="55" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentDelta" font="MyriadPro_12" maxchars="20" textalign="center" handleinput="false">
+					<Size>
+						<AbsPoint x="50" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="16"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+				<Label name="$parentRange" font="MyriadPro_11" maxchars="22" textalign="leftcenter" textAutoFitMinScale="0.818" handleinput="false">
+					<Size>
+						<AbsPoint x="100" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="55" y="16"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+				<Label name="$parentAfter" font="MyriadPro_10" maxchars="20" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="92" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-1" y="-2"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfALTmplateStatusExt -->
+
+		<Window name="ClfALTmplateDamageAttr">
+			<Size>
+				<AbsPoint x="100" y="10" />
+			</Size>
+			<Windows>
+				<!-- BG -->
+				<DynamicImage name="$parentBG" alpha="0.8" inherits="Clf_AlBgColorTemplate">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+					<TintColor r="70" g="75" b="80" />
+				</DynamicImage>
+
+				<Label name="$parentVal" font="Arial_Black_Shadow_12" maxchars="5" textalign="bottom">
+					<Size>
+						<AbsPoint x="100" y="10" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="bottomleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+				</Label>
+			</Windows>
+		</Window>
+
+
+		<Window name="ClfALTmplateManaRecovery" layer="popup">
+			<Size>
+				<AbsPoint x="160" y="4" />
+			</Size>
+
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ClfALGumpWindow.onManaRecovUpdate" />
+			</EventHandlers>
+
+			<Windows>
+
+				<!-- BG -->
+				<DynamicImage name="$parentBG" alpha="0.85" inherits="Clf_AlBgColorTemplate">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+					<TintColor r="70" g="75" b="80" />
+				</DynamicImage>
+
+				<!-- Gauge -->
+				<DynamicImage name="$parentGauge" inherits="Clf_AlBgColorTemplate">
+					<Size>
+						<AbsPoint x="0" y="4" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+					</Anchors>
+
+					<TintColor r="55" g="110" b="205" />
+				</DynamicImage>
+
+				<Label name="$parentVal" font="Arial_Black_Shadow_11" maxchars="10" textalign="leftbottom">
+					<Size>
+						<AbsPoint x="79" y="11" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="bottomleft">
+							<AbsPoint x="8" y="-4"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfALManaRecovery -->
+
+
+		<!-- Regist Label Template -->
+		<Window name="ClfALTmplateRegistExt">
+			<Size>
+				<AbsPoint x="79" y="80" />
+			</Size>
+			<Windows>
+				<!-- BG -->
+				<DynamicImage name="$parentBG" alpha="0.35" inherits="Clf_AlBgColorTemplate">
+					<Size>
+						<AbsPoint x="79" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+					</Anchors>
+				</DynamicImage>
+				<!-- BG2 -->
+				<FullResizeImage name="$parentBG2" alpha="0.45" inherits="UO_Simple_Black_Background">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="20"/>
+						</Anchor>
+						<Anchor point="bottomright" relativePoint="bottomright">
+							<AbsPoint x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FullResizeImage>
+
+				<Label name="$parentTitle" font="Arial_Black_14" maxchars="10" textalign="center" handleinput="false">
+					<Size>
+						<AbsPoint x="79" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="-2"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentValue" font="MyriadPro_14" maxchars="20" textalign="center" handleinput="false">
+					<Size>
+						<AbsPoint x="79" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="21"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentDelta" font="MyriadPro_12" maxchars="20" textalign="center" textAutoFitMinScale="0.75" handleinput="false">
+					<Size>
+						<AbsPoint x="79" y="18" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="41"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+				<Label name="$parentRange" font="MyriadPro_11" maxchars="20" textalign="center" textAutoFitMinScale="0.818" handleinput="false">
+					<Size>
+						<AbsPoint x="79" y="18" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="56"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfALTmplateRegistExt -->
+
+		<!-- Skill Label Template -->
+		<Window name="ClfALTmplateSkillExt">
+			<Size>
+				<AbsPoint x="243" y="21" />
+			</Size>
+			<Windows>
+				<!-- BG -->
+				<DynamicImage name="$parentBG" alpha="0.35" inherits="Clf_AlBgColorTemplate">
+					<Size>
+						<AbsPoint x="109" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+					</Anchors>
+				</DynamicImage>
+				<!-- BG2 -->
+				<FullResizeImage name="$parentBG2" alpha="0.45" inherits="UO_Simple_Black_Background">
+
+					<Size>
+						<AbsPoint x="134" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="109" y="0"/>
+						</Anchor>
+					</Anchors>
+				</FullResizeImage>
+
+				<Label name="$parentTitle" font="MyriadPro_13" maxchars="14" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="100" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="5" y="-2"/>
+						</Anchor>
+					</Anchors>
+					<Color r="210" g="215" b="220" />
+				</Label>
+
+				<Label name="$parentValue" font="MyriadPro_14" maxchars="20" textalign="left" handleinput="false" autoresizewidth="true">
+					<Size>
+						<AbsPoint x="120" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="114" y="-2"/>
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<Label name="$parentDelta" font="MyriadPro_12" maxchars="20" textalign="left" handleinput="false">
+					<Size>
+						<AbsPoint x="50" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topleft" relativeto="$parentValue">
+							<AbsPoint x="2" y="-1"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+				<Label name="$parentRange" font="MyriadPro_12" maxchars="20" textalign="rightcenter" handleinput="false">
+					<Size>
+						<AbsPoint x="92" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-3" y="-2"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+				<Label name="$parentAfter" font="MyriadPro_10" maxchars="20" textalign="right" handleinput="false">
+					<Size>
+						<AbsPoint x="92" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-1" y="-2"/>
+						</Anchor>
+					</Anchors>
+					<Color r="170" g="175" b="180" />
+				</Label>
+
+			</Windows>
+		</Window><!-- /ClfALTmplateSkillExt -->
+
+		<!-- Combo -->
+		<Button name="Clf_Combo_selected_button" inherits="UO_Default_LongComboBoxSelectedButton"  font="MyriadPro_14">
+			<TextOffset x="10" y="2" />
+		</Button>
+
+		<Button name="Clf_Combo_menu_item_button" inherits="UO_Default_LongComboBoxMenuItemButton" font="MyriadPro_14" textalign="left" >
+			<TextOffset x="0" y="2" />
+		</Button>
+
+		<ComboBox name="Clf_Combo_Box" inherits="UO_Default_LongComboBox" selectedbutton="Clf_Combo_selected_button" menuitembutton="Clf_Combo_menu_item_button" >
+		</ComboBox>
+
+		<!-- bg -->
+		<DynamicImage name="Clf_AlBgColorTemplate" texture="CC_Widgets" layer="background" handleinput="false">
+			<Size>
+				<AbsPoint x="142" y="24" />
+			</Size>
+			<TexCoords x="502" y="306" />
+			<TexDims   x="45" y="45" />
+			<TintColor r="120" g="125" b="130" />
+		</DynamicImage>
+
+	</Windows>
+</Interface>
