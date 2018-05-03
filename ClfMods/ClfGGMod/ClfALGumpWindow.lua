@@ -1119,10 +1119,10 @@ function ClfALGumpWindow.getManaRecoveryTime( id, Data )
 	local mana_delta = stat_mana_max - stat_mana_curr
 
 	local skill_focus = Data.Skill.focus
-	skill_focus = skill_focus.current or 0
+	skill_focus = skill_focus.current and tonumber( skill_focus.current ) or 0
 
 	local skill_meditation = Data.Skill.meditation
-	skill_meditation = skill_meditation.current or 0
+	skill_meditation = skill_meditation.current and tonumber( skill_meditation.current ) or 0
 
 	local stat_int = Data.Status.int
 	stat_int = stat_int.val or 0
