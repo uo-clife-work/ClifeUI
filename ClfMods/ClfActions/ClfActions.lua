@@ -1,3 +1,4 @@
+
 LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfActions", "ClfActions.xml", "ClfActions.xml" )
 
 
@@ -227,8 +228,10 @@ end
 --[[
 * カレントターゲットが敵性mob以外なら、近くの敵をカレントターゲットにする（敵性だった時はクリックする）
 * @param  {integer} [orderNum = 1] オプション - ターゲットを変更する場合は{orderNum}番目に近い敵をターゲットする
+* @param  {integer} [range      = 255]    オプション - ターゲットを変更する場合に選択する距離範囲
+* @param  {boolean} [descHealth = false]  オプション - ターゲットを変更する場合は同距離の時は体力の残りが大きい順にする
 ]]--
-function ClfActions.convTargetToEnemy( orderNum )
+function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
 
 	local targetId = WindowData.CurrentTarget and WindowData.CurrentTarget.TargetId
 	local changeTarg = true
@@ -266,7 +269,7 @@ function ClfActions.convTargetToEnemy( orderNum )
 	end
 
 	if ( changeTarg ) then
-		ClfActions.nearTarget( orderNum )
+		ClfActions.nearTarget( orderNum, descHealth, range )
 	end
 
 end
@@ -275,10 +278,11 @@ end
 --[[
 * 近くの敵をターゲットする（PCのペット・召喚生物と判定出来るmobは除く）
 * @param  {integer} [orderNum = 1] オプション - {orderNum}番目に近い敵をターゲットする
+* @param  {integer} [range      = 255]      オプション - 選択する距離範囲
+* @param  {boolean} [descHealth = false]  オプション - 同距離の時は体力の残りが大きい順にする
 ]]--
-function ClfActions.nearTarget( orderNum )
-
-	local tgMobs = ClfActions.p_getDistSortTargetArray()
+function ClfActions.nearTarget( orderNum, range, descHealth )
+	local tgMobs = ClfActions.p_getDistSortTargetArray( range, descHealth )
 
 	if ( tgMobs ) then
 
@@ -302,9 +306,11 @@ end
 
 --[[
 * 敵性mob（PCのペット・召喚生物と判定出来るmobは除く）情報を距離が近い順に格納した配列を得る
+* @param  {integer} [range      = 255]    オプション - 選択する距離範囲
+* @param  {boolean} [descHealth = false]  オプション - 同距離の時は体力の残りが大きい順にする
 * @return {array|nil}   敵性mobが取得出来なかった時は nil
 ]]--
-function ClfActions.p_getDistSortTargetArray()
+function ClfActions.p_getDistSortTargetArray( range, descHealth )
 
 	local tgMobs = {}
 	local mobiles = MobilesOnScreen.MobilesSort or {}
@@ -316,6 +322,12 @@ function ClfActions.p_getDistSortTargetArray()
 	local GetMobileData = Interface.GetMobileData
 	local MobileName = WindowData.MobileName
 	local TargetAllowed = Actions.TargetAllowed
+	local maxRange = tonumber( range )
+	if ( not maxRange ) then
+		maxRange = 255
+	else
+		maxRange = math.max( maxRange, 0 )
+	end
 
 	for i = 0, #mobiles do
 		local mobileId = mobiles[ i ]
@@ -335,9 +347,8 @@ function ClfActions.p_getDistSortTargetArray()
 
 				if ( not p_isWorkerMobile( mobileId ) ) then
 					-- ペット、召喚では無い
-					-- 距離を取得
 					local dist = GetDistanceFromPlayer( mobileId ) or -1
-					if ( dist >= 0 ) then
+					if ( dist >= 0 and dist <= maxRange ) then
 						local index = #tgMobs + 1
 						local mobileData = GetMobileData( mobileId, false ) or { CurrentHealth = 99999 }
 						tgMobs[ index ] = {
@@ -354,6 +365,20 @@ function ClfActions.p_getDistSortTargetArray()
 	end
 
 	if ( #tgMobs > 0 ) then
+		if ( descHealth ) then
+			table.sort(
+				tgMobs,
+				function( a, b )
+					if ( a.dist ~= b.dist ) then
+						return ( a.dist < b.dist )
+					end
+					if ( a.CurrentHealth ~= b.CurrentHealth ) then
+						return ( a.CurrentHealth > b.CurrentHealth )
+					end
+					return ( a.index > b.index )
+				end
+			)
+		else
 		table.sort(
 			tgMobs,
 			function( a, b )
@@ -366,6 +391,7 @@ function ClfActions.p_getDistSortTargetArray()
 				return ( a.index < b.index )
 			end
 		)
+		end
 		return tgMobs
 	end
 
@@ -622,7 +648,7 @@ function ClfActions.p_getSpellRange( spellId )
 			dist = data.distance
 			if ( dist > 10 ) then
 				-- 10マスのはずなのにSpellsDataでは12になっているスペルがあるので、10以上なら-2する
-				-- ※SAクラの距離表示で 11 でも届いたり届かなかったりするので 10マスを基準にしておく
+				-- ※SAクラの距離表示はマス目では無く距離なので（例えば10マスなら 11～14 でも届いたり届かなかったりするので）10マスを基準にしておく
 				dist = math.max( 10, dist - 2 )
 			end
 		end
@@ -638,10 +664,11 @@ end
 * @param  {boolean} [includeCursed    = false]  オプション - カース状態のmobも含む
 * @param  {boolean} [excludeParty     = false]  オプション - パーティメンバーを除外する
 * @param  {boolean} [excludeOthersPet = false]  オプション - 青ネームの他人のペットを含めない ※includeBlue がtrueの場合はこの指定は無効
+* @param  {boolean} [excludeDead      = false]  オプション - 死亡しているmobを含めない ※死亡していなくても体力が0%だと死亡扱いになる事が殆どなので注意
+* @param  {integer} [range            = 255]  オプション - 選択するmobの距離範囲
 ]]--
-function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed, excludeParty, excludeOthersPet )
-
-	local fMobs = ClfActions.p_getFriendlyMobArray( includeBlue, not includePoisoned, not includeCursed, excludeParty, false, excludeOthersPet )
+function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed, excludeParty, excludeOthersPet, excludeDead, range )
+	local fMobs = ClfActions.p_getFriendlyMobArray( includeBlue, not includePoisoned, not includeCursed, excludeParty, false, excludeOthersPet, excludeDead, range )
 --	Debug.DumpToConsole( "fMobs", fMobs )
 
 	if ( #fMobs > 0 ) then
@@ -703,9 +730,11 @@ end
 * @param  {boolean} [excludeParty     = false]  オプション - パーティメンバーを除外する
 * @param  {boolean} [myPetOnly        = false]  オプション - 自分のペットだけを選択する
 * @param  {boolean} [excludeOthersPet = false]  オプション - 青ネームの他人のペットを含めない ※includeBlue がtrueの場合はこの指定は無効
+* @param  {boolean} [excludeDead      = false]  オプション - 死亡しているmobを含めない ※死亡していなくても体力が0%だと死亡扱いになる事が殆どなので注意
+* @param  {integer} [range            = 255]  オプション - 選択するmobの距離範囲
 ]]--
-function ClfActions.poisonedFriendly( includeBlue, excludeParty, myPetOnly, excludeOthersPet )
-	local fMobs = ClfActions.p_getFriendlyMobArray( includeBlue, false, true, excludeParty, myPetOnly, excludeOthersPet )
+function ClfActions.poisonedFriendly( includeBlue, excludeParty, myPetOnly, excludeOthersPet, excludeDead, range )
+	local fMobs = ClfActions.p_getFriendlyMobArray( includeBlue, false, true, excludeParty, myPetOnly, excludeOthersPet, excludeDead, range )
 	local poisonState = 2
 
 	if ( #fMobs > 0 ) then
@@ -746,9 +775,11 @@ end
 * @param  {boolean} [excludeParty     = false]  オプション - パーティメンバーを除外する
 * @param  {boolean} [myPetOnly        = false]  オプション - 自分のペットだけを選択する
 * @param  {boolean} [excludeOthersPet = false]  オプション - 青ネームの他人のペットを含めない ※includeBlue がtrueの場合はこの指定は無効
+* @param  {boolean} [excludeDead      = false]  オプション - 死亡しているmobを含めない ※死亡していなくても体力が0%だと死亡扱いになる事が殆どなので注意
+* @param  {integer} [range            = 255]  オプション - 選択するmobの距離範囲
 * @return {array}   mob情報オブジェクト{id,perc,dist,visualState}の配列
 ]]--
-function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, excludeCursed, excludeParty, myPetOnly )
+function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, excludeCursed, excludeParty, myPetOnly, excludeOthersPet, excludeDead, range )
 	local allMobiles = {}
 	allMobiles[1] = PetWindow.SortedPet or {}
 	if ( not myPetOnly ) then
@@ -759,8 +790,15 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 	local fMobIds = {}
 	local includePoisoned = not excludePoisoned
 	local includeCursed = not excludeCursed
+	local includeDead = not excludeDead
 	local poisonState = 2
 	local cursedState = 3
+	local maxRange = tonumber( range )
+	if ( not maxRange ) then
+		maxRange = 255
+	else
+		maxRange = math.max( 0, maxRange )
+	end
 
 	local pairs = pairs
 	local GetDistanceFromPlayer = GetDistanceFromPlayer
@@ -789,8 +827,10 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 		local dist = GetDistanceFromPlayer( mobileId ) or -1
 		if (
 				dist >= 0 and
+				dist <= maxRange and
 				( includePoisoned or visualStateId ~= poisonState ) and
-				( includeCursed or visualStateId ~= cursedState )
+				( includeCursed or visualStateId ~= cursedState ) and
+				( includeDead or not mobileData.IsDead )
 			) then
 			local index = #fMobs + 1
 			fMobs[ index ] = {
