@@ -95,7 +95,12 @@ local ANIMAL_TYPE_ARRAY = {
 	{ objectType = 10000277, name = "cu sidhe", },
 	{ objectType = 10000122, name = "unicorn", },
 	{ objectType = 10000132, name = "ki-rin", },
-	{ objectType = 10000179, name = "nightmare", },	-- hueId 0 // SAクラだと色・姿の違いは無い？ 新レアだけ違うぽい？ https://stratics.com/threads/rare-nightmare-ww-hues.395794/
+	-- ナイトメア： SAクラだと色・姿の違いは無い（objectTypeは違う） レア色はhueIdが違う
+	{ objectType = 10000116, name = "nightmare", },	-- hueId 0, 1910	// モヒカン（薄）
+	{ objectType = 10000177, name = "nightmare", },	-- hueId 0, 1910	// モヒカン（濃）
+	{ objectType = 10000178, name = "nightmare", },	-- hueId 0, 1910	// ロン毛
+	{ objectType = 10000179, name = "nightmare", },	-- hueId 0, 1910	// 漆黒
+
 	{ objectType = 10000190, name = "fire steed",   hueId = { 1161, }, },
 	{ objectType = 10000794, name = "swamp dragon", hueId = { 34980, }, },	-- hueId 34980
 	{ objectType = 10000794, name = "bane dragon",  hueId = { 33943, }, },	-- swamp dragonとhueId違い（ hueId 33943 ）
@@ -103,8 +108,10 @@ local ANIMAL_TYPE_ARRAY = {
 	{ objectType = 10000276, name = "reptalon", },	-- hueId 0
 	{ objectType = 10000791, name = "giant beetle", },	-- hueId 0
 	{ objectType = 10000169, name = "fire beetle", },	-- hueId 1161
+	{ objectType = 10000244, name = "rune beetle", },	-- hueId 0
 	{ objectType = 10001291, name = "saurosaurus", },	-- hueId 0
 	{ objectType = 10001425, name = "ossein ram", },	-- hueId 0
+	{ objectType = 10000180, name = "white wyrm", },	-- hueId 0, 1150, ...
 	{ objectType = 10000243, name = "lesser hiryu", },	-- 普通の飛龍も同じIDだけど、まぁいいか。。。
 	{ objectType = 10000060, name = "cold drake",   excHueId = { 0, }, },	-- hueId 1317, 1350,
 	{ objectType = 10000060, name = "drake",        hueId = { 0, }, },
@@ -151,6 +158,7 @@ ClfALGump.DEBUG_MODE = false
 function ClfALGump.initialize()
 
 	-- 標準UIの CreaturesDB のデータを追加・マージする
+	local type = type
 	local mergeTable = ClfUtil.mergeTable
 	local creatures = ClfALGump.getClfCreaturesDB()
 	local CreaturesDB = CreaturesDB
@@ -379,10 +387,11 @@ function ClfALGump.updateGumpData( gumpData )
 	local loreData = {
 		name = loreName,
 		id = id,
+		objectType = objectType,
 		time = Interface.TimeSinceLogin or 0,
 		hueId = hueId,
 		hue = hue,
-		hueIMax = ClfUtil.rgbIMax( hue ),
+		hueSV = ClfUtil.rgbSV( hue ),
 	}
 
 	-- 自分のペットか
@@ -398,6 +407,15 @@ function ClfALGump.updateGumpData( gumpData )
 		end
 	end
 	loreData.PetSlot = petSlot
+	if ( petSlot ) then
+		local petSlotVals = explode( L" => ", petSlot, false, true )
+		if ( petSlotVals and #petSlotVals == 2 ) then
+			loreData.PetSlotVals = {
+				current = petSlotVals[ 1 ],
+				max = petSlotVals[ 2 ],
+			}
+		end
+	end
 
 	-- 忠誠度
 	local fidelity
@@ -511,6 +529,7 @@ function ClfALGump.updateGumpData( gumpData )
 		local val = data[2] and tonumber( data[2] )
 		status[ key ] = {
 			val = val,
+			max = data[2],
 			current = data[1],
 			lwr = dbData[1],
 			upr = dbData[2],
@@ -1157,6 +1176,34 @@ end
 function ClfALGump.getClfCreaturesDB()
 	local db = {
 
+		["cu sidhe"] = {
+			slayers = L"Fey",
+			oppositeslayers = L"Demon",
+			barddiff   = L"126,9",
+			physical   = L"50 - 65",
+			fire       = L"25 - 45",
+			cold       = L"70 - 85",
+			poison     = L"30 - 50",
+			energy     = L"70 - 85",
+			hits       = L"1010 - 1200",
+			stamina    = L"150 - 170",
+			mana       = L"250 - 290",
+			str        = L"1200 - 1225",
+			dex        = L"150 - 170",
+			int        = L"250 - 290",
+			wrestling  = L"90 - 100",
+			tactics    = L"90 - 100",
+			resspell   = L"75 - 90",
+			anatomy    = L"65 - 100",
+			poisoning  = L"0 - 0",
+			healing    = L"70 - 100",
+			magery     = L"0 - 0",
+			evalint    = L"0 - 0",
+			meditation = L"0 - 0",
+			tamable    = 101.1,
+			halfstat   = true,
+		},
+
 		["frost dragon"] = {
 			slayers = L"Reptile, Dragon",
 			oppositeslayers = L"Arachnid",
@@ -1338,6 +1385,34 @@ function ClfALGump.getClfCreaturesDB()
 			magery     = L"0 - 0",
 			evalint    = L"0 - 0",
 			meditation = L"0 - 0",
+		},
+
+
+		["nightmare"] = {
+			slayers = L"None",
+			oppositeslayers = L"None",
+			barddiff   = L"85,2",
+			physical   = L"55 - 65",
+			fire       = L"30 - 40",
+			cold       = L"30 - 40",
+			poison     = L"30 - 40",
+			energy     = L"20 - 30",
+			hits       = L"295 - 315",
+			stamina    = L"85 - 105",
+			mana       = L"85 - 125",
+			str        = L"250 - 525",
+			dex        = L"85 - 105",
+			int        = L"85 - 125",
+			wrestling  = L"80 - 95",
+			tactics    = L"95 - 100",
+			resspell   = L"85 - 100",
+			anatomy    = L"0 - 0",
+			poisoning  = L"0 - 0",
+			healing    = L"0 - 0",
+			magery     = L"10 - 50",
+			evalint    = L"30 - 50",
+			meditation = L"0 - 0",
+			tamable = 95.1,
 		},
 
 		["saurosaurus"] = {

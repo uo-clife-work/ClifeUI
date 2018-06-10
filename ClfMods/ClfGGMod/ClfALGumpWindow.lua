@@ -11,7 +11,7 @@ local SKILL_KEYS = {
 
 ClfALGumpWindow.WindowName = "ClfAnimalLoreWindow"
 
-ClfALGumpWindow.defaultGray = { r = 175, g = 180, b =185 }
+ClfALGumpWindow.DefaultGray = { r = 175, g = 180, b =185 }
 
 ClfALGumpWindow.TrainingMax = {
 	TOTAL_REGIST = 365,
@@ -307,7 +307,7 @@ function ClfALGumpWindow.showData( id )
 
 
 	local window = T.WindowName
-	local Gray = T.defaultGray
+	local Gray = T.DefaultGray
 
 	if ( not DoesWindowExist( window ) ) then
 		CreateWindow( window, false )
@@ -328,27 +328,34 @@ function ClfALGumpWindow.showData( id )
 	LabelSetText( window .. "Title", Data.name .. L" [ID: " .. towstring( id ) .. L"]" )
 
 	-- 訓練進行状況
+	local progStr = L""
 	if ( Data.petProgress and Data.petProgress.text ) then
-		local text = Data.petProgress.title .. L" " .. Data.petProgress.text
-		LabelSetText( window .. "HeaderPetProgress", text )
+		progStr = Data.petProgress.title .. L" " .. Data.petProgress.text
 	else
 		if ( hasMobDB and Data.creatureName ) then
-			local creatureName = towstring( Data.creatureName )
+			progStr = towstring( Data.creatureName )
 			if ( isRleased ) then
-				creatureName = creatureName .. L" (Maybe Released)"
+				progStr = progStr .. L" (Maybe Released)"
 			end
-			LabelSetText( window .. "HeaderPetProgress", creatureName )
-		else
-			LabelSetText( window .. "HeaderPetProgress", L"" )
 		end
 	end
+	if ( Data.objectType ) then
+		progStr = progStr .. L" [" .. towstring( Data.objectType ) .. L"]"
+	end
+	LabelSetText( window .. "HeaderPetProgress", progStr )
 
 	-- スロット
 	local petSlot = Data.PetSlot or L"(none)"
 	petSlot = L"SLOT : " .. petSlot
 	LabelSetText( window .. "StatusPetSlot", petSlot )
 	if ( tamable ) then
-		LabelSetTextColor( window .. "StatusPetSlot", 255, 255, 255 )
+		local color = { r = 255, g = 255, b = 255 }
+		local PetSlotVals = Data.PetSlotVals
+		if ( PetSlotVals and type( PetSlotVals.current ) == "number" and type( PetSlotVals.max ) == "number" ) then
+			local rate = getRate( PetSlotVals.current, 1, mathMin( PetSlotVals.max, 5 ) )
+			color = getRateColor( 1 - rate )
+		end
+		LabelSetTextColor( window .. "StatusPetSlot", color.r, color.g, color.b )
 	else
 		LabelSetTextColor( window .. "StatusPetSlot", Gray.r, Gray.g, Gray.b )
 	end
@@ -359,13 +366,12 @@ function ClfALGumpWindow.showData( id )
 	LabelSetText( window .. "HeaderHueName", towstring( hueIdStr ) )
 	local hue = Data.hue or { r = 255, g = 255, b = 255 }
 	LabelSetTextColor( window .. "HeaderHueName", hue.r, hue.g, hue.b )
-
-	local iMax = Data.hueIMax or 255
+	local rgbSV = Data.hueSV or { v = 255, s = 1 }
 	local bgHue
-	if ( iMax > 65 ) then
-		bgHue = 0
+	if ( rgbSV.v < 65 or ( rgbSV.s < 0.2 and rgbSV.v < 95 ) ) then
+		bgHue = 200
 	else
-		bgHue = 160
+		bgHue = 0
 	end
 
 	WindowSetTintColor( window .. "HeaderHueBG", bgHue, bgHue, bgHue )
@@ -399,18 +405,19 @@ function ClfALGumpWindow.showData( id )
 		end
 
 		local val = d.val
+		local max = d.max
 
 		if ( hasMobDB ) then
 			local dbLwr = d.lwr
 			local dbUpr = d.upr
 			local range = "(---)"
 			local percVal = "---"
-			local color = T.defaultGray
+			local color = Gray
 
 			if ( type( dbLwr ) == "number" and type( dbUpr ) == "number" ) then
 				range = "(" .. dbLwr .. "~" .. dbUpr .. ")"
 
-				if ( dbUpr > 0 and type( val ) == "number" ) then
+				if ( dbUpr > 0 and type( max ) == "number" ) then
 					if ( tamable ) then
 						range = stringFormat( "%+d ", val - dbUpr ) .. range
 					end
@@ -453,12 +460,12 @@ function ClfALGumpWindow.showData( id )
 		local sep = ""
 
 		if ( val ) then
-			if ( type( val ) == "number" and val < 10000 ) then
+			if ( type( max ) == "number" and val < 10000 ) then
 				sep = " / "
 				valStr = val
-			elseif ( type( val ) == "wstring" ) then
+			elseif ( type( max ) == "wstring" ) then
 				sep = " / "
-				valStr = tostring( val )
+				valStr = tostring( max )
 			else
 				sep = "/"
 				valStr = val
@@ -529,7 +536,7 @@ function ClfALGumpWindow.showData( id )
 			local dbUpr = d.upr
 			local percVal = "---"
 			local range = "(---)"
-			local color = T.defaultGray
+			local color = Gray
 
 			if ( type( dbLwr ) == "number" and type( dbUpr ) == "number" ) then
 				range = "(" .. d.lwr .. "~" .. d.upr .. ")"
@@ -613,7 +620,7 @@ function ClfALGumpWindow.showData( id )
 
 			local range = "(---)"
 			local percVal = "---"
-			local color = T.defaultGray
+			local color = Gray
 
 			if ( key ~= "total" ) then
 				if ( type( dbLwr ) == "number" and type( dbUpr ) == "number" ) then
@@ -1063,7 +1070,7 @@ end
 
 
 function ClfALGumpWindow.getRate( val, lwr, upr )
-	if ( not tonumber( val ) or not tonumber( lwr ) or not tonumber( upr )) then
+	if ( not tonumber( val ) or not tonumber( lwr ) or not tonumber( upr ) ) then
 		return 0
 	end
 
@@ -1119,10 +1126,10 @@ function ClfALGumpWindow.getManaRecoveryTime( id, Data )
 	local mana_delta = stat_mana_max - stat_mana_curr
 
 	local skill_focus = Data.Skill.focus
-	skill_focus = skill_focus.current and tonumber( skill_focus.current ) or 0
+	skill_focus = ( type( skill_focus.current ) == "number" ) and skill_focus.current or 0
 
 	local skill_meditation = Data.Skill.meditation
-	skill_meditation = skill_meditation.current and tonumber( skill_meditation.current ) or 0
+	skill_meditation = ( type( skill_meditation.current ) == "number" ) and skill_meditation.current or 0
 
 	local stat_int = Data.Status.int
 	stat_int = stat_int.val or 0

@@ -156,7 +156,7 @@
 
 							<Windows>
 
-								<DynamicImage name="$parentBG" alpha="0.65" inherits="Clf_AlBgColorTemplate">
+								<DynamicImage name="$parentBG" alpha="0.75" inherits="Clf_AlBgColorTemplate">
 									<Size>
 										<AbsPoint x="142" y="24" />
 									</Size>
