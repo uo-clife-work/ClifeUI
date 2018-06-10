@@ -201,6 +201,33 @@ function ClfUtil.rgbIMax( rgb )
 end
 
 
+-- rgb値の連想配列から明度・彩度を求める
+function ClfUtil.rgbSV( rgb )
+	local sv = { v = 0, s = 0 }
+	if ( type( rgb ) ~= "table" ) then
+		return sv
+	end
+	local iMax = 0
+	local iMin = 255
+	local mathMax = math.max
+	local mathMin = math.min
+	local tonumber = tonumber
+	local rgbKeys = { "r", "g", "b" }
+	for i = 1, #rgbKeys do
+		local v = rgb[ rgbKeys[ i ] ]
+		if ( type( v ) == "number" ) then
+			iMax = mathMax( iMax, v )
+			iMin = mathMin( iMin, v )
+		end
+	end
+	iMax = mathMin( iMax, 255 )
+	iMin = mathMax( iMin, 0 )
+	sv.v = iMax
+	sv.s = ( iMax - iMin ) / iMax
+	return sv
+end
+
+
 -- タイムスタンプから、時、分、秒 の配列を返す
 function ClfUtil.getTimeArrByTimestamp( timestamp )
 	if ( timestamp and timestamp > 0 ) then
