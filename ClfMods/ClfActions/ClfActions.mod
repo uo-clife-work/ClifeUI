@@ -11,10 +11,12 @@
 
 		<Files>
 			<File name="ClfActions.lua" />
+			<File name="ClfMacroEdit.lua" />
 		</Files>
 
 		<OnInitialize>
 			<CallFunction name="ClfActions.initialize" />
+			<CallFunction name="ClfMacroEdit.initialize" />
 		</OnInitialize>
 
 	</UiMod>
