@@ -98,14 +98,16 @@ function ClfUtil.isInArray( val, t )
 		return ret
 	end
 
+	local index = false
 	for i = 1, #t do
 		if ( val == t[ i ] ) then
 			ret = true
+			index = i
 			break
 		end
 	end
 
-	return ret
+	return ret, index
 end
 
 
