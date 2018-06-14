@@ -73,6 +73,10 @@ function ClfActions.onUpdate( timePassed )
 	if ( ClfActions.AFKmode ) then
 		ClfActions.p_massAFKmode( timePassed )
 	end
+
+	if ( ClfActions.LoadFukiyaEnable ) then
+		ClfActions.p_autoLoadFukiya( timePassed )
+	end
 end
 
 
@@ -1020,6 +1024,118 @@ function ClfActions.targetGold( ascend )
 end
 
 
+ClfActions.LoadFukiyaEnable = false
+ClfActions.LoadFukiyaMsgEnable = true
+
+--[[
+** （サブコンテナを含む）バックパック内の吹き矢全てに吹き矢針を装填する
+* @param  {boolean} [silent = false]  オプション - これを指定すると開始・終了時のメッセージを出力しない
+]]--
+function ClfActions.loadFukiya( silent )
+	local msgEnable = not silent
+	ClfActions.LoadFukiyaMsgEnable = msgEnable
+	local fukiyaArr, needleArr = ClfActions.p_getFukiyaAndNeedles()
+	if ( fukiyaArr and needleArr and #fukiyaArr > 0 and #needleArr > 0 ) then
+		ClfActions.LoadFukiyaDelta = 0
+		ClfActions.LoadFukiyaEnable = true
+		if ( msgEnable ) then
+			WindowUtils.SendOverheadText( L"loadFukiya: start", 1152, true )
+		end
+		return
+	end
+
+	ClfActions.LoadFukiyaEnable = false
+	if ( msgEnable ) then
+		WindowUtils.SendOverheadText( L"No Fukiya or Needle", 46, true )
+	end
+end
+
+function ClfActions.p_getFukiyaAndNeedles()
+	local allItems = ContainerWindow.ScanQuantities( ContainerWindow.PlayerBackpack, true )
+	if ( type( allItems ) ~= "table" or #allItems < 1 ) then
+		return
+	end
+
+	local FUKIYA_TYPE = 10154
+	local NEEDLE_TYPE = 10246
+	local fukiyaArr = {}
+	local needleArr = {}
+	local ObjectInfo = WindowData.ObjectInfo
+	local GetCharges = ItemProperties.GetCharges
+	local foundFukiya = false
+	local foundNeedle = false
+
+	for i = 1, #allItems do
+		local id = allItems[ i ]
+		if ( id and id > 0 ) then
+			local data = ObjectInfo[ id ]
+			if ( not data ) then
+				RegisterWindowData( ObjectInfo.Type, id )
+				data = ObjectInfo[ id ]
+			end
+			local objType = data and data.objectType
+
+			if ( objType == FUKIYA_TYPE ) then
+				local charges = GetCharges( id )
+				if ( type( charges ) == "table" and #charges > 1 ) then
+					local charge = charges[2]
+					if ( type( charge ) == "number" and charge < 10 ) then
+						fukiyaArr[ #fukiyaArr + 1 ] = id
+						foundFukiya = true
+					end
+				end
+			elseif ( objType == NEEDLE_TYPE ) then
+				local charges = GetCharges( id )
+				if ( type( charges ) == "table" and #charges > 1 ) then
+					local charge = charges[2]
+					if ( type( charge ) == "number" and charge > 0 ) then
+						needleArr[ #needleArr + 1 ] = id
+						foundNeedle = true
+					end
+				end
+			end
+		end
+		if ( foundFukiya and foundNeedle ) then
+			return fukiyaArr, needleArr
+		end
+	end
+
+	return false
+end
+
+ClfActions.LoadFukiyaDelta = 0
+function ClfActions.p_autoLoadFukiya( timePassed )
+	if ( ClfActions.LoadFukiyaEnable ) then
+		local delta = ClfActions.LoadFukiyaDelta + timePassed
+		local duration = 0.35
+		if ( delta >= duration ) then
+			local fukiyaArr, needleArr = ClfActions.p_getFukiyaAndNeedles()
+
+			if ( not fukiyaArr or not needleArr or #fukiyaArr < 1 or #needleArr < 1 ) then
+				ClfActions.LoadFukiyaEnable = false
+				ClfActions.LoadFukiyaDelta = 0
+				HandleSingleLeftClkTarget(0)
+				if ( ClfActions.LoadFukiyaMsgEnable ) then
+					WindowUtils.SendOverheadText( L"loadFukiya: END", 150, true )
+				end
+				return
+			end
+
+			if ( WindowData.Cursor and WindowData.Cursor.target == true ) then
+				HandleSingleLeftClkTarget( needleArr[1] )
+				ClfActions.LoadFukiyaDelta = 0
+			else
+				-- 装填
+				ContextMenu.RequestContextAction( fukiyaArr[1], 703 )
+				ClfActions.LoadFukiyaDelta = duration - 0.1
+			end
+		else
+			ClfActions.LoadFukiyaDelta = delta
+		end
+	end
+end
+
+
 
 function ClfActions.toggleAFKmode()
 	ClfActions.AFKmode = not ClfActions.AFKmode
@@ -1039,7 +1155,7 @@ function ClfActions.toggleAFKmode()
 			DestroyWindow( win )
 		end
 	end
-	WindowUtils.SendOverheadText( L"AFKmode: " .. onOffStr, hue, true)
+	WindowUtils.SendOverheadText( L"AFKmode: " .. onOffStr, hue, true )
 end
 
 ClfActions.AFKmode = false
