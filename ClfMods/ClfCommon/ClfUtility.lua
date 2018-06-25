@@ -16,6 +16,7 @@ ClfUtil.LOG_EXPORT_DIR = "clfExport/"
 
 function ClfUtil.initialize()
 	ClfUtil.InitialTimeStamp = GetCurrentDateTime()
+	ClfRefactor.initialize()
 end
 
 function ClfUtil.onUpdate( timePassed )

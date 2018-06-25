@@ -1,0 +1,85 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- ObjectHandle OnUpdate EventHandle windw -->
+		<Window name="ClfObjectHandleProcess" movable="false" handleinput="false" layer="background">
+			<Size>
+				<AbsPoint x="0" y="0"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+			</Anchors>
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ObjectHandleWindow.OnUpdate" />
+			</EventHandlers>
+		</Window>
+		<!-- /ObjectHandle OnUpdate EventHandle windw -->
+
+		<!-- ObjectHandle Template -->
+		<Window name="ClfObjectHandleWindow" movable="false">
+			<Size>
+				<AbsPoint x="274" y="50" />
+			</Size>
+			<Windows>
+				<Window name="$parentTint" movable="false">
+					<Size>
+						<AbsPoint x="254" y="41" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="0" y="7" />
+						</Anchor>
+					</Anchors>
+					<Windows>
+
+						<DynamicImage name="$parentBackground" texture="Object_Handle" acceptInput="false" draganddrop="true">
+							<Size>
+								<AbsPoint x="254" y="33" />
+							</Size>
+							<TexCoords x="0" y="0" />
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="0" y="7" />
+								</Anchor>
+							</Anchors>
+							<EventHandlers>
+								<EventHandler event="OnLButtonDown" function="ObjectHandleWindow.OnItemClicked" />
+								<EventHandler event="OnLButtonDblClk" function="ObjectHandleWindow.OnDblClick" />
+								<EventHandler event="OnRButtonUp" function="ObjectHandleWindow.OnClickClose" />
+								<EventHandler event="OnLButtonUp" function="ObjectHandleWindow.OnLButtonUp" />
+								<EventHandler event="OnMouseOver" function="ObjectHandleWindow.OnMouseOver" />
+								<EventHandler event="OnMouseOverEnd" function="ObjectHandleWindow.OnMouseOverEnd" />
+							</EventHandlers>
+						</DynamicImage>
+
+<!--						<Label name="$parentName" font="UO_GoldButtonText" maxchars="64" textalign="center" handleinput="false" wordwrap="true" linespacing="18" poppable="false" layer="popup">-->
+						<Label name="$parentName" font="MgenPlus_18" maxchars="64" textalign="center" handleinput="false" wordwrap="true" linespacing="18" poppable="false" layer="popup">
+							<Size>
+								<AbsPoint x="254" y="33" />
+							</Size>
+							<Anchors>
+								<Anchor point="center" relativePoint="center">
+									<AbsPoint x="0" y="-4" />
+								</Anchor>
+							</Anchors>
+							<Color r="255" g="255" b="255" a="255" />
+						</Label>
+						<Label name="$parentNameBG" font="MgenPlus_18" maxchars="64" textalign="center" handleinput="false" wordwrap="true" linespacing="18" poppable="false" layer="secondary">
+							<Size>
+								<AbsPoint x="254" y="33" />
+							</Size>
+							<Anchors>
+								<Anchor point="center" relativePoint="center">
+									<AbsPoint x="-2" y="-5" />
+								</Anchor>
+							</Anchors>
+							<Color r="30" g="30" b="30" a="255" />
+						</Label>
+					</Windows>
+				</Window>
+			</Windows>
+		</Window>
+		<!-- /ObjectHandle Template -->
+
+	</Windows>
+</Interface>

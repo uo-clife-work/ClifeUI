@@ -7,6 +7,7 @@
 
 		<Files>
 			<File name="ClfUtility.lua" />
+			<File name="ClfRefactor.lua" />
 		</Files>
 
 		<OnInitialize>
