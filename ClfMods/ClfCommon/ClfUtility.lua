@@ -226,7 +226,11 @@ function ClfUtil.rgbSV( rgb )
 	iMax = mathMin( iMax, 255 )
 	iMin = mathMax( iMin, 0 )
 	sv.v = iMax
+	if ( iMax <= 0 ) then
+		sv.s = 0
+	else
 	sv.s = ( iMax - iMin ) / iMax
+	end
 	return sv
 end
 
@@ -288,5 +292,209 @@ function ClfUtil.exportStr( str, fileName, suffix, dir, silent )
 		WindowUtils.ChatPrint( towstring( "File Exported: " .. filePath ) , SystemData.ChatLogFilters.SYSTEM )
 	end
 
+end
+
+
+
+local NeutralMobNames = {
+	[L"a cat"]               = true,
+	[L"a dog"]               = true,
+	[L"a rat"]               = true,
+	[L"a rabbit"]            = true,
+	[L"a jack rabbit"]       = true,
+
+	-- farm
+	[L"a pig"]               = true,
+	[L"a boar"]              = true,
+	[L"a hind"]              = true,
+	[L"a great hart"]        = true,
+	[L"a cow"]               = true,
+	[L"a bull"]              = true,
+	[L"a chicken"]           = true,
+	[L"a greater chicken"]   = true,
+	[L"a sheep"]             = true,
+
+	[L"a goat"]              = true,
+	[L"a mountain goat"]     = true,
+
+	-- ferret
+	[L"a ferret"]            = true,
+	[L"a squirrel"]          = true,
+
+	-- catamount
+	[L"a cougar"]            = true,
+	[L"a panther"]           = true,
+	[L"a snow leopard"]      = true,
+
+	-- bear
+	[L"a brown bear"]        = true,
+	[L"a black bear"]        = true,
+	[L"a grizzly bear"]      = true,
+	[L"a polar bear"]        = true,
+
+	-- wolf
+	[L"a grey wolf"]         = true,
+	[L"a timber wolf"]       = true,
+	[L"a white wolf"]        = true,
+
+	[L"a walrus"]            = true,
+
+	[L"a gorilla"]           = true,
+
+	[L"a horse"]             = true,
+	[L"a llama"]             = true,
+	[L"a ridable llama"]     = true,
+	[L"a forest ostard"]     = true,
+	[L"a desert ostard"]     = true,
+	[L"a swamp dragon"]      = true,
+
+	-- bird
+	[L"a bird"]              = true,
+	[L"a canary"]            = true,
+	[L"a chickadee"]         = true,
+	[L"a crossbill"]         = true,
+	[L"a crow"]              = true,
+	[L"a cuckoo"]            = true,
+	[L"a dove"]              = true,
+	[L"a finch"]             = true,
+	[L"a hawk"]              = true,
+	[L"a kingfisher"]        = true,
+	[L"a lapwing"]           = true,
+	[L"a magpie"]            = true,
+	[L"mister gobbles"]      = true,
+	[L"a nightingale"]       = true,
+	[L"a nuthatch"]          = true,
+	[L"a plover"]            = true,
+	[L"a raven"]             = true,
+	[L"a shrike"]            = true,
+	[L"a skylark"]           = true,
+	[L"a sparrow"]           = true,
+	[L"a starling"]          = true,
+	[L"a swallow"]           = true,
+	[L"a swift"]             = true,
+	[L"a tern"]              = true,
+	[L"a thrush"]            = true,
+	[L"a towhee"]            = true,
+	[L"a tropical bird"]     = true,
+	[L"a turkey"]            = true,
+	[L"a warbler"]           = true,
+	[L"a woodpecker"]        = true,
+	[L"a wren"]              = true,
+	[L"an eagle"]            = true,
+
+	-- malas
+	[L"a skittering hopper"] = true,
+
+	-- tokuno
+	[L"a crane"]             = true,
+	[L"a gaman"]             = true,
+
+}
+
+
+function ClfUtil.isNeutralMobileName( mobileId, mobName )
+	local type = type
+	if ( mobName and type( mobName ) == "wstring" and mobName ~= L"" ) then
+		mobName = wstring.trim( mobName )
+	end
+	if ( type( mobName ) ~= "wstring" or mobName == L"" ) then
+		mobName = ClfUtil.getMobName( mobileId )
+	end
+
+	if ( mobName and type( mobName )  == "wstring" and mobName ~= L"" ) then
+		mobName = wstring.lower( mobName )
+		if ( NeutralMobNames[ mobName ] == true ) then
+			return true
+		end
+	end
+
+	return false
+end
+
+
+ClfUtil.MobNames = {}
+ClfUtil.LastCleanTime = 0
+
+function ClfUtil.getMobName( mobileId )
+	if ( not mobileId or mobileId < 1 ) then
+		return
+	end
+
+	local time = Interface.TimeSinceLogin
+	if ( ClfUtil.LastCleanTime + 360 < time ) then
+		ClfUtil.cleanMobNames( false )
+	end
+
+	local lastNameObj = ClfUtil.MobNames[ mobileId ]
+	if ( lastNameObj ) then
+		if ( lastNameObj.time + 60 < time ) then
+			return lastNameObj.name
+		else
+			ClfUtil.MobNames[ mobileId ] = nil
+		end
+	end
+
+	local wTrim = wstring.trim
+	local nameFunc = function ( str )
+		if ( type( str ) ~= "wstring" or str == L"" ) then
+			return false
+		end
+		local n = wTrim( str )
+		if ( type( n ) == "wstring" and n ~= L"" ) then
+			return n
+		end
+	end
+
+	local name = false
+	local mobileName = WindowData.MobileName[ mobileId ]
+	if ( mobileName and mobileName.MobName ) then
+		name = nameFunc( mobileName.MobName )
+	end
+	if ( not name and IsMobile( mobileId ) ) then
+		local mobData = Interface.GetMobileData( mobileId, true )
+		if ( mobileData and mobileData.MobName ) then
+			name = nameFunc( mobileData.MobName )
+		end
+		if ( not name ) then
+			local props = ItemProperties.GetObjectPropertiesArray( mobileId, "ClfUtil.getMobName" )
+			if ( props and props.PropertiesList ) then
+				name = nameFunc( props.PropertiesList[1] )
+			end
+		end
+	end
+
+	if ( name ) then
+		ClfUtil.MobNames[ mobileId ] = {
+			name = name,
+			time = time,
+		}
+	end
+
+	return name
+end
+
+function ClfUtil.cleanMobNames( force )
+	local time = Interface.TimeSinceLogin
+	ClfUtil.LastCleanTime = time
+	local MobNames = ClfUtil.MobNames
+	local limit
+
+	local cleanFunc
+	if ( force ) then
+		cleanFunc = function( id, obj )
+			MobNames[ id ] = nil
+		end
+	else
+		limit = time - 360
+		cleanFunc = function( id, obj )
+			if ( obj and obj.time and obj.time < limit ) then
+				MobNames[ id ] = nil
+			end
+		end
+	end
+
+	for id, obj in pairs( MobNames ) do
+		cleanFunc( id, obj )
+	end
 end
 
