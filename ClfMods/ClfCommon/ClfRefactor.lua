@@ -54,8 +54,8 @@ function ClfRefactor.createObjectHandles()
 		local DoesPlayerHaveItem = DoesPlayerHaveItem
 		local RegisterWindowData = RegisterWindowData
 		local UnregisterWindowData = UnregisterWindowData
-		local IsMobile = IsMobile
 		local wLower = wstring.lower
+		local wFind =  wstring.find
 		local ItemProperties_GetObjectPropertiesArray = ItemProperties.GetObjectPropertiesArray
 		local CreateWindowFromTemplateShow = CreateWindowFromTemplateShow
 		local WindowSetScale = WindowSetScale
@@ -67,8 +67,10 @@ function ClfRefactor.createObjectHandles()
 		local WindowSetShowing = WindowSetShowing
 
 		-- variables
-		local ObjectHandleWindow_ObjectsData = ObjectHandleWindow.ObjectsData
-		local ObjectHandleWindow_ObjectsData_ObjectId = ObjectHandleWindow_ObjectsData.ObjectId
+		local ObjectHandleWindow_ObjectsData_ObjectId = ObjectHandleWindow.ObjectsData.ObjectId
+		local ObjectHandleWindow_ObjectsData_Names = ObjectHandleWindow.ObjectsData.Names
+		local ObjectHandleWindow_ObjectsData_IsMobile = ObjectHandleWindow.ObjectsData.IsMobile
+		local ObjectHandleWindow_ObjectsData_Notoriety = ObjectHandleWindow.ObjectsData.Notoriety
 		local ObjectHandleWindow_ReverseObjectLookUp = ObjectHandleWindow.ReverseObjectLookUp
 		local ObjectHandleWindow_hasWindow = ObjectHandleWindow.hasWindow
 		local ObjectHandleWindow_CurrentFilter = ObjectHandleWindow.CurrentFilter
@@ -80,16 +82,18 @@ function ClfRefactor.createObjectHandles()
 		local WindowData_ContainerWindow_Type = WindowData_ContainerWindow.Type
 		local ContainerWindow_OpenContainers = ContainerWindow.OpenContainers
 
-		local isItemsOnly = ( SystemData.Settings.GameOptions.objectHandleFilter == SystemData.Settings.ObjectHandleFilter.eItemsOnlyFilter )
-		local isLostItemsOnly = ( SystemData.Settings.GameOptions.objectHandleFilter == SystemData.Settings.ObjectHandleFilter.eLostItemsOnlyFilter )
-
 		local grayColor = ObjectHandleWindow.grayColor
 		local TextColors = ObjectHandleWindow.TextColors
 
+		local isItemsOnly = ( SystemData.Settings.GameOptions.objectHandleFilter == SystemData.Settings.ObjectHandleFilter.eItemsOnlyFilter )
+		local isLostItemsOnly = ( SystemData.Settings.GameOptions.objectHandleFilter == SystemData.Settings.ObjectHandleFilter.eLostItemsOnlyFilter )
+
 		-- define local function
-		local filterNames = nil
-		local isNamePassedFilter
-		if ( ObjectHandleWindow_CurrentFilter and ObjectHandleWindow_CurrentFilter ~= "" and ObjectHandleWindow_CurrentFilter ~= L"" ) then
+		local filterNames
+		local isNamePassedFilter = function( name )
+			return true
+		end
+		if ( type( ObjectHandleWindow_CurrentFilter ) == "wstring" and ObjectHandleWindow_CurrentFilter ~= L"" ) then
 			filterNames = {}
 			for cf in wstring.gmatch( ObjectHandleWindow_CurrentFilter, L"[^|]+" ) do
 				local cfFix = wLower( cf )
@@ -97,10 +101,10 @@ function ClfRefactor.createObjectHandles()
 					filterNames[ #filterNames + 1 ] = cfFix
 				end
 			end
+			if ( #filterNames ~= 0 ) then
 			isNamePassedFilter = function( name )
 				local nameFix = wLower( name )
 				if ( nameFix ~= L"" and type( nameFix ) == "wstring" ) then
-					local wFind =  wstring.find
 					for k = 1, #filterNames do
 						if ( wFind( nameFix, filterNames[ k ] ) ) then
 							return true
@@ -109,9 +113,6 @@ function ClfRefactor.createObjectHandles()
 				end
 				return false
 			end
-		else
-			isNamePassedFilter = function( name )
-				return true
 			end
 		end
 
@@ -143,7 +144,7 @@ function ClfRefactor.createObjectHandles()
 				continue
 			end
 
-			local name = ObjectHandleWindow_ObjectsData.Names[ i ]
+			local name = ObjectHandleWindow_ObjectsData_Names[ i ]
 			if ( not name or name == L"" or name == L"Treasure Sand" ) then
 				continue
 			end
@@ -151,13 +152,35 @@ function ClfRefactor.createObjectHandles()
 				continue
 			end
 
+			local ObjectDataIsMobile = ObjectHandleWindow_ObjectsData_IsMobile[ i ]
+			if ( isItemsOnly ) then
+				if ( ObjectDataIsMobile ) then
+					continue
+				end
+
+				local removeOnComplete = false
+				local containerWin = WindowData_ContainerWindow[ objectId ]
+				if ( not containerWin ) then
+					RegisterWindowData( WindowData_ContainerWindow_Type, objectId )
+					containerWin = WindowData_ContainerWindow[ objectId ]
+					removeOnComplete = true
+				end
+				if ( containerWin and containerWin.isCorpse ) then
+					continue
+				end
+				if ( removeOnComplete and ContainerWindow_OpenContainers[ objectId ] == nil ) then
+					UnregisterWindowData( WindowData_ContainerWindow_Type, objectId )
+				end
+			end
+
+			-- Lost Item check
 			local lostItem = false
-			if ( not IsMobile( objectId ) ) then
+			if ( not ObjectDataIsMobile ) then
 				local tids = ItemProperties_GetObjectPropertiesArray( objectId, "Object Handle - check lost item" )
 				tids = tids and tids.PropertiesTids or {}
 
-				for i = 1, #tids do
-					if ( tids[ i ] == 1151520 ) then
+				for j = 1, #tids do
+					if ( tids[ j ] == 1151520 ) then
 						-- 1151520: 遺失物（返却すると誠実さを獲得）
 						lostItem = true
 						break
@@ -165,27 +188,8 @@ function ClfRefactor.createObjectHandles()
 				end
 			end
 
-			local ObjectDataIsMobile = ObjectHandleWindow_ObjectsData.IsMobile[ i ]
 			if ( isLostItemsOnly and not lostItem ) then
 				continue
-			elseif ( isItemsOnly ) then
-				if ( ObjectDataIsMobile ) then
-					continue
-				end
-
-				local removeOnComplete = false
-				if ( not WindowData_ContainerWindow[ objectId ] ) then
-					RegisterWindowData( WindowData_ContainerWindow_Type, objectId )
-					removeOnComplete = true
-				end
-
-				if ( WindowData_ContainerWindow[ objectId ] and WindowData_ContainerWindow[ objectId ].isCorpse ) then
-					continue
-				end
-
-				if ( removeOnComplete and ContainerWindow_OpenContainers[ objectId ] == nil ) then
-					UnregisterWindowData( WindowData_ContainerWindow_Type, objectId )
-				end
 			end
 
 			local hue
@@ -193,7 +197,7 @@ function ClfRefactor.createObjectHandles()
 				if ( objectId == CurrentHonor ) then
 					hue = honorColor
 				else
-					hue = TextColors[ ObjectHandleWindow_ObjectsData.Notoriety[ i ] + 1 ]
+					hue = TextColors[ ObjectHandleWindow_ObjectsData_Notoriety[ i ] + 1 ]
 				end
 			else
 				if ( lostItem ) then
@@ -203,7 +207,7 @@ function ClfRefactor.createObjectHandles()
 				end
 			end
 
-			-- Create Object handle
+			-- Create Object handle window
 			local windowName     = "ObjectHandleWindow" .. objectId
 			local windowTintName = windowName .. "Tint"
 			local labelName      = windowName .. "TintName"
