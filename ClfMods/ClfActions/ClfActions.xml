@@ -77,6 +77,117 @@
 		</Window>
 
 
+		<!-- Object's Hue Display Window -->
+		<Window name="ClfObjHueWin" layer="" movable="true" sticky="false">
+			<Size>
+				<AbsPoint x="270" y="60"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft">
+					<AbsPoint x="100" y="100"/>
+				</Anchor>
+			</Anchors>
+			<EventHandlers>
+				<EventHandler event="OnInitialize" function="ClfObjHueWindow.onInitialize"/>
+				<EventHandler event="OnShutdown" function="ClfObjHueWindow.onShutdown"/>
+				<EventHandler event="OnLButtonDblClk" function="ClfObjHueWindow.onDblClick" />
+			</EventHandlers>
+
+			<Windows>
+
+				<!-- BG -->
+				<FullResizeImage name="$parentFrame" inherits="UO_Simple_Frame" layer="background" frameonly="false">
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" />
+						<Anchor point="bottomright" relativePoint="bottomright" />
+					</Anchors>
+					<TintColor r="120" g="130" b="160" />
+				</FullResizeImage>
+
+				<!-- Object Name  -->
+				<Label name="$parentName" font="Arial_Black_Shadow_14" maxchars="35" textalign="left">
+					<Size>
+						<AbsPoint x="263" y="14" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="5" y="1"/>
+						</Anchor>
+					</Anchors>
+					<Color r="255" g="255" b="255" />
+				</Label>
+
+				<!-- Data  -->
+				<Label name="$parentData" font="MgenPlus_12" maxchars="255" textalign="left" wordwrap="true">
+					<Size>
+						<AbsPoint x="120" y="22" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="5" y="25"/>
+						</Anchor>
+					</Anchors>
+					<Color r="218" g="218" b="234" />
+				</Label>
+
+				<!-- Hue -->
+				<Window name="$parentHue">
+					<Size>
+						<AbsPoint x="142" y="24" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright">
+							<AbsPoint x="-5" y="27"/>
+						</Anchor>
+					</Anchors>
+
+					<EventHandlers>
+						<EventHandler event="OnMouseOver" function="ClfObjHueWindow.onHueBtnOver"/>
+					</EventHandlers>
+
+					<Windows>
+						<DynamicImage name="$parentBG" alpha="0.75" texture="CC_Widgets" layer="background" handleinput="false">
+							<Size>
+								<AbsPoint x="142" y="24" />
+							</Size>
+							<TexCoords x="502" y="306" />
+							<TexDims   x="45" y="45" />
+							<TintColor r="0" g="0" b="0" />
+							<Anchors>
+								<Anchor point="topright" relativePoint="topright">
+									<AbsPoint x="0" y="0"/>
+								</Anchor>
+							</Anchors>
+						</DynamicImage>
+
+						<DynamicImage name="$parentImage" texture="ClfTexMonotoneGradient" handleinput="false">
+							<Size>
+								<AbsPoint x="20" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="2" y="2"/>
+								</Anchor>
+							</Anchors>
+						</DynamicImage>
+
+						<Label name="$parentName" font="Arial_Black_12" maxchars="64" textalign="center" handleinput="false">
+							<Size>
+								<AbsPoint x="120" y="20" />
+							</Size>
+							<Anchors>
+								<Anchor point="topleft" relativePoint="topleft">
+									<AbsPoint x="22" y="-1"/>
+								</Anchor>
+							</Anchors>
+						</Label>
+					</Windows>
+				</Window>
+
+			</Windows>
+		</Window><!-- /ClfObjHueWindow -->
+
+
 		<!-- AFK Window -->
 		<Window name="ClfAFKmodeWin" handleinput="false">
 			<Size>

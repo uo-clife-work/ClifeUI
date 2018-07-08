@@ -28,10 +28,20 @@ ClfActions.SummonedPropTids = {
 -- spellIdをキーにしたSpellsDataを保持するテーブル
 ClfActions.SpellIdsData = nil
 
+-- ニュートラルなmobをターゲット対象にしない
+ClfActions.EnableFilterNeutralMobile = true
+
+-- 敵性mobの取得先をmobileHealthbarから取得する（ヘルスバーが表示されているmobだけが対象になる）
+ClfActions.EnableFilterEnemy = true
+
+-- Hue表示ウィンドウの有効・無効
+ClfActions.EnableHueWindow = true
+
 
 function ClfActions.initialize()
-
 	ClfActions.setDistWindowEnable( Interface.LoadBoolean( "ClfDistWindowEnable", true ) )
+	ClfActions.EnableFilterNeutralMobile = Interface.LoadBoolean( "ClfFilterNeutralMobile", ClfActions.EnableFilterNeutralMobile )
+	ClfActions.EnableFilterEnemy = Interface.LoadBoolean( "ClfFilterEnemy", ClfActions.EnableFilterEnemy )
 
 	if ( not ClfActions.WorkerMobileTids ) then
 		-- WorkerMobileTids を生成
@@ -48,7 +58,6 @@ function ClfActions.initialize()
 		end
 	end
 
-
 	if ( not ClfActions.SpellIdsData ) then
 		-- SpellIdsData： SpellsInfo.SpellsDataからspellIdをキーにしたテーブルを生成
 		ClfActions.SpellIdsData = {}
@@ -59,6 +68,12 @@ function ClfActions.initialize()
 				ClfActions.SpellIdsData[ id ] = data
 			end
 		end
+	end
+
+	ClfActions.EnableHueWindow = Interface.LoadBoolean( "ClfHueWindow", ClfActions.EnableHueWindow )
+	if ( ClfActions.EnableHueWindow ) then
+		ClfActions.EnableHueWindow = false
+		ClfActions.toggleHueWindow();
 	end
 end
 
@@ -136,17 +151,18 @@ function ClfActions.p_dispTargetDist( timePassed )
 			local label = newWin .. "Num"
 			LabelSetText( label, towstring( dist ) )
 			LabelSetTextColor( label, color.r, color.g, color.b )
-			WindowSetFontAlpha( newWin, 0.85 )
+			WindowSetShowing( newWin, true )
 		else
-			WindowSetFontAlpha( newWin, 0 )
+			WindowSetShowing( newWin, false )
 		end
 	end
 
 	local delta = ClfActions.DistCleanDelta + timePassed
-	ClfActions.DistCleanDelta = delta
 	if ( delta > 120 ) then
 		ClfActions.p_cleanDistData()
 		ClfActions.DistCleanDelta = 0
+	else
+		ClfActions.DistCleanDelta = delta
 	end
 end
 
@@ -166,9 +182,7 @@ end
 -- ** EventHandle: WindowData.CurrentTarget.Event
 function ClfActions.p_onUpdateTarget()
 	if ( ClfActions.DistWindowEnable ) then
-
 		local targetId = WindowData.CurrentTarget.TargetId
-
 		local oldId = ClfActions.CurrentDistId
 		local oldWin = ClfActions.DistWindows[ oldId ]
 		if ( oldWin and targetId ~= oldId ) then
@@ -177,11 +191,10 @@ function ClfActions.p_onUpdateTarget()
 		end
 
 		if ( targetId and targetId > 0 and targetId ~= WindowData.PlayerStatus.PlayerId ) then
-
 			if ( IsMobile( targetId ) ) then
 				if ( not ClfActions.DistWindows[ targetId ] ) then
 					local newWin = ClfActions.DistWindowName .. targetId
-					CreateWindowFromTemplateShow( newWin, ClfActions.DistWindowName, "Root", true )
+					CreateWindowFromTemplateShow( newWin, ClfActions.DistWindowName, "Root", false )
 					ClfActions.DistWindows[ targetId ] = newWin
 					ClfActions.CurrentDistId = targetId
 					AttachWindowToWorldObject( targetId, newWin )
@@ -192,7 +205,11 @@ function ClfActions.p_onUpdateTarget()
 						local label = newWin .. "Label"
 						local name = wstring.lower( mobileData.MobName )
 						name = wstring.gsub( towstring( name ), L"^%s*an?%s+", L"" )
+						if ( type( name ) == "wstring" ) then
 						LabelSetText( label, name )
+						else
+							LabelSetText( label, L"" )
+						end
 						WindowSetFontAlpha( label, 0.7 )
 						local noto = mobileData.Notoriety and mobileData.Notoriety + 1
 						local col = noto and NameColor.TextColors[ noto ]
@@ -200,13 +217,11 @@ function ClfActions.p_onUpdateTarget()
 							LabelSetTextColor( label, col.r, col.g, col.b )
 						end
 					end
+					WindowSetShowing( newWin, true )
 				end
 			end
-
 		end
-
 	end
-
 end
 
 
@@ -229,6 +244,48 @@ function ClfActions.setOpenedCorpse()
 end
 
 
+-- ニュートラルなmobをターゲット対象にしない設定を切り替える
+function ClfActions.toggleFilterNeutralMobile( silent )
+	local enable = not ClfActions.EnableFilterNeutralMobile
+	Interface.SaveBoolean( "ClfFilterNeutralMobile", enable )
+	ClfActions.EnableFilterNeutralMobile = enable
+
+	if ( not silent ) then
+		local str
+		local hue
+		if ( enable ) then
+			str = L"ON"
+			hue = 1152
+		else
+			str = L"OFF"
+			hue = 150
+		end
+		WindowUtils.SendOverheadText( L"FilterNeutralMobile: " .. str, hue, true )
+	end
+end
+
+
+-- 敵性mobの取得先をヘルスバーにするか全mobにするかを切り替える
+function ClfActions.toggleFilterEnemy( silent )
+	local enable = not ClfActions.EnableFilterEnemy
+	Interface.SaveBoolean( "ClfFilterEnemy", enable )
+	ClfActions.EnableFilterEnemy = enable
+
+	if ( not silent ) then
+		local str
+		local hue
+		if ( enable ) then
+			str = L"ON"
+			hue = 1152
+		else
+			str = L"OFF"
+			hue = 150
+		end
+		WindowUtils.SendOverheadText( L"FilterEnemy: " .. str, hue, true )
+	end
+end
+
+
 --[[
 * カレントターゲットが敵性mob以外なら、近くの敵をカレントターゲットにする（敵性だった時はクリックする）
 * @param  {integer} [orderNum = 1] オプション - ターゲットを変更する場合は{orderNum}番目に近い敵をターゲットする
@@ -248,23 +305,22 @@ function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
 			) then
 			-- 自分、パーティメンバー、ペットなので変更
 			changeTarg = true
-
 		elseif ( IsMobile( targetId ) ) then
-			local mobName = WindowData.MobileName[ targetId ] or {}
-			local noto = mobName.Notoriety
+			local mobData = WindowData.MobileName[ targetId ] or {}
+			local noto = mobData.Notoriety
 			if ( not noto ) then
-				local mobileData = Interface.GetMobileData( targetId, false ) or {}
-				noto = mobileData.Notoriety
+				mobData = Interface.GetMobileData( targetId, false ) or {}
+				noto = mobData.Notoriety
 			end
 			noto = noto and noto + 1
 			if (
 					noto == 3	-- 緑
 					or noto == 8	-- 黄
 					or ClfActions.p_isWorkerMobile( targetId )
+					or ( ClfActions.EnableFilterNeutralMobile and noto == 4 and ClfUtil.isNeutralMobileName( targetId, mobData.MobName ) )
 				) then
 				-- 緑、黄色、ペット、召喚
 				changeTarg = true
-
 			else
 				changeTarg = false
 				HandleSingleLeftClkTarget( targetId )
@@ -275,7 +331,6 @@ function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
 	if ( changeTarg ) then
 		ClfActions.nearTarget( orderNum, descHealth, range )
 	end
-
 end
 
 
@@ -289,7 +344,6 @@ function ClfActions.nearTarget( orderNum, range, descHealth )
 	local tgMobs = ClfActions.p_getDistSortTargetArray( range, descHealth )
 
 	if ( tgMobs ) then
-
 		if ( not orderNum or type( orderNum ) ~= "number" or orderNum <= 1 ) then
 			orderNum = 1
 		else
@@ -317,7 +371,12 @@ end
 function ClfActions.p_getDistSortTargetArray( range, descHealth )
 
 	local tgMobs = {}
-	local mobiles = MobilesOnScreen.MobilesSort or {}
+	local mobiles
+	if ( ClfActions.EnableFilterEnemy ) then
+		mobiles = MobilesOnScreen.MobilesSort or {}
+	else
+		mobiles = GetAllMobileTargets() or {}
+	end
 
 	local FiendlyIds = ClfActions.FiendlyIds
 	local p_isWorkerMobile = ClfActions.p_isWorkerMobile
@@ -326,16 +385,25 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 	local GetMobileData = Interface.GetMobileData
 	local MobileName = WindowData.MobileName
 	local TargetAllowed = Actions.TargetAllowed
+	local isNeutralMobileName = ClfUtil.isNeutralMobileName
 	local maxRange = tonumber( range )
 	if ( not maxRange ) then
-		maxRange = 255
+		maxRange = 29
 	else
-		maxRange = math.max( maxRange, 0 )
+		maxRange = math.min( 29, math.max( maxRange, 0 ) )
+	end
+	local isNeutral
+	if ( ClfActions.EnableFilterNeutralMobile ) then
+		isNeutral = function( noto, id, mobName )
+			return ( noto == 4 and isNeutralMobileName( id, mobName ) )
+		end
+	else
+		isNeutral = function( noto, id, mobName ) return false end
 	end
 
 	for i = 0, #mobiles do
 		local mobileId = mobiles[ i ]
-		if ( mobileId and mobileId > 0 and IsMobile( mobileId ) and TargetAllowed( mobileId ) ) then
+		if ( mobileId and mobileId > 0 and TargetAllowed( mobileId ) ) then
 			local mobileName = MobileName[ mobileId ] or {}
 			local noto = mobileName.Notoriety
 			noto = noto and noto + 1
@@ -348,8 +416,10 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 					and not IsPartyMember( mobileId )
 				) then
 				-- 青、緑、黄色、パーティメンバー以外 // TargetAllowed でこれらは返ってこないハズだけど念のため
-
-				if ( not p_isWorkerMobile( mobileId ) ) then
+				if (
+						not p_isWorkerMobile( mobileId )
+						and not isNeutral( noto, mobileId, mobileName.MobName )
+					) then
 					-- ペット、召喚では無い
 					local dist = GetDistanceFromPlayer( mobileId ) or -1
 					if ( dist >= 0 and dist <= maxRange ) then
@@ -363,7 +433,6 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 						}
 					end
 				end
-
 			end
 		end
 	end
@@ -412,7 +481,6 @@ ClfActions.WorkerMobileIds = {}
 * @return {boolean}
 ]]--
 function ClfActions.p_isWorkerMobile( mobileId, mobileType )
-
 	if ( not mobileId or mobileId < 1 ) then
 		return
 	end
@@ -423,14 +491,11 @@ function ClfActions.p_isWorkerMobile( mobileId, mobileType )
 		workerType = ClfActions.WorkerMobileIds[ mobileId ]
 	else
 		workerType = false
-
 		local props = ItemProperties.GetObjectPropertiesArray( mobileId, "ClfActions.p_isWorkerMobile" )
 		local tids = props and props.PropertiesTids
 
 		if ( tids and #tids > 1 ) then
-
 			local WorkerMobileTids = ClfActions.WorkerMobileTids
-
 			-- プロパティにペット、召喚のtIdがあるかチェック
 			-- ※ 「召喚」のプロパティが無い召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）もいるが、とりあえずはコレで.
 			-- 1番目プロパティは名前なので、2から
@@ -502,10 +567,8 @@ function ClfActions.waitTargetRange( range, minRange, notCastSpell )
 
 	if ( id and id > 0 ) then
 		ClfActions.WaitTargetId = id
-
 		local isCastSpell = not notCastSpell
 		ClfActions.WaitTargetIsCastSpell = isCastSpell
-
 		local lastSpell = Interface.LastSpell
 		ClfActions.WaitTargetLastSpell = lastSpell
 		ClfActions.WaitTargetDelta = 0
@@ -513,9 +576,7 @@ function ClfActions.waitTargetRange( range, minRange, notCastSpell )
 		ClfActions.TargetRangeMax = range and tonumber( range ) or isCastSpell and ClfActions.p_getSpellRange( lastSpell ) or 10
 		minRange = minRange and tonumber( minRange ) or 0
 		ClfActions.TargetRangeMin = math.min( math.max( 0, minRange ), ClfActions.TargetRangeMax )
-
 		ClfActions.WaitTargetEnable = true
-
 		CreateWindow( win, true )
 		AttachWindowToWorldObject( WindowData.PlayerStatus.PlayerId, win )
 	else
@@ -559,13 +620,10 @@ function ClfActions.p_massWaitTarget( timePassed )
 		T.WaitTargetEnable = false
 		LabelSetTextColor( label, 255, 70, 80 )
 		LabelSetText( label, L"Spell Changed! - END Wait targ" )
-
 		WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
-
 	elseif ( cursor.target ) then
 		-- ターゲットカーソル状態： 待機時間をリセット
 		T.WaitTargetDelta = 0
-
 		local currentTargetId = WindowData.CurrentTarget and WindowData.CurrentTarget.TargetId
 		local id = ClfActions.WaitTargetId
 
@@ -576,7 +634,6 @@ function ClfActions.p_massWaitTarget( timePassed )
 			LabelSetText( label, L"Target Changed! - END Wait targ" )
 
 			WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
-
 		elseif ( id and id > 0 ) then
 			local dist = GetDistanceFromPlayer( id )
 			if ( not dist or dist < 0 ) then
@@ -610,18 +667,15 @@ function ClfActions.p_massWaitTarget( timePassed )
 			LabelSetText( label, L"wait (none target)" )
 			T.WaitTargetTxtDelta = 0
 		end
-
 	elseif ( ClfActions.WaitTargetIsCastSpell and currentSpell.casting ) then
 		-- 詠唱中： 待機時間をリセット
 		T.WaitTargetDelta = 0
-
 	elseif ( delta >= 0.6 or IsPlayerDead() ) then
 		-- 詠唱中では無い＆ターゲットカーソル状態では無い状態が0.6秒以上経過 or 自分が死んでいる： 終了
 		T.WaitTargetDelta = 0
 		T.WaitTargetEnable = false
 		LabelSetTextColor( label, 255, 160, 70 )
 		LabelSetText( label, L"TimeOut - END Wait targ" )
-
 		WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
 	end
 end
@@ -700,7 +754,6 @@ function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed
 					return ( a.index < b.index )
 				end
 			)
-
 		else
 			table.sort(
 				fMobs,
@@ -720,10 +773,7 @@ function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed
 		if ( mob.perc < 1 or ( includePoisoned and mob.visualState == poisonState ) ) then
 			HandleSingleLeftClkTarget( mob.id )
 		end
-
---		Debug.DumpToConsole( "fMobs", fMobs )
 	end
-
 end
 
 
@@ -759,7 +809,6 @@ function ClfActions.poisonedFriendly( includeBlue, excludeParty, myPetOnly, excl
 					return ( a.dist < b.dist )
 				end
 				return ( a.index < b.index )
-
 			end
 		)
 
@@ -792,25 +841,52 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 
 	local fMobs = {}
 	local fMobIds = {}
-	local includePoisoned = not excludePoisoned
-	local includeCursed = not excludeCursed
-	local includeDead = not excludeDead
-	local poisonState = 2
-	local cursedState = 3
 	local maxRange = tonumber( range )
 	if ( not maxRange ) then
-		maxRange = 255
+		maxRange = 29
 	else
-		maxRange = math.max( 0, maxRange )
+		maxRange = math.min( 29, math.max( 0, maxRange ) )
 	end
 
-	local pairs = pairs
 	local GetDistanceFromPlayer = GetDistanceFromPlayer
 	local GetMobileData = Interface.GetMobileData
 	local IsPartyMember = IsPartyMember
 	local HealthBarColor = WindowData.HealthBarColor
 	local MobileName = WindowData.MobileName
 	local p_isWorkerMobile = ClfActions.p_isWorkerMobile
+
+	local isPoison
+	if ( not excludePoisoned ) then
+		isPoison = function( visualStateId )
+			return false
+		end
+	else
+		isPoison = function( visualStateId )
+			return ( visualStateId == 2 )
+		end
+	end
+
+	local isCurse
+	if ( not excludeCursed ) then
+		isCurse = function( visualStateId )
+			return false
+		end
+	else
+		isCurse = function( visualStateId )
+			return ( visualStateId == 3 )
+		end
+	end
+
+	local isDead
+	if ( not excludeDead ) then
+		isDead = function( mobileData )
+			return false
+		end
+	else
+		isDead = function( mobileData )
+			return ( mobileData.IsDead )
+		end
+	end
 
 	local setFMobs = function( mobileData, mobileId )
 		if ( not mobileId or mobileId < 1 ) then
@@ -830,11 +906,11 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 
 		local dist = GetDistanceFromPlayer( mobileId ) or -1
 		if (
-				dist >= 0 and
-				dist <= maxRange and
-				( includePoisoned or visualStateId ~= poisonState ) and
-				( includeCursed or visualStateId ~= cursedState ) and
-				( includeDead or not mobileData.IsDead )
+				dist >= 0
+				and dist <= maxRange
+				and not isPoison( visualStateId )
+				and not isCurse( visualStateId )
+				and not isDead( mobileData )
 			) then
 			local index = #fMobs + 1
 			fMobs[ index ] = {
@@ -852,7 +928,8 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 	local FiendlyIds = ClfActions.FiendlyIds
 	for j = 1, #allMobiles do
 		local mobiles = allMobiles[ j ]
-		for i, mobileId in pairs( mobiles ) do
+		for i = 1, #mobiles do
+			local mobileId = mobiles[ i ]
 			if ( fMobIds[ mobileId ] ) then
 				continue
 			end
@@ -887,9 +964,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 				if ( mobileId and mobileId > 0 ) then
 					local mobileData = GetMobileData( mobileId, true )
 					if ( mobileData ) then
-
 						setFMobs( mobileData, mobileId )
-
 					end
 				end
 			end
@@ -1005,16 +1080,24 @@ function ClfActions.targetGold( ascend )
 		end
 	end
 
+	local ObjectInfo = WindowData.ObjectInfo
 	for i = 1, numItems do
 		local item = items[ i ]
 		local id = item and item.objectId
 		if ( id and id > 0 ) then
-			RegisterWindowData( WindowData.ObjectInfo.Type, id )
-			local data = WindowData.ObjectInfo[ id ]
-			if ( data and data.objectType == GOLD_TYPE and data.hueId == GOLD_HUE ) then
+			local data = ObjectInfo[ id ]
+			local registered = false
+			if ( not data ) then
+				RegisterWindowData( ObjectInfo.Type, id )
+				data = ObjectInfo[ id ]
+			end
+			if ( data ) then
+				if ( data.objectType == GOLD_TYPE and data.hueId == GOLD_HUE ) then
 				sFunc( data.quantity, id )
 			end
-			UnregisterWindowData( WindowData.ObjectInfo.Type, id )
+			elseif ( registered ) then
+				UnregisterWindowData( ObjectInfo.Type, id )
+			end
 		end
 	end
 
@@ -1135,6 +1218,32 @@ function ClfActions.p_autoLoadFukiya( timePassed )
 	end
 end
 
+
+-- オブジェクトのHueID等を表示するウィンドウ表示切り替え
+function ClfActions.toggleHueWindow()
+	local enable = not ClfActions.EnableHueWindow
+	local win = ClfObjHueWindow and ClfObjHueWindow.WindowName
+	if ( enable ) then
+		CreateWindow( win, true )
+		WindowUtils.RestoreWindowPosition( win )
+	else
+		if ( DoesWindowExist( win ) ) then
+			DestroyWindow( win )
+		end
+	end
+
+	Interface.SaveBoolean( "ClfHueWindow", enable )
+	ClfActions.EnableHueWindow = enable
+end
+
+
+-- オブジェクトをターゲットしてHueを表示
+function ClfActions.showHue()
+	if ( not ClfActions.EnableHueWindow ) then
+		ClfActions.toggleHueWindow()
+	end
+	ClfObjHueWindow.onDblClick()
+end
 
 
 function ClfActions.toggleAFKmode()
