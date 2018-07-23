@@ -16,6 +16,7 @@ ClfUtil.LOG_EXPORT_DIR = "clfExport/"
 
 function ClfUtil.initialize()
 	ClfUtil.InitialTimeStamp = GetCurrentDateTime()
+	ClfSettings.initialize()
 	ClfRefactor.initialize()
 end
 
@@ -291,7 +292,6 @@ function ClfUtil.exportStr( str, fileName, suffix, dir, silent )
 	if ( not silent ) then
 		WindowUtils.ChatPrint( towstring( "File Exported: " .. filePath ) , SystemData.ChatLogFilters.SYSTEM )
 	end
-
 end
 
 
