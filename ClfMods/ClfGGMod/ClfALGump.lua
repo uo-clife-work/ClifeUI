@@ -116,6 +116,8 @@ local ANIMAL_TYPE_ARRAY = {
 	{ objectType = 10000060, name = "cold drake",   excHueId = { 0, }, },	-- hueId 1317, 1350,
 	{ objectType = 10000060, name = "drake",        hueId = { 0, }, },
 	{ objectType = 10000061, name = "cold drake",   excHueId = { 0, }, },	-- hueId 1302, 1305, 1313, 1324, 1342, 1343, 1347,  etc.
+	{ objectType = 10001418, name = "platinum drake", },	-- hueId cold:34134, poison:34136
+	{ objectType = 10001420, name = "crimson drake", },	-- hueId cold:34134,
 }
 
 local FIDELITY_RATES = {

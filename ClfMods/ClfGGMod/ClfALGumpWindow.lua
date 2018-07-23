@@ -758,7 +758,6 @@ function ClfALGumpWindow.showData( id )
 				CreateWindowFromTemplateShow( newWin, "ClfALTmplateSkillExt", parent, true )
 				LabelSetText( newWin .. "Title", skillTitles[ key ] )
 				WindowAddAnchor( newWin, "topleft", parent, "topleft", ancX, ancY)
-
 			end
 
 			local val = d.val
@@ -771,12 +770,10 @@ function ClfALGumpWindow.showData( id )
 
 			if ( type( current ) == "number" ) then
 				currentStr = stringFormat( "%.1f", current )
-
 				if ( tamable and not isTamed and not isRleased ) then
 					local delta =  mathFloor( current * 9 ) * 0.1
 					deltaStr = ">" .. tonumber( stringFormat( "%.1f", delta ) )
 				end
-
 			else
 				currentStr = tostring( current )
 			end
@@ -801,7 +798,7 @@ function ClfALGumpWindow.showData( id )
 
 			local valLabelText = currentStr
 
-			if ( tamable and not isTamed ) then
+			if ( tamable and not isTamed and not isRleased ) then
 				valLabelText = currentStr
 			elseif ( valStr ) then
 				valLabelText = currentStr .. "/" .. valStr
