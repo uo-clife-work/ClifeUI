@@ -2,7 +2,7 @@
 	<Windows>
 
 		<!-- ObjectHandle OnUpdate EventHandle windw -->
-		<Window name="ClfObjectHandleProcess" movable="false" handleinput="false" layer="background">
+		<Window name="ClfObjectHandleProcess" movable="false" handleinput="false" layer="background" savesettings="false">
 			<Size>
 				<AbsPoint x="0" y="0"/>
 			</Size>
@@ -16,7 +16,7 @@
 		<!-- /ObjectHandle OnUpdate EventHandle windw -->
 
 		<!-- ObjectHandle Template -->
-		<Window name="ClfObjectHandleWindow" movable="false">
+		<Window name="ClfObjectHandleWindow" movable="false" savesettings="false">
 			<Size>
 				<AbsPoint x="274" y="50" />
 			</Size>

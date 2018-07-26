@@ -14,18 +14,22 @@ ClfRefactor.Enable = true
 ClfRefactor.createObjectHandles_org = nil
 -- デフォルトのオブハン削除用メソッドを保持
 ClfRefactor.destroyObjectHandles_org = nil
--- デフォルトのオブハンonUpdateメソッドを保持
+-- デフォルトのオブハンonUpdateメソッドを保持： 現状使用しないが一応。
 ClfRefactor.objectHandleWindowOnUpdate_org = nil
--- デフォルトのVacuum開始メソッドを保持
+-- デフォルトのVacuum開始メソッドを保持： 現状使用しないが一応。
 ClfRefactor.massOrganizerStart_org = nil
--- デフォルトのVacuum用onUpdateメソッドを保持
+-- デフォルトのVacuum用onUpdateメソッドを保持： 現状使用しないが一応。
 ClfRefactor.massOrganizer_org = nil
 
 
 function ClfRefactor.initialize()
+	local ClfRefactor = ClfRefactor
 	if ( not ClfRefactor.Enable ) then
 		return
 	end
+
+	local ObjectHandleWindow = ObjectHandleWindow
+	local Actions = Actions
 
 	if ( not ClfRefactor.createObjectHandles_org ) then
 		-- オブハン表示用メソッドをオーバーライド
