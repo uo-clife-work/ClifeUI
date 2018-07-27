@@ -2,7 +2,7 @@
 	<Windows>
 
 		<!-- Template: EventHandle Window -->
-		<Window name="ClfActionsWindow" handleinput="false" layer="background">
+		<Window name="ClfActionsWindow" handleinput="false" layer="background" savesettings="false">
 			<Size>
 				<AbsPoint x="0" y="0"/>
 			</Size>
@@ -13,7 +13,7 @@
 
 
 		<!-- Distance Window -->
-		<Window name="ClfDistanceWindow" handleinput="false" layer="secondary">
+		<Window name="ClfDistanceWindow" handleinput="false" layer="secondary" savesettings="false">
 			<Size>
 				<AbsPoint x="70" y="20"/>
 			</Size>
@@ -52,7 +52,7 @@
 
 
 		<!-- Target Distance Check Window -->
-		<Window name="ClfDelayTarget" handleinput="false">
+		<Window name="ClfDelayTarget" handleinput="false" savesettings="false">
 			<Size>
 				<AbsPoint x="220" y="20"/>
 			</Size>
@@ -189,11 +189,13 @@
 
 
 		<!-- AFK Window -->
-		<Window name="ClfAFKmodeWin" handleinput="false">
+		<Window name="ClfAFKmodeWin" handleinput="false" savesettings="false">
 			<Size>
 				<AbsPoint x="70" y="20"/>
 			</Size>
-
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ClfActions.p_massAFKmode" />
+			</EventHandlers>
 			<Windows>
 				<Label name="$parentLabel" font="Arial_Black_Shadow_12" maxchars="256" textalign="center" handleinput="false" layer="default">
 					<Size>

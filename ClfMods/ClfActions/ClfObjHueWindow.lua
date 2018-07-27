@@ -17,7 +17,8 @@ ClfObjHueWindow.TypeColors = {
 		[1652] = L"Wine Red (cu sidhe)",	-- Red (plant pigment)
 		[1153] = L"Pure White (cu sidhe)",	-- Pure White (AOS Cloth)
 		[1154] = L"Ice Blue (cu sidhe)",	-- Ice Blue (Cloth Lv5, plant pigment)
-		-- and Valorite, Fire
+		[1161] = L"Fire (cu sidhe)",	-- Blaze (Cloth Lv5)
+		-- and Valorite
 	},
 }
 

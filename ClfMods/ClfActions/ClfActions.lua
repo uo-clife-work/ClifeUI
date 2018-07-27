@@ -19,7 +19,7 @@ ClfActions.FiendlyIds = {}
 ClfActions.WorkerMobileTids = nil
 ClfActions.PetPropTids = {
 	[502006]  = "pet",	-- "ペット"
-	[1049608] = "petFavorite",	-- "おきにいり"
+	[1049608] = "petBonded",	-- "おきにいり"
 }
 ClfActions.SummonedPropTids = {
 	[1049646] = "summon",	-- "召喚" （NPCが召喚したmobには付かないっぽい） ※ 一部の召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）では付かない
@@ -39,6 +39,7 @@ ClfActions.EnableHueWindow = true
 
 
 function ClfActions.initialize()
+	local ClfActions = ClfActions
 	ClfActions.setDistWindowEnable( Interface.LoadBoolean( "ClfDistWindowEnable", true ) )
 	ClfActions.EnableFilterNeutralMobile = Interface.LoadBoolean( "ClfFilterNeutralMobile", ClfActions.EnableFilterNeutralMobile )
 	ClfActions.EnableFilterEnemy = Interface.LoadBoolean( "ClfFilterEnemy", ClfActions.EnableFilterEnemy )
@@ -75,6 +76,12 @@ function ClfActions.initialize()
 		ClfActions.EnableHueWindow = false
 		ClfActions.toggleHueWindow();
 	end
+
+	-- 追加Actionを定義
+	local Actions = Actions
+	Actions.ReimbueLast = Actions.ReimbueLast or ClfActions.reImbueLast
+	Actions.UnravelContainer = Actions.UnravelContainer or ClfActions.unravelContainer
+
 end
 
 
@@ -83,10 +90,6 @@ end
 function ClfActions.onUpdate( timePassed )
 	if ( ClfActions.DistWindowEnable ) then
 		ClfActions.p_dispTargetDist( timePassed )
-	end
-
-	if ( ClfActions.AFKmode ) then
-		ClfActions.p_massAFKmode( timePassed )
 	end
 
 	if ( ClfActions.LoadFukiyaEnable ) then
@@ -133,6 +136,7 @@ ClfActions.CurrentDistId = 0
 ClfActions.DistCleanDelta = 0
 function ClfActions.p_dispTargetDist( timePassed )
 	local targetId = WindowData.CurrentTarget.TargetId
+	local ClfActions = ClfActions
 	local newWin = ClfActions.DistWindows[ targetId ]
 
 	if ( newWin ) then
@@ -172,7 +176,7 @@ function ClfActions.p_cleanDistData( forceClean )
 	local data = ClfActions.DistWindows
 	for id, win in pairs( data ) do
 		if ( forceClean or targetId ~= id ) then
-			ClfActions.DistWindows[ id ] = nil
+			data[ id ] = nil
 			DestroyWindow( win )
 		end
 	end
@@ -293,7 +297,7 @@ end
 * @param  {boolean} [descHealth = false]  オプション - ターゲットを変更する場合は同距離の時は体力の残りが大きい順にする
 ]]--
 function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
-
+	local WindowData = WindowData
 	local targetId = WindowData.CurrentTarget and WindowData.CurrentTarget.TargetId
 	local changeTarg = true
 	if ( targetId and targetId > 0 ) then
@@ -313,6 +317,7 @@ function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
 				noto = mobData.Notoriety
 			end
 			noto = noto and noto + 1
+
 			if (
 					noto == 3	-- 緑
 					or noto == 8	-- 黄
@@ -369,7 +374,6 @@ end
 * @return {array|nil}   敵性mobが取得出来なかった時は nil
 ]]--
 function ClfActions.p_getDistSortTargetArray( range, descHealth )
-
 	local tgMobs = {}
 	local mobiles
 	if ( ClfActions.EnableFilterEnemy ) then
@@ -481,6 +485,7 @@ ClfActions.WorkerMobileIds = {}
 * @return {boolean}
 ]]--
 function ClfActions.p_isWorkerMobile( mobileId, mobileType )
+
 	if ( not mobileId or mobileId < 1 ) then
 		return
 	end
@@ -491,11 +496,13 @@ function ClfActions.p_isWorkerMobile( mobileId, mobileType )
 		workerType = ClfActions.WorkerMobileIds[ mobileId ]
 	else
 		workerType = false
+
 		local props = ItemProperties.GetObjectPropertiesArray( mobileId, "ClfActions.p_isWorkerMobile" )
 		local tids = props and props.PropertiesTids
 
 		if ( tids and #tids > 1 ) then
 			local WorkerMobileTids = ClfActions.WorkerMobileTids
+
 			-- プロパティにペット、召喚のtIdがあるかチェック
 			-- ※ 「召喚」のプロパティが無い召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）もいるが、とりあえずはコレで.
 			-- 1番目プロパティは名前なので、2から
@@ -566,9 +573,12 @@ function ClfActions.waitTargetRange( range, minRange, notCastSpell )
 	end
 
 	if ( id and id > 0 ) then
+		local ClfActions = ClfActions
 		ClfActions.WaitTargetId = id
+
 		local isCastSpell = not notCastSpell
 		ClfActions.WaitTargetIsCastSpell = isCastSpell
+
 		local lastSpell = Interface.LastSpell
 		ClfActions.WaitTargetLastSpell = lastSpell
 		ClfActions.WaitTargetDelta = 0
@@ -576,7 +586,9 @@ function ClfActions.waitTargetRange( range, minRange, notCastSpell )
 		ClfActions.TargetRangeMax = range and tonumber( range ) or isCastSpell and ClfActions.p_getSpellRange( lastSpell ) or 10
 		minRange = minRange and tonumber( minRange ) or 0
 		ClfActions.TargetRangeMin = math.min( math.max( 0, minRange ), ClfActions.TargetRangeMax )
+
 		ClfActions.WaitTargetEnable = true
+
 		CreateWindow( win, true )
 		AttachWindowToWorldObject( WindowData.PlayerStatus.PlayerId, win )
 	else
@@ -620,12 +632,16 @@ function ClfActions.p_massWaitTarget( timePassed )
 		T.WaitTargetEnable = false
 		LabelSetTextColor( label, 255, 70, 80 )
 		LabelSetText( label, L"Spell Changed! - END Wait targ" )
+
 		WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
+
 	elseif ( cursor.target ) then
 		-- ターゲットカーソル状態： 待機時間をリセット
 		T.WaitTargetDelta = 0
-		local currentTargetId = WindowData.CurrentTarget and WindowData.CurrentTarget.TargetId
-		local id = ClfActions.WaitTargetId
+
+		local WindowData_CurrentTarget = WindowData.CurrentTarget
+		local currentTargetId = WindowData_CurrentTarget and WindowData_CurrentTarget.TargetId
+		local id = T.WaitTargetId
 
 		if ( currentTargetId and currentTargetId > 0 and currentTargetId ~= id ) then
 			-- 実行時のターゲットから現在ターゲットが変更された： 終了
@@ -634,6 +650,7 @@ function ClfActions.p_massWaitTarget( timePassed )
 			LabelSetText( label, L"Target Changed! - END Wait targ" )
 
 			WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
+
 		elseif ( id and id > 0 ) then
 			local dist = GetDistanceFromPlayer( id )
 			if ( not dist or dist < 0 ) then
@@ -650,7 +667,7 @@ function ClfActions.p_massWaitTarget( timePassed )
 					LabelSetTextColor( label, 30, 220, 255 )
 					LabelSetText( label, L"Shoot!" )
 					WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
-					local targId = WindowData.CurrentTarget and WindowData.CurrentTarget.TargetId
+					local targId = WindowData_CurrentTarget and WindowData_CurrentTarget.TargetId
 					if ( targId ~= id ) then
 						HandleSingleLeftClkTarget( id )
 					end
@@ -667,15 +684,18 @@ function ClfActions.p_massWaitTarget( timePassed )
 			LabelSetText( label, L"wait (none target)" )
 			T.WaitTargetTxtDelta = 0
 		end
+
 	elseif ( ClfActions.WaitTargetIsCastSpell and currentSpell.casting ) then
 		-- 詠唱中： 待機時間をリセット
 		T.WaitTargetDelta = 0
+
 	elseif ( delta >= 0.6 or IsPlayerDead() ) then
 		-- 詠唱中では無い＆ターゲットカーソル状態では無い状態が0.6秒以上経過 or 自分が死んでいる： 終了
 		T.WaitTargetDelta = 0
 		T.WaitTargetEnable = false
 		LabelSetTextColor( label, 255, 160, 70 )
 		LabelSetText( label, L"TimeOut - END Wait targ" )
+
 		WindowStartAlphaAnimation( win, Window.AnimationType.SINGLE_NO_RESET, 1, 0, 1, false, 0.8, 0 )
 	end
 end
@@ -701,16 +721,14 @@ function ClfActions.p_getSpellRange( spellId )
 	local dist
 	spellId = spellId or Interface.LastSpell
 	if ( spellId and spellId > 0 ) then
-		local data = ClfActions.SpellIdsData[ spellId ]
-		if ( data and data.distance ) then
+		local data = ClfActions.SpellIdsData[ spellId ] or {}
 			dist = data.distance
-			if ( dist > 10 ) then
+		if ( dist and dist > 10 ) then
 				-- 10マスのはずなのにSpellsDataでは12になっているスペルがあるので、10以上なら-2する
 				-- ※SAクラの距離表示はマス目では無く距離なので（例えば10マスなら 11～14 でも届いたり届かなかったりするので）10マスを基準にしておく
 				dist = math.max( 10, dist - 2 )
 			end
 		end
-	end
 	return dist
 end
 
@@ -754,6 +772,7 @@ function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed
 					return ( a.index < b.index )
 				end
 			)
+
 		else
 			table.sort(
 				fMobs,
@@ -774,6 +793,7 @@ function ClfActions.injuredFriendly( includeBlue, includePoisoned, includeCursed
 			HandleSingleLeftClkTarget( mob.id )
 		end
 	end
+
 end
 
 
@@ -924,7 +944,6 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 		end
 	end
 
-
 	local FiendlyIds = ClfActions.FiendlyIds
 	for j = 1, #allMobiles do
 		local mobiles = allMobiles[ j ]
@@ -937,7 +956,6 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 			if ( mobileData ) then
 				local mobName = MobileName[ mobileId ] or {}
 				local noto = mobName.Notoriety or mobileData.Notoriety
-
 				if (
 						FiendlyIds[ mobileId ] or
 						mobileData.MyPet or
@@ -947,7 +965,6 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 					) then
 					setFMobs( mobileData, mobileId )
 				end
-
 			end
 		end
 	end
@@ -964,7 +981,9 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 				if ( mobileId and mobileId > 0 ) then
 					local mobileData = GetMobileData( mobileId, true )
 					if ( mobileData ) then
+
 						setFMobs( mobileData, mobileId )
+
 					end
 				end
 			end
@@ -1244,6 +1263,29 @@ function ClfActions.showHue()
 	end
 	ClfObjHueWindow.onDblClick()
 end
+
+
+-- 再練成： 練成スキル使用後に実行すること
+function ClfActions.reImbueLast()
+	local gumpID = 999059
+	if ( GumpsParsing.ParsedGumps[ gumpID ] ) then
+		GumpsParsing.PressButton( gumpID, 2 )
+	else
+		WindowUtils.ChatPrint( GetStringFromTid(1155370), SystemData.ChatLogFilters.SYSTEM )
+	end
+end
+
+
+-- 容器内全抽出： 練成スキル使用後に実行すること
+function ClfActions.unravelContainer()
+	local gumpID = 999059
+	if ( GumpsParsing.ParsedGumps[ gumpID ] ) then
+		GumpsParsing.PressButton( gumpID, 6 )
+	else
+		WindowUtils.ChatPrint( GetStringFromTid(1155370), SystemData.ChatLogFilters.SYSTEM )
+	end
+end
+
 
 
 function ClfActions.toggleAFKmode()
