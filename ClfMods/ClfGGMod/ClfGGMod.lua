@@ -1,3 +1,6 @@
+
+LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfGGMod", "ClfGGMod.xml", "ClfGGMod.xml" )
+
 ClfGGMod = {}
 
 
@@ -13,8 +16,15 @@ ClfGGMod.Enables = {
 	ClosePetProgress = false,
 }
 
+ClfGGMod.EnableRefact = true
 
 ClfGGMod.DEBUG = false
+
+
+-- デフォルトのgump表示時のメソッドを保持： 現状使用しないが一応。
+ClfGGMod.genericGumpOnShown_org = nil
+-- デフォルトのgump終了時のメソッドを保持： 現状使用しないが一応。
+ClfGGMod.genericGumpShutdown_org = nil
 
 
 function ClfGGMod.initialize()
@@ -37,6 +47,23 @@ function ClfGGMod.initialize()
 			local enableType = k
 			Debug.DumpToConsole( "enableType", ClfGGMod.Enables[ enableType ] )
 			ClfGGMod.setEnableType( not ClfGGMod.Enables[ enableType ], enableType, false )
+		end
+	end
+
+
+	if ( ClfGGMod.EnableRefact ) then
+		-- Craftingユティリティーが動作するように対応する
+
+		if ( not ClfGGMod.genericGumpOnShown_org ) then
+			-- gump表示時のメソッドをオーバーライド：
+			ClfGGMod.genericGumpOnShown_org = GenericGump.OnShown
+			GenericGump.OnShown = ClfGGMod.onGenericGumpOnShown
+		end
+
+		if ( not ClfGGMod.genericGumpShutdown_org ) then
+			-- gump終了時のメソッドをオーバーライド：
+			ClfGGMod.genericGumpShutdown_org = GenericGump.Shutdown
+			GenericGump.Shutdown = ClfGGMod.onGenericGumpShutdown
 		end
 	end
 
@@ -65,13 +92,11 @@ end
 
 -- オリジナルの GGManager.GGParseData をオーバーライドするメソッド
 function ClfGGMod.GGParseData()
-
 	if ( ClfGGMod.DEBUG ) then
-		local ok, err = pcall( ClfGGMod.dumpGumpData, GumpData )
+		pcall( ClfGGMod.dumpGumpData, GumpData )
 	end
 
-	local ok, err = pcall( ClfGGMod.gumpDataParse, GumpData )
-	Interface.ErrorTracker(ok, err)
+	pcall( ClfGGMod.gumpDataParse, GumpData )
 
 	ClfGGMod.GGManagerGGParseData_org()
 end
@@ -111,6 +136,55 @@ function ClfGGMod.gumpDataParse( gumpData )
 
 end
 
+
+--[[
+** OverRide: GenericGump.OnShown
+*  ※ 意図は不明だが、デフォルトでは GumpsParsing.ParsedGumps[gumpID] 等にnilをセットしている（これが原因でCraftingユティリティーが動作しない）ので、Gumpのチェックだけ行う様に変更（initializeの時点でパースされるのでチェックは不要と思われるが念のため）
+]]
+function ClfGGMod.onGenericGumpOnShown()
+	GumpsParsing.CheckGumpType(0)
+end
+
+
+ClfGGMod.AfterGGShutdownDelta = 0
+
+-- OverRide: GenericGump.Shutdown
+function ClfGGMod.onGenericGumpShutdown()
+	local windowName = SystemData.ActiveWindow.name
+	local gumpID = GenericGump.GumpsList[ windowName ]
+	if ( gumpID ) then
+		GumpsParsing.ParsedGumps[ gumpID ] = nil
+		GumpsParsing.ToShow[ gumpID ] = nil
+--		GumpData.Gumps[ gumpID ] = nil	-- // この処理のせいで、生産ツールのガンプ表示時に新しく生産ツールのガンプが表示されるとガンプタイプのチェックが出来ない。何もしなくても抹消されるデータなので行削除。
+	end
+	GenericGump.GumpsList[ windowName ] = nil
+
+	ClfGGMod.AfterGGShutdownDelta = 0
+	if ( not DoesWindowExist( "ClfAfterGGShutdownProcess" ) ) then
+		-- OnUpdate用のウィンドウを作る： ClfGGMod.afterGGShutdownOnUpdate を実行するウィンドウ
+		CreateWindow( "ClfAfterGGShutdownProcess", true )
+	end
+end
+
+
+--[[
+** EventHandle: ClfAfterGGShutdownProcess.OnUpdate
+*  GenericGumpが閉じてから ガンプタイプのチェックを一定時間実行
+*  ※ 生産ツールgumpが開いている状態から生産ツールgumpが再表示されると生産メニュー種別が正常に取得出来ないため
+]]
+function ClfGGMod.afterGGShutdownOnUpdate( timePassed )
+	local ClfGGMod = ClfGGMod
+	local delta = ClfGGMod.AfterGGShutdownDelta + timePassed
+	if ( delta > 3 ) then
+		if ( DoesWindowExist( "ClfAfterGGShutdownProcess" ) ) then
+			DestroyWindow( "ClfAfterGGShutdownProcess" )
+			ClfGGMod.AfterGGShutdownDelta = 0
+		end
+	else
+		ClfGGMod.AfterGGShutdownDelta = delta
+		GumpsParsing.CheckGumpType( timePassed )
+	end
+end
 
 
 
@@ -179,3 +253,5 @@ function ClfGGMod.dumpGumpData( gumpData )
 	end
 
 end
+
+

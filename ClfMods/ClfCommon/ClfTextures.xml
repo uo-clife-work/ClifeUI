@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Assets>
+		<!-- ClifeUI 追加テクスチャ -->
+		<Texture name="ClfTexMonotoneGradient" file="Textures/shade.dds" />
+
+	</Assets>
+</Interface>

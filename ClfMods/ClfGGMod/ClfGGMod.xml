@@ -1,0 +1,19 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- after GenericGump.Shutdown OnUpdate EventHandle windw -->
+		<Window name="ClfAfterGGShutdownProcess" movable="false" handleinput="false" layer="background" savesettings="false">
+			<Size>
+				<AbsPoint x="0" y="0"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+			</Anchors>
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ClfGGMod.afterGGShutdownOnUpdate" />
+			</EventHandlers>
+		</Window>
+		<!-- /ClfAfterGGShutdownProcess -->
+
+	</Windows>
+</Interface>

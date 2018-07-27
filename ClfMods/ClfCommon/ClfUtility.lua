@@ -16,13 +16,7 @@ ClfUtil.LOG_EXPORT_DIR = "clfExport/"
 
 function ClfUtil.initialize()
 	ClfUtil.InitialTimeStamp = GetCurrentDateTime()
-	ClfSettings.initialize()
-	ClfRefactor.initialize()
-end
-
-function ClfUtil.onUpdate( timePassed )
-	pcall( ClfActions.onUpdate, timePassed )
-	pcall( ClfDamageMod.onUpdate, timePassed )
+	BuffDebuff.ShouldCreateNewBuff()
 end
 
 

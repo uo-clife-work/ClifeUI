@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Assets>
+		<!-- ClifeUI 追加アイコン -->
+		<Icon id="876007" texture="Icons/actions/CraftingUtilities/reimbuelast.dds" name="Reimbue Last" />
+		<Icon id="876008" texture="Icons/actions/CraftingUtilities/unravelcontainer.dds" name="Unravel Container" />
+
+	</Assets>
+</Interface>
