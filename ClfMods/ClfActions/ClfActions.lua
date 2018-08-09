@@ -1287,6 +1287,42 @@ function ClfActions.unravelContainer()
 end
 
 
+-- Flying Animation設定の切り替え
+function ClfActions.toggleFlyingAnim( silent )
+	local _sso = SystemData.Settings.Optimization
+	local enable = not _sso.bEnableFlyingAnimation
+	_sso.bEnableFlyingAnimation = enable
+	UserSettingsChanged()
+
+	if ( not silent ) then
+		local text = L"FlyingAnim: "
+		local hue = 150
+		if ( enable ) then
+			hue = 1152
+			text = text .. L"ON"
+		else
+			text = text .. L"OFF"
+		end
+		WindowUtils.SendOverheadText( text , hue, true )
+	end
+end
+
+
+-- Flying Animation設定をON
+function ClfActions.enableFlyingAnim()
+	if ( not SystemData.Settings.Optimization.bEnableFlyingAnimation ) then
+		ClfActions.toggleFlyingAnim( true )
+	end
+end
+
+
+-- Flying Animation設定をOFF
+function ClfActions.disableFlyingAnim()
+	if ( SystemData.Settings.Optimization.bEnableFlyingAnimation ) then
+		ClfActions.toggleFlyingAnim( true )
+	end
+end
+
 
 function ClfActions.toggleAFKmode()
 	ClfActions.AFKmode = not ClfActions.AFKmode
