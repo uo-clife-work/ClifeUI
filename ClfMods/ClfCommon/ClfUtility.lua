@@ -21,23 +21,36 @@ end
 
 
 -- テーブルのマージ：連想配列用
-function ClfUtil.mergeTable( t1, t2 )
+-- ※ コピーでは無く、第一引数のテーブルを直接変更する。
+-- 　 コピーしたい時は、第一引数を {} とし、第二引数（およびそれ以降）にマージするテーブルを順に指定すること。
+function ClfUtil.mergeTable( t1, ... )
 	local type = type
+
+	if ( type( t1 ) ~= "table" ) then
+		return t1
+	end
+
+	local tbls = { ... }
+
 	local pairs = pairs
 	local merge = ClfUtil.mergeTable
 
-	if ( type( t2 ) == "table" ) then
-		for k, v in pairs( t2 ) do
-			if ( type( v ) == "table"  ) then
-				local v1 = t1[ k ]
-				if ( type( v1 ) ~= "table" ) then
-					v1 = {}
+	for j = 1, #tbls do
+		local t2 = tbls[ j ]
+		if ( type( t2 ) == "table" ) then
+			for k, v2 in pairs( t2 ) do
+				local v
+				if ( type( v2 ) == "table"  ) then
+					local v1 = t1[ k ]
+					if ( type( v1 ) ~= "table" ) then
+						v1 = {}
+					end
+					v = merge( v1, v2 )
 				else
-					v1 = merge( {}, v1 )
+					v = v2
 				end
-				v = merge( v1, v )
+				t1[ k ] = v
 			end
-			t1[ k ] = v
 		end
 	end
 
@@ -147,13 +160,16 @@ function ClfUtil.explode( div, str, usePattern, numStrToNum )
 	local towstring = towstring
 	local type = type
 	local tonumber = tonumber
+	local tostring = tostring
+	local string_match
 	local numFunc
 
 	if ( numStrToNum ) then
+		string_match = string.match
 		numFunc = function( s )
-			num = tonumber( s )
-			if ( num and wstring.match( s, L"^[.]?%d+[.]?%d*$" ) ) then
-				-- ここの判定が適当なので、そのうち修正・・・
+			local ts = tostring( s )
+			local num = tonumber( ts )
+			if ( num and string_match( ts, "^[%-%+]?[.]?%d+[.]?%d*$" ) ) then
 				s = num
 			end
 			return s
@@ -187,7 +203,6 @@ function ClfUtil.rgbIMax( rgb )
 	end
 	local iMax = 0
 	local mathMax = math.max
-	local tonumber = tonumber
 	local rgbKeys = { "r", "g", "b" }
 	for i = 1, #rgbKeys do
 		local v = rgb[ rgbKeys[ i ] ]
@@ -209,7 +224,6 @@ function ClfUtil.rgbSV( rgb )
 	local iMin = 255
 	local mathMax = math.max
 	local mathMin = math.min
-	local tonumber = tonumber
 	local rgbKeys = { "r", "g", "b" }
 	for i = 1, #rgbKeys do
 		local v = rgb[ rgbKeys[ i ] ]
