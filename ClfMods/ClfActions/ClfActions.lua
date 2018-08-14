@@ -13,17 +13,9 @@ ClfActions.DistColors = {
 	{ r = 160, g = 150, b = 140 },
 }
 
-ClfActions.FiendlyIds = {}
+ClfActions.FiendlyIds = {
+}
 
--- プレイヤーが使役しているmobのプロパティに使われるtId
-ClfActions.WorkerMobileTids = nil
-ClfActions.PetPropTids = {
-	[502006]  = "pet",	-- "ペット"
-	[1049608] = "petBonded",	-- "おきにいり"
-}
-ClfActions.SummonedPropTids = {
-	[1049646] = "summon",	-- "召喚" （NPCが召喚したmobには付かないっぽい） ※ 一部の召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）では付かない
-}
 
 -- spellIdをキーにしたSpellsDataを保持するテーブル
 ClfActions.SpellIdsData = nil
@@ -43,21 +35,6 @@ function ClfActions.initialize()
 	ClfActions.setDistWindowEnable( Interface.LoadBoolean( "ClfDistWindowEnable", true ) )
 	ClfActions.EnableFilterNeutralMobile = Interface.LoadBoolean( "ClfFilterNeutralMobile", ClfActions.EnableFilterNeutralMobile )
 	ClfActions.EnableFilterEnemy = Interface.LoadBoolean( "ClfFilterEnemy", ClfActions.EnableFilterEnemy )
-
-	if ( not ClfActions.WorkerMobileTids ) then
-		-- WorkerMobileTids を生成
-		ClfActions.WorkerMobileTids = {}
-		local allTids = {
-			[1] = ClfActions.PetPropTids,
-			[2] = ClfActions.SummonedPropTids,
-		}
-		for i = 1, #allTids do
-			local tids = allTids[ i ]
-			for k, _ in pairs( tids ) do
-				ClfActions.WorkerMobileTids[ k ] = i
-			end
-		end
-	end
 
 	if ( not ClfActions.SpellIdsData ) then
 		-- SpellIdsData： SpellsInfo.SpellsDataからspellIdをキーにしたテーブルを生成
@@ -321,7 +298,7 @@ function ClfActions.convTargetToEnemy( orderNum, range, descHealth )
 			if (
 					noto == 3	-- 緑
 					or noto == 8	-- 黄
-					or ClfActions.p_isWorkerMobile( targetId )
+					or ClfUtil.isWorkerMobile( targetId )
 					or ( ClfActions.EnableFilterNeutralMobile and noto == 4 and ClfUtil.isNeutralMobileName( targetId, mobData.MobName ) )
 				) then
 				-- 緑、黄色、ペット、召喚
@@ -383,7 +360,7 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 	end
 
 	local FiendlyIds = ClfActions.FiendlyIds
-	local p_isWorkerMobile = ClfActions.p_isWorkerMobile
+	local isWorkerMobile = ClfUtil.isWorkerMobile
 	local IsPartyMember = IsPartyMember
 	local GetDistanceFromPlayer = GetDistanceFromPlayer
 	local GetMobileData = Interface.GetMobileData
@@ -421,7 +398,7 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 				) then
 				-- 青、緑、黄色、パーティメンバー以外 // TargetAllowed でこれらは返ってこないハズだけど念のため
 				if (
-						not p_isWorkerMobile( mobileId )
+						not isWorkerMobile( mobileId )
 						and not isNeutral( noto, mobileId, mobileName.MobName )
 					) then
 					-- ペット、召喚では無い
@@ -473,64 +450,6 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 	end
 
 	return nil
-end
-
-
-
-ClfActions.WorkerMobileIds = {}
---[[
-* mobileIdから、ペット・召喚生物かどうかを返す
-* @param  {integer}         mobileId
-* @param  {integer|boolean} [mobileType = nil] オプション - 指定無し or false： 全て、 2:召喚生物のみ、 その他:ペットのみ
-* @return {boolean}
-]]--
-function ClfActions.p_isWorkerMobile( mobileId, mobileType )
-
-	if ( not mobileId or mobileId < 1 ) then
-		return
-	end
-
-	local workerType = nil
-
-	if ( ClfActions.WorkerMobileIds[ mobileId ] ~= nil ) then
-		workerType = ClfActions.WorkerMobileIds[ mobileId ]
-	else
-		workerType = false
-
-		local props = ItemProperties.GetObjectPropertiesArray( mobileId, "ClfActions.p_isWorkerMobile" )
-		local tids = props and props.PropertiesTids
-
-		if ( tids and #tids > 1 ) then
-			local WorkerMobileTids = ClfActions.WorkerMobileTids
-
-			-- プロパティにペット、召喚のtIdがあるかチェック
-			-- ※ 「召喚」のプロパティが無い召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）もいるが、とりあえずはコレで.
-			-- 1番目プロパティは名前なので、2から
-			for i = 2, #tids do
-				local tId = tids[ i ]
-				if ( WorkerMobileTids[ tId ] ) then
-					workerType = WorkerMobileTids[ tId ]
-					break
-				end
-			end
-		end
-
-		ClfActions.WorkerMobileIds[ mobileId ] = workerType
-	end
-
-	if ( not mobileType ) then
-		if ( workerType ) then
-			return true
-		else
-			return false
-		end
-	elseif ( mobileType == 2 ) then
-		return ( workerType == 2 )
-	else
-		return ( workerType == 1 )
-	end
-
-	return false
 end
 
 
@@ -873,7 +792,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 	local IsPartyMember = IsPartyMember
 	local HealthBarColor = WindowData.HealthBarColor
 	local MobileName = WindowData.MobileName
-	local p_isWorkerMobile = ClfActions.p_isWorkerMobile
+	local isWorkerMobile = ClfUtil.isWorkerMobile
 
 	local isPoison
 	if ( not excludePoisoned ) then
@@ -961,7 +880,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 						mobileData.MyPet or
 						noto == 2 or
 						IsPartyMember( mobileId ) or
-						( noto == 1 and ( includeBlue or ( not excludeOthersPet and p_isWorkerMobile( mobileId, 1 ) ) ) )
+						( noto == 1 and ( includeBlue or ( not excludeOthersPet and isWorkerMobile( mobileId, 1 ) ) ) )
 					) then
 					setFMobs( mobileData, mobileId )
 				end

@@ -14,9 +14,37 @@ ClfUtil.GAP_JST = ClfUtil.HOUR_IN_SECONDS * 9
 ClfUtil.LOG_EXPORT_DIR = "clfExport/"
 
 
+-- プレイヤーが使役しているmobのプロパティに使われるtId
+local WorkerMobileTids = {}
+local CONST = {
+	PetPropTids = {
+		[502006]  = "pet",	-- "ペット"
+		[1049608] = "petBonded",	-- "おきにいり"
+	},
+	SummonedPropTids = {
+		[1049646] = "summon",	-- "召喚" （NPCが召喚したmobには付かないっぽい） ※ 一部の召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）では付かない
+	},
+}
+
+
+
 function ClfUtil.initialize()
 	ClfUtil.InitialTimeStamp = GetCurrentDateTime()
 	BuffDebuff.ShouldCreateNewBuff()
+
+	-- WorkerMobileTids を生成
+	if ( not next( WorkerMobileTids ) ) then
+		local allTids = {
+			[1] = CONST.PetPropTids,
+			[2] = CONST.SummonedPropTids,
+		}
+		for i = 1, #allTids do
+			local tids = allTids[ i ]
+			for k, _ in pairs( tids ) do
+				WorkerMobileTids[ k ] = i
+			end
+		end
+	end
 end
 
 
@@ -420,8 +448,8 @@ function ClfUtil.isNeutralMobileName( mobileId, mobName )
 end
 
 
-ClfUtil.MobNames = {}
-ClfUtil.LastCleanTime = 0
+local MobNames = {}
+local LastMobNameCleanTime = 0
 
 function ClfUtil.getMobName( mobileId )
 	if ( not mobileId or mobileId < 1 ) then
@@ -429,16 +457,16 @@ function ClfUtil.getMobName( mobileId )
 	end
 
 	local time = Interface.TimeSinceLogin
-	if ( ClfUtil.LastCleanTime + 360 < time ) then
+	if ( LastMobNameCleanTime + 360 < time ) then
 		ClfUtil.cleanMobNames( false )
 	end
 
-	local lastNameObj = ClfUtil.MobNames[ mobileId ]
+	local lastNameObj = MobNames[ mobileId ]
 	if ( lastNameObj ) then
 		if ( lastNameObj.time + 60 < time ) then
 			return lastNameObj.name
 		else
-			ClfUtil.MobNames[ mobileId ] = nil
+			MobNames[ mobileId ] = nil
 		end
 	end
 
@@ -472,7 +500,7 @@ function ClfUtil.getMobName( mobileId )
 	end
 
 	if ( name ) then
-		ClfUtil.MobNames[ mobileId ] = {
+		MobNames[ mobileId ] = {
 			name = name,
 			time = time,
 		}
@@ -483,8 +511,8 @@ end
 
 function ClfUtil.cleanMobNames( force )
 	local time = Interface.TimeSinceLogin
-	ClfUtil.LastCleanTime = time
-	local MobNames = ClfUtil.MobNames
+	LastMobNameCleanTime = time
+	local MobNames = MobNames
 	local limit
 
 	local cleanFunc
@@ -505,4 +533,110 @@ function ClfUtil.cleanMobNames( force )
 		cleanFunc( id, obj )
 	end
 end
+
+
+
+function ClfUtil.filterMobileNameData( mobileNameData, mobileId, allowCorpse )
+	local name = mobileNameData and mobileNameData.MobName
+	if ( name ) then
+		if ( type( name ) ~= "wstring" or name == L"" ) then
+			return nil
+		end
+
+		if ( mobileId and mobileNameData.Notoriety == 0 ) then
+			local WindowData = WindowData
+			local mobStat = WindowData.MobileStatus[ mobileId ] or {}
+			local MobName = mobStat.MobName
+			if ( MobName and MobName ~= L"" ) then
+				return nil
+			end
+
+			if ( allowCorpse ) then
+				local contData = WindowData.ContainerWindow[ mobileId ]
+				if ( not contData ) then
+					RegisterWindowData( WindowData.ContainerWindow.Type, mobileId )
+					contData = WindowData.ContainerWindow[ mobileId ]
+				end
+				if ( contData ) then
+					if ( contData.isCorpse ) then
+						return mobileNameData
+					else
+						return nil
+					end
+				end
+			end
+		end
+	end
+
+	return mobileNameData
+end
+
+
+local WorkerMobileIds = {}
+local LastWorkerMobCleanTime = 0
+
+--[[
+* mobileIdから、ペット・召喚生物かどうかを返す
+* @param  {integer}         mobileId
+* @param  {integer|boolean} [mobileType = nil] オプション - 指定無し or false： 全て、 2:召喚生物のみ、 その他:ペットのみ
+* @return {boolean}
+]]--
+function ClfUtil.isWorkerMobile( mobileId, mobileType )
+	if ( not mobileId or mobileId < 1 or mobileId == WindowData.PlayerStatus.PlayerId ) then
+		return
+	end
+
+	local time = Interface.TimeSinceLogin
+	if ( LastWorkerMobCleanTime + 180 < time ) then
+		WorkerMobileIds = {}
+		LastWorkerMobCleanTime = time
+	end
+
+	local workerType = nil
+
+	if ( WorkerMobileIds[ mobileId ] ~= nil ) then
+		workerType = WorkerMobileIds[ mobileId ]
+	else
+		workerType = false
+		local props = WindowData.ItemProperties[ mobileId ]
+		if ( not props ) then
+			RegisterWindowData( WindowData.ItemProperties.Type, mobileId )
+			props = WindowData.ItemProperties[ mobileId ]
+		end
+
+		local tids = props and props.PropertiesTids
+
+		if ( tids and #tids > 1 ) then
+			local WorkerMobileTids = WorkerMobileTids
+
+			-- プロパティにペット、召喚のtIdがあるかチェック
+			-- ※ 「召喚」のプロパティが無い召喚mob（ネクロのSummon FamiliarやAnimate Deadなど）もいるが、とりあえずはコレで.
+			-- 1番目プロパティは名前なので、2から
+			for i = 2, #tids do
+				local tId = tids[ i ]
+				if ( WorkerMobileTids[ tId ] ) then
+					workerType = WorkerMobileTids[ tId ]
+					break
+				end
+			end
+
+			WorkerMobileIds[ mobileId ] = workerType
+		end
+	end
+
+	if ( not mobileType ) then
+		if ( workerType ) then
+			return true
+		else
+			return false
+		end
+	elseif ( mobileType == 2 ) then
+		return ( workerType == 2 )
+	else
+		return ( workerType == 1 )
+	end
+
+	return false
+end
+
 
