@@ -1,4 +1,7 @@
 
+LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfCommon", "ClfSettingsWindow.xml", "ClfSettingWindow.xml" )
+
+
 ClfSettings = {}
 
 -- Agentでゴールドをドロップする対象をBP第一階層にするか
@@ -17,6 +20,29 @@ ClfSettings.EnableVacuumMsg = true
 ClfSettings.EnableScavengeAll = false
 
 
+-- You see: 表示：非表示フィルター
+ClfSettings.YouSeeFilters = {
+	-- Notoriety: Name Color
+	[1]  = false,	-- Grey/None - Unknown Mobile
+	[2]  = false,	-- Blue
+	[3]  = false,	-- Green
+	[4]  = false,	-- Grey/CanAttack
+	[5]  = false,	-- Grey/Criminal
+	[6]  = false,	-- Orange
+	[7]  = false,	-- Red
+	[8]  = false,	-- Yellow
+	-- Otherwise
+	[9]  = false,	-- Neutral Animal
+	[10] = false,	-- Summon
+	[11] = false,	-- My Pet
+	[12] = false,	-- Other's Pet
+}
+-- You Seeを表示するか（全てのフィルターがfalseならfalseにセットされる）
+ClfSettings.EnableYouSee = true
+-- You Seeの各フィルターで使用するチャットログフィルター（チャンネル）
+ClfSettings.YouSeeChannels = {}
+
+
 function ClfSettings.initialize()
 
 	ClfSettings.EnableDropGoldToBP = Interface.LoadBoolean( "ClfDropGoldToBP", ClfSettings.EnableDropGoldToBP )
@@ -29,6 +55,55 @@ function ClfSettings.initialize()
 
 	ClfSettings.EnableScavengeAll = Interface.LoadBoolean( "ClfScavengeAll", ClfSettings.EnableScavengeAll )
 
+	ClfSettings.setupYouSeeFilter()
+end
+
+
+
+function ClfSettings.setupYouSeeFilter( filters, channels )
+	filters  = ( filters and type( filters ) == "table" ) and filters or {}
+	channels = ( channels and type( channels ) == "table" ) and channels or {}
+	local YouSeeFilters = ClfSettings.YouSeeFilters
+	local YouSeeChannels = ClfSettings.YouSeeChannels
+
+	local LoadBoolean = Interface.LoadBoolean
+	local SaveBoolean = Interface.SaveBoolean
+	local LoadNumber = Interface.LoadNumber
+	local SaveNumber = Interface.SaveNumber
+
+	local enableYouSee = false
+	for key, enable in pairs( YouSeeFilters ) do
+		-- You see filter
+		local saveKey = "ClfYouSee_" .. key
+		local enabled
+		if ( filters[ key ] ~= nil ) then
+			enabled = not not filters[ key ]
+		else
+			enabled = LoadBoolean( saveKey, enable )
+		end
+		enableYouSee = enableYouSee or enabled
+
+		if ( YouSeeFilters[ key ] ~= enabled ) then
+			SaveBoolean( saveKey, enabled )
+		end
+		YouSeeFilters[ key ] = enabled
+
+		-- You see channel
+		local saveChKey = "ClfYouSeeChannel_" .. key
+		local channel
+		if ( channels[ key ] and tonumber( channels[ key ] ) ) then
+			channel = channels[ key ]
+		else
+			channel = LoadNumber( saveChKey, 1 )
+		end
+
+		if ( YouSeeChannels[ key ] ~= channel ) then
+			SaveNumber( saveChKey, channel )
+		end
+		YouSeeChannels[ key ] = channel
+	end
+
+	ClfSettings.EnableYouSee = enableYouSee
 end
 
 
