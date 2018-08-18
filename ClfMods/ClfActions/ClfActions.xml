@@ -188,6 +188,20 @@
 		</Window><!-- /ClfObjHueWindow -->
 
 
+		<!-- Auto Restock Process Window -->
+		<Window name="ClfRestockProcessWin" handleinput="false" layer="background" savesettings="false">
+			<Size>
+				<AbsPoint x="0" y="0"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+			</Anchors>
+			<EventHandlers>
+				<EventHandler event="OnUpdate" function="ClfActions.p_MassRestock" />
+			</EventHandlers>
+		</Window><!-- /ClfRestockProcessWin -->
+
+
 		<!-- AFK Window -->
 		<Window name="ClfAFKmodeWin" handleinput="false" savesettings="false">
 			<Size>

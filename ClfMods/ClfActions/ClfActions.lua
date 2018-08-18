@@ -1243,6 +1243,297 @@ function ClfActions.disableFlyingAnim()
 end
 
 
+-- Restockアイテム判定用のtable
+local RestockItemTypes = {}
+-- Restockのドロップ先がプレイヤーが所持しているコンテナか
+local IsRestockBagInBP = false
+-- Restock時、アイテムのドロップに連続で失敗した回数をカウント
+local RestockDropErrCount = 0
+
+ClfActions.EnableAutoRestock = false
+
+-- 自動リストック開始
+function ClfActions.autoRestock()
+	RestockItemTypes = false
+	RestockDropErrCount = 0
+	local EnableRestockMsg = ClfSettings.EnableRestockMsg
+
+	if ( ClfActions.EnableAutoRestock == false ) then
+		local Organizer = Organizer
+		-- アクティブなRestockのindexを取得
+		local Organizer_ActiveRestock = Organizer.ActiveRestock
+		-- ドロップするbagのIDを取得
+		local activeRestockCont = Organizer.Restocks_Cont[ Organizer_ActiveRestock ]
+		if ( activeRestockCont ) then
+			-- Restockアイテムtype判定に使うtableを生成
+			local activeRestockItemDatas = Organizer.Restock[ Organizer_ActiveRestock ]
+			if ( activeRestockItemDatas ) then
+				local itemNum = Organizer.Restocks_Items[ Organizer_ActiveRestock ]
+				if ( itemNum <= 0 ) then
+					if ( EnableRestockMsg ) then
+						WindowUtils.SendOverheadText( ClfActions.p_getRestockTitle( Organizer_ActiveRestock ) .. L" is Empty: not start" , 46, true )
+					end
+					return
+				end
+				RestockItemTypes = {}
+				local RestockItemTypes = RestockItemTypes
+				for i = 1, itemNum do
+					local itemL = activeRestockItemDatas[ i ]
+					local itemType = itemL and itemL.type
+					if ( itemType and itemType > 0 ) then
+						local hue = itemL.hue
+						local qta = itemL.qta
+						if ( hue and qta and hue >= 0 and qta > 0 ) then
+							if ( not RestockItemTypes[ itemType ] ) then
+								RestockItemTypes[ itemType ] = {}
+							end
+							RestockItemTypes[ itemType ][ hue ] = {
+								NEED = qta,
+								amount = 0,
+							}
+						end
+					end
+				end
+
+				if ( not next( RestockItemTypes ) ) then
+					RestockItemTypes = false
+					if ( EnableRestockMsg ) then
+						WindowUtils.SendOverheadText( ClfActions.p_getRestockTitle( Organizer_ActiveRestock ) .. L" is Empty: not start" , 46, true )
+					end
+					return
+				end
+
+				if ( activeRestockCont == 0 ) then
+					activeRestockCont = ContainerWindow.PlayerBackpack
+				end
+				IsRestockBagInBP = IsInPlayerBackPack( activeRestockCont )
+				ContainerWindow.Restock = false
+				ContainerWindow.OrganizeBag = activeRestockCont
+
+				ClfActions.EnableAutoRestock = true
+				local win = "ClfRestockProcessWin"
+				if ( not DoesWindowExist( win ) ) then
+					CreateWindow( win, true )
+				end
+			end
+		end
+
+	else
+		ClfActions.stopAutoRestock()
+		if ( EnableRestockMsg ) then
+			WindowUtils.SendOverheadText( L"Stop Restock" , 46, true )
+		end
+	end
+
+end
+
+
+-- メッセージ用のRestok名称を返す
+function ClfActions.p_getRestockTitle( activeRestock )
+	local restock_desc = Organizer.Restocks_Desc[ activeRestock ]
+	if ( type( restock_desc ) ~= "wstring" or restock_desc == L"" ) then
+		restock_desc = L"Restock[ " .. towstring( activeRestock ) .. L" ]"
+	else
+		restock_desc = L"Restock[ "..  restock_desc .. L" ]"
+	end
+	return restock_desc
+end
+
+
+-- 自動Restockを止める
+function ClfActions.stopAutoRestock()
+	ClfActions.EnableAutoRestock = false
+	RestockItemTypes = false
+
+	local win = "ClfRestockProcessWin"
+	if ( DoesWindowExist( win ) ) then
+		DestroyWindow( win )
+	end
+end
+
+
+-- ** Eventhandle: Window[name="ClfRestockProcessWin"].OnUpdate
+function ClfActions.p_MassRestock( timePassed )
+	if ( ClfActions.EnableAutoRestock ~= true ) then
+		return
+	end
+
+	local ContainerWindow = ContainerWindow
+	local SD_DragItem = SystemData.DragItem
+
+	if ( ContainerWindow.CanPickUp ~= true or SD_DragItem.DragType == SD_DragItem.TYPE_ITEM ) then
+		-- アイテムをドラッグ出来る状態じゃない： return
+		return
+	end
+
+	local RestockItemTypes = RestockItemTypes
+	if ( not RestockItemTypes or ContainerWindow.Restock ) then
+		-- 判定用テーブルが無い or コンテナウィンドウからリストックが実行された： 終了
+		ClfActions.stopAutoRestock()
+		return
+	end
+
+	local CW_OrganizeBag = ContainerWindow.OrganizeBag
+	local WD_ContainerWindow = WindowData.ContainerWindow
+	local WD_ObjectInfo = WindowData.ObjectInfo
+	local WD_ObjectInfo_Type = WD_ObjectInfo.Type
+
+	local DoesWindowExist = DoesWindowExist
+	local RegisterWindowData = RegisterWindowData
+
+	local sendOverheadText
+	if ( ClfSettings.EnableRestockMsg ) then
+		sendOverheadText = WindowUtils.SendOverheadText
+	else
+		sendOverheadText = function() end
+	end
+
+	-- Restockアイテムのドロップ先コンテナをチェック
+	local restockContainerData = WD_ContainerWindow[ CW_OrganizeBag ]
+	if ( not restockContainerData ) then
+		RegisterWindowData( WD_ContainerWindow.Type, CW_OrganizeBag )
+		restockContainerData = WD_ContainerWindow[ CW_OrganizeBag ]
+		if ( not restockContainerData ) then
+			-- ドロップ対象のコンテナが無い： 終了
+			ClfActions.stopAutoRestock()
+			sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": No Container" , 33, true )
+			return
+		end
+	end
+
+	-- Restockアイテムの所持数チェック（ドロップ先コンテナ内の各オブジェクト数量をカウント）
+	local amountTbl = {}
+
+	local restockCntContainedItems = restockContainerData.ContainedItems
+	local next = next
+
+	for i = 1, restockContainerData.numItems do
+		local item = restockCntContainedItems[ i ]
+		local objectId = item.objectId
+		local itemData = WD_ObjectInfo[ objectId ]
+		if ( not itemData and objectId ) then
+			RegisterWindowData( WD_ObjectInfo_Type, objectId )
+			itemData = WD_ObjectInfo[ objectId ]
+		end
+
+		if ( itemData ) then
+			local hue = itemData.hueId
+			local objectType = itemData.objectType
+			local restockItem = RestockItemTypes[ objectType ] and RestockItemTypes[ objectType ][ hue ]
+			if ( restockItem ) then
+				local quantity = itemData.quantity or 1
+
+				amountTbl[ objectType ] = amountTbl[ objectType ] or {}
+				local amount = amountTbl[ objectType ][ hue ] or 0
+				amount = amount + quantity
+				if ( amount >= restockItem.NEED ) then
+					-- アイテム数が足りている： Restockアイテム判定テーブルから外す
+					RestockItemTypes[ objectType ][ hue ] = nil
+					if ( not next( RestockItemTypes[ objectType ] ) ) then
+						RestockItemTypes[ objectType ] = nil
+						if ( not next( RestockItemTypes ) ) then
+							break
+						end
+					end
+				else
+					amountTbl[ objectType ][ hue ] = amount
+					restockItem.amount = amount
+				end
+			end
+		end
+	end
+	if ( not next( RestockItemTypes ) ) then
+		-- Restockアイテム判定テーブルがカラになった： リストック完了
+		ClfActions.stopAutoRestock()
+		if ( ClfSettings.EnableRestockMsg ) then
+			sendOverheadText( ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L" Complete", 1152, true )
+		end
+		return
+	end
+
+	-- 開いている全コンテナのチェック開始
+	for id in pairs( ContainerWindow.OpenContainers ) do
+		if ( id ~= CW_OrganizeBag and DoesWindowExist( "ContainerWindow_" .. id ) ) then
+
+			local containerData = WD_ContainerWindow[ id ]
+			local containedItems = containerData.ContainedItems
+
+			for i = 1, containerData.numItems do
+				local item = containedItems[ i ] or {}
+				local objectId = item.objectId
+				local itemData = WD_ObjectInfo[ objectId ]
+				if ( not itemData and objectId ) then
+					RegisterWindowData( WD_ObjectInfo_Type, objectId )
+					itemData = WD_ObjectInfo[ objectId ]
+				end
+				if ( itemData ) then
+					local objectType = itemData.objectType
+					local hue = itemData.hueId
+					local restockItem = RestockItemTypes[ objectType ] and RestockItemTypes[ objectType ][ hue ]
+
+					if ( restockItem ) then
+						-- リストック対象のアイテムがあった： 数をチェック
+						local quantity = itemData.quantity or 1
+						local dragNum = ( restockItem.NEED or 0 ) - ( restockItem.amount or 0 )
+						dragNum = ( quantity > dragNum ) and dragNum or quantity
+						if ( dragNum > 0 ) then
+							-- 必要な分だけドラッグしてreturn
+							ContainerWindow.TimePassedSincePickUp = 0
+							ContainerWindow.CanPickUp = false
+							local dropContainerId = MoveItemToContainer( objectId, dragNum, CW_OrganizeBag )
+
+							if ( dropContainerId == nil ) then
+								-- アイテムのドロップが出来ない状態： ドロップ先コンテナが遠い（無い） or アイテムが遠い（無い）
+								RestockDropErrCount = RestockDropErrCount + 1
+								if ( RestockDropErrCount >= 5 ) then
+									-- 5回連続で失敗したら停止する
+									ClfActions.stopAutoRestock()
+									sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": Can't Drop" , 33, true )
+									-- アイテムがドラッグされたままの状態（？）になってしまうので、元に戻しておく
+									MoveItemToContainer( objectId, dragNum, id )
+									return
+								end
+							else
+								-- ドロップが正常に出来る状態だったのでエラー回数をリセット
+								-- ※ 動作が完了するまで～～ の状態になり実際にはドロップ出来ていない場合もある
+								RestockDropErrCount = 0
+							end
+
+							if ( IsRestockBagInBP ) then
+								-- ドロップ先のバッグをプレイヤーが所持している or バックパック自体： プレイヤーの所持アイテム数チェック
+								local playersItemNum = Interface.BackPackItems and #Interface.BackPackItems or 0
+								if ( playersItemNum >= 125 ) then
+									-- 持てるアイテム数を超えた： Restockを停止する
+									ClfActions.stopAutoRestock()
+									sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": ItemNum Limit" , 33, true )
+								end
+							else
+								-- Rstockバッグ内のアイテム個数チェック
+								local itemNum = restockContainerData.numItems or 0
+								if ( itemNum >= 125 ) then
+									-- コンテナに入るアイテム数を超えた： Restockを停止する
+									ClfActions.stopAutoRestock()
+									sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": ItemNum Limit" , 33, true )
+								end
+							end
+
+							return
+						else
+							RestockItemTypes[ objectType ][ hue ] = nil
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- 対象のアイテムが見つからなかった： 終了
+	ClfActions.stopAutoRestock()
+	sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": No Items" , 33, true )
+end
+
+
+
 function ClfActions.toggleAFKmode()
 	ClfActions.AFKmode = not ClfActions.AFKmode
 	local onOffStr = L"OFF"

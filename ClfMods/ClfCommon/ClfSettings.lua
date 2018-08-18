@@ -19,6 +19,9 @@ ClfSettings.EnableVacuumMsg = true
 -- オブハン表示時にフィールド上のアイテム全てを拾うか
 ClfSettings.EnableScavengeAll = false
 
+-- 自動リストックの停止時や、重量・アイテム数のアラートを頭上にメッセージ表示するか
+ClfSettings.EnableRestockMsg = true
+
 
 -- You see: 表示：非表示フィルター
 ClfSettings.YouSeeFilters = {
@@ -44,16 +47,15 @@ ClfSettings.YouSeeChannels = {}
 
 
 function ClfSettings.initialize()
+	local LoadBoolean = Interface.LoadBoolean
+	local ClfSettings = ClfSettings
 
-	ClfSettings.EnableDropGoldToBP = Interface.LoadBoolean( "ClfDropGoldToBP", ClfSettings.EnableDropGoldToBP )
-
-	ClfSettings.EnableCloseContainerOnVacuum = Interface.LoadBoolean( "ClfCloseContainerOnVacuum", ClfSettings.EnableCloseContainerOnVacuum )
-
-	ClfSettings.EnableAbortVacuum = Interface.LoadBoolean( "ClfAbortVacuum", ClfSettings.EnableAbortVacuum )
-
-	ClfSettings.EnableVacuumMsg = Interface.LoadBoolean( "ClfVacuumMsg", ClfSettings.EnableVacuumMsg )
-
-	ClfSettings.EnableScavengeAll = Interface.LoadBoolean( "ClfScavengeAll", ClfSettings.EnableScavengeAll )
+	ClfSettings.EnableDropGoldToBP = LoadBoolean( "ClfDropGoldToBP", ClfSettings.EnableDropGoldToBP )
+	ClfSettings.EnableCloseContainerOnVacuum = LoadBoolean( "ClfCloseContainerOnVacuum", ClfSettings.EnableCloseContainerOnVacuum )
+	ClfSettings.EnableAbortVacuum = LoadBoolean( "ClfAbortVacuum", ClfSettings.EnableAbortVacuum )
+	ClfSettings.EnableVacuumMsg = LoadBoolean( "ClfVacuumMsg", ClfSettings.EnableVacuumMsg )
+	ClfSettings.EnableScavengeAll = LoadBoolean( "ClfScavengeAll", ClfSettings.EnableScavengeAll )
+	ClfSettings.EnableRestockMsg = LoadBoolean( "ClfRestockMsg", ClfSettings.EnableRestockMsg )
 
 	ClfSettings.setupYouSeeFilter()
 end
@@ -208,6 +210,27 @@ function ClfSettings.toggleScavengeAll( silent )
 			hue = 150
 		end
 		WindowUtils.SendOverheadText( L"Scavenge All: " .. str, hue, true )
+	end
+end
+
+
+-- 自動リストックの完了・停止時に頭上メッセージ表示するかを切り替え
+function ClfSettings.toggleRestockMsg( silent )
+	enable = not ClfSettings.EnableRestockMsg
+	ClfSettings.EnableRestockMsg = enable
+	Interface.SaveBoolean( "ClfRestockMsg", enable )
+
+	if ( not silent ) then
+		local str
+		local hue
+		if ( enable ) then
+			str = L"ON"
+			hue = 1152
+		else
+			str = L"OFF"
+			hue = 150
+		end
+		WindowUtils.SendOverheadText( L"Restoc Msg: " .. str, hue, true )
 	end
 end
 
