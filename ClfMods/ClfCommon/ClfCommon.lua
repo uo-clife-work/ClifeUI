@@ -5,8 +5,12 @@ LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."
 
 ClfCommon = {}
 
+function _void() end
 
-ClfCommon.actionsWindowInitActionData_org = nil
+function _return_false() return false end
+
+function _return_true() return true end
+
 
 function ClfCommon.initialize()
 	ClfUtil.initialize()
@@ -66,7 +70,7 @@ end
 *                 fail   = function() {  },						-- limit までに判定が完了しなかった時に実行
 *                 begin  = Interface.TimeSinceLogin + 1,		-- いつから判定開始するか。指定しなければ次のプロセスから
 *                 limit  = Interface.TimeSinceLogin + 10,	-- いつまで判定するか。指定しなければ 10秒後まで
-*                 remove = true,										-- 判定完了・limit時に取り除く。指定しなければ true
+*                 remove = true,										-- 判定完了時に取り除く。指定しなければ true
 *              }
 ]]
 function ClfCommon.addCheckListener( name, listener )
