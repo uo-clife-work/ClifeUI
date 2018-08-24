@@ -535,12 +535,12 @@ function ClfRefactor.onVacuumStart()
 			DoesVacuumAlert = not ClfSettings.EnableVacuumMsg
 			Actions.MassOrganize = true
 		end
-	else
-		Actions.MassOrganize = false
-		Actions.VacuumObjects = {}
-		if ( ClfSettings.EnableVacuumMsg ) then
-			WindowUtils.SendOverheadText( L"=== Stop Vacuum ===" , 46, true )
-		end
+--	else
+--		Actions.MassOrganize = false
+--		Actions.VacuumObjects = {}
+--		if ( ClfSettings.EnableVacuumMsg ) then
+--			WindowUtils.SendOverheadText( L"=== Stop Vacuum ===" , 46, true )
+--		end
 	end
 end
 

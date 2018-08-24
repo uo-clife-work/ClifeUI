@@ -16,7 +16,6 @@ ClfActions.DistColors = {
 ClfActions.FiendlyIds = {
 }
 
-
 -- spellIdをキーにしたSpellsDataを保持するテーブル
 ClfActions.SpellIdsData = nil
 
@@ -187,7 +186,7 @@ function ClfActions.p_onUpdateTarget()
 						local name = wstring.lower( mobileData.MobName )
 						name = wstring.gsub( towstring( name ), L"^%s*an?%s+", L"" )
 						if ( type( name ) == "wstring" ) then
-						LabelSetText( label, name )
+							LabelSetText( label, name )
 						else
 							LabelSetText( label, L"" )
 						end
@@ -269,7 +268,7 @@ end
 
 --[[
 * カレントターゲットが敵性mob以外なら、近くの敵をカレントターゲットにする（敵性だった時はクリックする）
-* @param  {integer} [orderNum = 1] オプション - ターゲットを変更する場合は{orderNum}番目に近い敵をターゲットする
+* @param  {integer} [orderNum   = 1]      オプション - ターゲットを変更する場合は{orderNum}番目に近い敵をターゲットする
 * @param  {integer} [range      = 255]    オプション - ターゲットを変更する場合に選択する距離範囲
 * @param  {boolean} [descHealth = false]  オプション - ターゲットを変更する場合は同距離の時は体力の残りが大きい順にする
 ]]--
@@ -318,7 +317,7 @@ end
 
 --[[
 * 近くの敵をターゲットする（PCのペット・召喚生物と判定出来るmobは除く）
-* @param  {integer} [orderNum = 1] オプション - {orderNum}番目に近い敵をターゲットする
+* @param  {integer} [orderNum   = 1]      オプション - {orderNum}番目に近い敵をターゲットする
 * @param  {integer} [range      = 255]      オプション - 選択する距離範囲
 * @param  {boolean} [descHealth = false]  オプション - 同距離の時は体力の残りが大きい順にする
 ]]--
@@ -379,7 +378,7 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 			return ( noto == 4 and isNeutralMobileName( id, mobName ) )
 		end
 	else
-		isNeutral = function( noto, id, mobName ) return false end
+		isNeutral = _return_false
 	end
 
 	for i = 0, #mobiles do
@@ -433,18 +432,18 @@ function ClfActions.p_getDistSortTargetArray( range, descHealth )
 				end
 			)
 		else
-		table.sort(
-			tgMobs,
-			function( a, b )
-				if ( a.dist ~= b.dist ) then
-					return ( a.dist < b.dist )
+			table.sort(
+				tgMobs,
+				function( a, b )
+					if ( a.dist ~= b.dist ) then
+						return ( a.dist < b.dist )
+					end
+					if ( a.CurrentHealth ~= b.CurrentHealth ) then
+						return ( a.CurrentHealth < b.CurrentHealth )
+					end
+					return ( a.index < b.index )
 				end
-				if ( a.CurrentHealth ~= b.CurrentHealth ) then
-					return ( a.CurrentHealth < b.CurrentHealth )
-				end
-				return ( a.index < b.index )
-			end
-		)
+			)
 		end
 		return tgMobs
 	end
@@ -641,13 +640,13 @@ function ClfActions.p_getSpellRange( spellId )
 	spellId = spellId or Interface.LastSpell
 	if ( spellId and spellId > 0 ) then
 		local data = ClfActions.SpellIdsData[ spellId ] or {}
-			dist = data.distance
+		dist = data.distance
 		if ( dist and dist > 10 ) then
-				-- 10マスのはずなのにSpellsDataでは12になっているスペルがあるので、10以上なら-2する
-				-- ※SAクラの距離表示はマス目では無く距離なので（例えば10マスなら 11～14 でも届いたり届かなかったりするので）10マスを基準にしておく
-				dist = math.max( 10, dist - 2 )
-			end
+			-- 10マスのはずなのにSpellsDataでは12になっているスペルがあるので、10以上なら-2する
+			-- ※SAクラの距離表示はマス目では無く距離なので（例えば10マスなら 11～14 でも届いたり届かなかったりするので）10マスを基準にしておく
+			dist = math.max( 10, dist - 2 )
 		end
+	end
 	return dist
 end
 
@@ -796,9 +795,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 
 	local isPoison
 	if ( not excludePoisoned ) then
-		isPoison = function( visualStateId )
-			return false
-		end
+		isPoison = _return_false
 	else
 		isPoison = function( visualStateId )
 			return ( visualStateId == 2 )
@@ -807,9 +804,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 
 	local isCurse
 	if ( not excludeCursed ) then
-		isCurse = function( visualStateId )
-			return false
-		end
+		isCurse = _return_false
 	else
 		isCurse = function( visualStateId )
 			return ( visualStateId == 3 )
@@ -818,9 +813,7 @@ function ClfActions.p_getFriendlyMobArray( includeBlue, excludePoisoned, exclude
 
 	local isDead
 	if ( not excludeDead ) then
-		isDead = function( mobileData )
-			return false
-		end
+		isDead = _return_false
 	else
 		isDead = function( mobileData )
 			return ( mobileData.IsDead )
@@ -1031,8 +1024,8 @@ function ClfActions.targetGold( ascend )
 			end
 			if ( data ) then
 				if ( data.objectType == GOLD_TYPE and data.hueId == GOLD_HUE ) then
-				sFunc( data.quantity, id )
-			end
+					sFunc( data.quantity, id )
+				end
 			elseif ( registered ) then
 				UnregisterWindowData( ObjectInfo.Type, id )
 			end
@@ -1385,7 +1378,7 @@ function ClfActions.p_MassRestock( timePassed )
 	if ( ClfSettings.EnableRestockMsg ) then
 		sendOverheadText = WindowUtils.SendOverheadText
 	else
-		sendOverheadText = function() end
+		sendOverheadText = _void
 	end
 
 	-- Restockアイテムのドロップ先コンテナをチェック
@@ -1532,6 +1525,64 @@ function ClfActions.p_MassRestock( timePassed )
 	sendOverheadText( L"Stop " .. ClfActions.p_getRestockTitle( Organizer.ActiveRestock ) .. L": No Items" , 33, true )
 end
 
+
+-- Vacuumを停止させる
+function ClfActions.stopVacuum()
+	local Actions = Actions
+	if ( Actions.MassOrganize == true and ClfSettings.EnableVacuumMsg ) then
+		WindowUtils.SendOverheadText( L"=== Stop Vacuum ===" , 46, true )
+	end
+	Actions.MassOrganize = false
+	Actions.VacuumObjects = {}
+end
+
+
+--[[
+** 2マス以内の棺桶をクリック
+*   オブハン表示時時にフィールド上オブジェクトのデータを更新し、そのデータから棺桶を選別する
+*   また、オブハンのフィルターがアイテム類を表示しない設定になっているとデータを取得出来ない点に注意
+]]
+function ClfActions.clickNearCorpse()
+	local objectIds = ClfRefactor.FieldObjectIds
+	local len =  objectIds and #objectIds or 0
+	if ( len == 0 ) then
+		return
+	end
+
+	local GetDistanceFromPlayer = GetDistanceFromPlayer
+	local RegisterWindowData = RegisterWindowData
+	local WD_ContainerWindow = WindowData.ContainerWindow
+	local WD_ContainerWindow_Type = WD_ContainerWindow.Type
+
+	local ignoreItemIds = {}
+	local CW_IgnoreItems = ContainerWindow.IgnoreItems
+	for j = 1, #CW_IgnoreItems do
+		local id = CW_IgnoreItems[ j ] and CW_IgnoreItems[ j ].id
+		if ( id ) then
+			ignoreItemIds[ id ] = true
+		end
+	end
+
+	for i = 1, len do
+		local id = objectIds[ i ]
+		if ( ignoreItemIds[ id ] ) then
+			continue
+		end
+		local dist = GetDistanceFromPlayer( id ) or -1
+		if ( dist < 0 or dist > 2 ) then
+			continue
+		end
+		local containerData = WD_ContainerWindow[ id ]
+		if ( not containerData ) then
+			RegisterWindowData( WD_ContainerWindow_Type, id )
+			containerData = WD_ContainerWindow[ id ]
+		end
+		if ( containerData and containerData.isCorpse ) then
+			HandleSingleLeftClkTarget( id )
+			return true
+		end
+	end
+end
 
 
 function ClfActions.toggleAFKmode()
