@@ -498,10 +498,10 @@ local OrganizeItemIds = {}
 
 -- OverRide: Actions.MassOrganizerStart
 function ClfRefactor.onVacuumStart()
-	OrganizeItemTypesHues = false
-	OrganizeItemIds = false
 	local Actions = Actions
 	if ( Actions.MassOrganize == false ) then
+		OrganizeItemTypesHues = false
+		OrganizeItemIds = false
 		Actions.VacuumObjects = Actions.VacuumObjects or {}
 		local Organizer = Organizer
 		local Organizer_ActiveOrganizer = Organizer.ActiveOrganizer
