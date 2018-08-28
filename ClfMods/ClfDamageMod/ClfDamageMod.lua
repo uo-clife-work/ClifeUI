@@ -306,36 +306,40 @@ function ClfDamageMod.printChat( damObj )
 	end
 
 	local T = ClfDamageMod
+	local ClfS_ExtChatFilters = ClfSettings.ExtChatFilters or {}
+
+	local towstring = towstring
+	local wstring_rep = wstring.rep
+	local wstring_len = wstring.len
 
 	local filter
 	local nameStr
 	local prefix
 	if ( damObj.isPet ) then
-		filter = SystemData.ChatLogFilters.PRIVATE
+		filter = ClfS_ExtChatFilters.CLF_DAMAGE_PET or SystemData.ChatLogFilters.SYSTEM
 		nameStr = damObj.name
 		prefix = L"damage "
 	elseif ( damObj.isPlayer ) then
-		filter = SystemData.ChatLogFilters.YELL
+		filter = ClfS_ExtChatFilters.CLF_DAMAGE_SELF or SystemData.ChatLogFilters.SYSTEM
 		nameStr = damObj.name
 		prefix = L"damage "
 	else
-		filter = SystemData.ChatLogFilters.GESTURE
+		filter = ClfS_ExtChatFilters.CLF_DAMAGE or SystemData.ChatLogFilters.SYSTEM
 		local count = damObj.count or 1
-		count = wstring.format( L"%02d", count )
+		local wstring_format = wstring.format
+		count = wstring_format( L"%02d", count )
 		nameStr = damObj.name .. L" : " .. count
-		prefix = L"hit " .. wstring.format( L"%02d", damObj.hit ) .. L" "
-
+		prefix = L"hit " .. wstring_format( L"%02d", damObj.hit ) .. L" "
 	end
 
 	local healthPerc = L""
 	if ( damObj.CurrentHealth and damObj.MaxHealth and damObj.MaxHealth > 0 ) then
-		healthPerc = math.ceil( 100 * damObj.CurrentHealth / damObj.MaxHealth )
-		healthPerc = towstring( healthPerc )
-		healthPerc = wstring.rep( L" ", 4 - wstring.len( healthPerc ) ) .. healthPerc .. L"% -"
+		healthPerc = towstring( math.ceil( 100 * damObj.CurrentHealth / damObj.MaxHealth ) )
+		healthPerc = wstring_rep( L" ", 4 - wstring_len( healthPerc ) ) .. healthPerc .. L"% -"
 	end
 
 	local lastDamage = towstring( damObj.lastDamage )
-	lastDamage = wstring.rep( L" ", 4 - wstring.len( lastDamage ) ) .. lastDamage
+	lastDamage = wstring_rep( L" ", 4 - wstring_len( lastDamage ) ) .. lastDamage
 
 	local text = prefix .. L"[" .. nameStr .. L"]" .. healthPerc .. lastDamage .. L", total: " .. towstring( damObj.totalDamage )
 

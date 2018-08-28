@@ -50,6 +50,8 @@ ClfTextParse.overheadTextUpdateName_org = nil
 
 
 function ClfTextParse.initialize()
+	ClfYouSee.initialize()
+
 	if ( not ClfTextParse.showOverheadText_Org ) then
 		ClfTextParse.showOverheadText_Org = OverheadText.ShowOverheadText
 		OverheadText.ShowOverheadText = ClfTextParse.preShowOverheadText
@@ -154,100 +156,20 @@ function ClfTextParse.overheadTextOnUpdateName( mobileId )
 end
 
 
--- add You see:
+
 function ClfTextParse.overheadTextUpdateNameCheked( mobileId )
 	-- オリジナルの OverheadText.UpdateName を実行
 	ClfTextParse.overheadTextUpdateName_org( mobileId )
 
-	if ( not ClfSettings.EnableYouSee or OverheadText.LastSeeName[ mobileId ] ) then
-		return
-	end
-
-	if ( mobileId == WindowData.PlayerStatus.PlayerId ) then
-		OverheadText.LastSeeName[ mobileId ] = true
-		return
-	end
-
-	-- Start You see:
-	local mobileNameData = WindowData.MobileName[ mobileId ] or {}
-	local mobileName = mobileNameData.MobName
-
-	if ( not mobileName or mobileName == L"" ) then
-		return
-	end
-
-	local YouSeeFilters = ClfSettings.YouSeeFilters
-	local YouSeeChannels = ClfSettings.YouSeeChannels
-
-	local noto = mobileNameData.Notoriety
-	noto = noto and noto + 1
-	local enable = YouSeeFilters[ noto ]
-	local channel = YouSeeChannels[ noto ]
-
-	if ( noto == 8 ) then
-		-- Yellow
-		if ( not enable ) then
-			return
-		end
-		local lwrName = string.lower( tostring( mobileName ) )
-		local string_match = string.match
-		if ( string_match( lwrName, ".-%sthe parrot$" ) ) then
-			return
-		end
-		if ( string_match( lwrName, "^%s+a mannequin%s+$" ) ) then
-			return
-		end
-	else
-		-- not Yellow
-		local isWorkerMobile = ClfUtil.isWorkerMobile
-
-		local isMyPet = IsObjectIdPet( mobileId )
-		local isSummon = CONST.NOTO_SUMMON[ noto ] and ( MobilesOnScreen.IsSummon( mobileName, mobileId ) or isWorkerMobile( mobileId, 2 ) )
-
-		if ( isSummon ) then
-			-- Summons
-			if ( not YouSeeFilters[10] ) then
-				return
-			end
-			enable = true
-			channel = YouSeeChannels[10]
-		elseif ( isMyPet ) then
-			-- My Pet
-			if ( not YouSeeFilters[11] ) then
-				return
-			end
-			enable = true
-			channel = YouSeeChannels[11]
-		elseif ( isWorkerMobile( mobileId, 1 ) ) then
-			-- Other's Pets
-			if ( not YouSeeFilters[12] ) then
-				return
-			end
-			enable = true
-			channel = YouSeeChannels[12]
-		elseif ( CONST.NOTO_FARM[ noto ] and MobilesOnScreen.IsFarm( mobileName ) ) then
-			-- Farm Animals
-			if ( not YouSeeFilters[9] ) then
-				return
-			end
-			enable = true
-			channel = YouSeeChannels[9]
-		end
-	end
-
-	if ( not enable ) then
-		return
-	end
-
-	local data = { mobileId = mobileId, }
-	channel = channel or SystemData.ChatLogFilters.SYSTEM
-	OverheadText.LastSeeName[ mobileId ] = true
-	ClfTextParse.printChat( L"You see: " .. mobileName, channel, data )
+	-- add You see:
+	ClfYouSee.output( mobileId )
 end
 
 
-function ClfTextParse.printChat( text, channel, data )
-	PrintWStringToChatWindow( text, channel )
+function ClfTextParse.printChat( text, channel, enable, data )
+	if ( enable ) then
+		PrintWStringToChatWindow( text, channel )
+	end
 end
 
 
