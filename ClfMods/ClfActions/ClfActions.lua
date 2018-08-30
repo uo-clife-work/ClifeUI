@@ -58,6 +58,19 @@ function ClfActions.initialize()
 	Actions.ReimbueLast = Actions.ReimbueLast or ClfActions.reImbueLast
 	Actions.UnravelContainer = Actions.UnravelContainer or ClfActions.unravelContainer
 
+	-- コンテナのスクロール位置情報を削除
+	if ( ClfSettings.EnableCleanContScroll ) then
+		ClfCommon.addCheckListener( "cleanContScrollVars", {
+				check = function()
+					local ContainerWindow = ContainerWindow
+					return ( ContainerWindow and ContainerWindow.OpenContainers and ClfUtil.tableElemn( ContainerWindow.OpenContainers ) > 0 )
+				end,
+				done = ClfActions.cleanContScrollVars,
+				fail = ClfActions.cleanContScrollVars,
+				begin  = Interface.TimeSinceLogin + 5,
+				limit  = Interface.TimeSinceLogin + 20,
+			} )
+	end
 end
 
 
@@ -1581,6 +1594,65 @@ function ClfActions.clickNearCorpse()
 			HandleSingleLeftClkTarget( id )
 			return true
 		end
+	end
+end
+
+
+-- キャラクター設定に保存されるコンテナのスクロール位置データのうち不要な物を削除： 設定ファイルの肥大化を抑止する
+function ClfActions.cleanContScrollVars( force )
+	local varNames  = SystemData.Settings.Interface.UIVariables.NumberNames
+	local varValues = SystemData.Settings.Interface.UIVariables.NumberValues
+	local len = varNames and #varNames or -1
+	if ( len < 1 ) then
+		return
+	end
+	force = ( force == true )
+
+	local type = type
+	local string_match = string.match
+	local tonumber = tonumber
+	local table_remove = table.remove
+	local RegisterWindowData = RegisterWindowData
+
+	local CW_OpenContainers = ContainerWindow.OpenContainers
+	local WD_ContainerWindow = WindowData.ContainerWindow
+
+	local getContId = function( varKey )
+		if ( type( varKey ) == "string" ) then
+			local prefix, id = string_match( varKey, "^(Scroll[GL][ridst]+)(%d+)$" )
+			if ( id and ( prefix == "ScrollGrid" or prefix == "ScrollList" ) ) then
+				return id and tonumber( id )
+			end
+		end
+		return false
+	end
+
+	local count = 0
+	for i = len, 1, -1 do
+		local id = getContId( varNames[ i ] )
+		if ( id ) then
+			local val = varValues[ i ] or 0
+			local contData = WD_ContainerWindow[ id ]
+			if ( val ~= 0 and contData == nil ) then
+				RegisterWindowData( WD_ContainerWindow.Type, id )
+				contData = WD_ContainerWindow[ id ]
+			end
+			if (
+					force
+					or val == 0
+					or (
+						not CW_OpenContainers[ id ]
+						and ( not contData or contData.isCorpse )
+					)
+				) then
+				table_remove( varNames, i )
+				table_remove( varValues, i )
+				count = count + 1
+			end
+		end
+	end
+	if ( count ~= 0 ) then
+		Debug.PrintToChat( L"Cleared scroll position data of " .. towstring( count ) .. L" containers"  )
 	end
 end
 

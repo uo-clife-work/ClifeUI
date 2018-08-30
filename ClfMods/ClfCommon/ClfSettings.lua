@@ -22,6 +22,9 @@ ClfSettings.EnableScavengeAll = false
 -- 自動リストックの停止時や、重量・アイテム数のアラートを頭上にメッセージ表示するか
 ClfSettings.EnableRestockMsg = true
 
+-- ユーザー設定に保存されるコンテナのスクロール位置情報を自動で削除するか
+ClfSettings.EnableCleanContScroll = false
+
 -- 追加するチャットフィルターを、 [フィルター名] = id番号 として保持するテーブル
 -- * 追加するフィルター名は CONST.ExtChatFilterKeys で定義しておく
 ClfSettings.ExtChatFilters = {
@@ -118,6 +121,7 @@ function ClfSettings.initialize()
 	ClfSettings.EnableVacuumMsg = LoadBoolean( "ClfVacuumMsg", ClfSettings.EnableVacuumMsg )
 	ClfSettings.EnableScavengeAll = LoadBoolean( "ClfScavengeAll", ClfSettings.EnableScavengeAll )
 	ClfSettings.EnableRestockMsg = LoadBoolean( "ClfRestockMsg", ClfSettings.EnableRestockMsg )
+	ClfSettings.EnableCleanContScroll = LoadBoolean( "ClfCleanContSc", ClfSettings.EnableCleanContScroll )
 end
 
 
@@ -179,11 +183,14 @@ end
 function ClfSettings.setupExtChatChannelColor()
 
 	local ChatSettings = ChatSettings
+	local ChatWindow = ChatWindow
 	local ClfS_ExtChatFilterColors = ClfSettings.ExtChatFilterColors
 	local ClfS_ExtChatFilters = ClfSettings.ExtChatFilters
 	local CS_ChannelColors = ChatSettings.ChannelColors
 	local CS_Ordering = ChatSettings.Ordering
 	local CW_Windows = ChatWindow.Windows
+	local CW_S_Chat = ChatWindow.Settings.Chat
+	local CW_S_Chat_Windows = CW_S_Chat.Windows
 
 	local ExtChatFilterKeys = CONST.ExtChatFilterKeys
 	local ExtChatFilterVars = CONST.ExtChatFilterVars
@@ -244,18 +251,16 @@ function ClfSettings.setupExtChatChannelColor()
 
 		-- SavedVariablesに保存されたフィルター状態をチャットログ画面の各タブに反映させる
 		-- ※ 他のUIに切り替えると設定が消えてしまうので、その場合はONにする。とりあえずそういう仕様ということで。。。
-		for savedWndIdx, savedWnd in pairs( ChatWindow.Settings.Chat.Windows ) do
-			if ( savedWndIdx > ChatWindow.Settings.Chat.numWindows ) then
+		for savedWndIdx, savedWnd in pairs( CW_S_Chat_Windows ) do
+			if ( savedWndIdx > CW_S_Chat.numWindows ) then
 				continue
 			end
-
 			local winName = savedWnd.windowName
 
 			for savedTabIdx, savedTab in pairs( savedWnd.Tabs ) do
 				if ( savedTabIdx > savedWnd.numTabs ) then
 					continue
 				end
-
 				local savedFilter = savedTab.Filters and savedTab.Filters[ channelId ]
 				local enabled = channelData.isOnAlways or ( savedFilter == nil ) or savedFilter
 				LogDisplaySetFilterState( winName .. "ChatLogDisplay", logName, channelId, enabled )
@@ -439,6 +444,27 @@ function ClfSettings.toggleRestockMsg( silent )
 			hue = 150
 		end
 		WindowUtils.SendOverheadText( L"Restoc Msg: " .. str, hue, true )
+	end
+end
+
+
+-- コンテナのスクロール位置情報を自動で削除するかを切り替え
+function ClfSettings.toggleCleanContScroll( silent )
+	enable = not ClfSettings.EnableCleanContScroll
+	ClfSettings.EnableCleanContScroll = enable
+	Interface.SaveBoolean( "ClfCleanContSc", enable )
+
+	if ( not silent ) then
+		local str
+		local hue
+		if ( enable ) then
+			str = L"ON"
+			hue = 1152
+		else
+			str = L"OFF"
+			hue = 150
+		end
+		WindowUtils.SendOverheadText( L"Clean Container scroll data: " .. str, hue, true )
 	end
 end
 
