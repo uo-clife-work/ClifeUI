@@ -191,6 +191,7 @@ function ClfSettings.setupExtChatChannelColor()
 	local pairs = pairs
 	local TextLogAddFilterType = TextLogAddFilterType
 	local LogDisplaySetFilterColor = LogDisplaySetFilterColor
+	local LogDisplaySetFilterState = LogDisplaySetFilterState
 	local mergeTable = ClfUtil.mergeTable
 
 	-- // 下2行をコメントアウトすると SYSTEMフィルターの設定が出来る様になる（OFFにしても再ログインでONに戻ってしまうけど、文字色は保持される）
@@ -218,7 +219,8 @@ function ClfSettings.setupExtChatChannelColor()
 		local channelData = mergeTable( {}, DEFAULT_DATA, {
 				id = channelId,
 				name = OPT.name or L"(not set)",
-				isOnAlways = not not OPT.always
+				logName = OPT.logName,
+				isOnAlways = not not OPT.always,
 			} )
 		ChatSettings.Channels[ channelId ] = channelData
 		if ( not OPT.always ) then
@@ -226,22 +228,39 @@ function ClfSettings.setupExtChatChannelColor()
 		end
 
 		-- チャットログに、追加したフィルターIDを反映させる
-		TextLogAddFilterType( "Chat", channelId, L"" )
+		local logName = channelData.logName
+		TextLogAddFilterType( logName, channelId, L"" )
 		-- チャットログ画面の各タブに、追加したフィルターの文字色を定義
 		local color = CS_ChannelColors[ channelId ] or ClfS_ExtChatFilterColors[ channelKey ] or GREY
+		local r, g, b = color.r, color.g, color.b
 		for _, wnd in pairs( CW_Windows ) do
 			for _, tab in pairs( wnd.Tabs ) do
-				LogDisplaySetFilterColor(
-					tab.tabWindow,
-					"Chat",
-					channelId,
-					color.r, color.g, color.b
-				)
+				LogDisplaySetFilterColor( tab.tabWindow, logName, channelId, r, g, b )
 			end
 		end
 
 		CS_ChannelColors[ channelId ] = color
 		ClfS_ExtChatFilterColors[ channelKey ] = color
+
+		-- SavedVariablesに保存されたフィルター状態をチャットログ画面の各タブに反映させる
+		-- ※ 他のUIに切り替えると設定が消えてしまうので、その場合はONにする。とりあえずそういう仕様ということで。。。
+		for savedWndIdx, savedWnd in pairs( ChatWindow.Settings.Chat.Windows ) do
+			if ( savedWndIdx > ChatWindow.Settings.Chat.numWindows ) then
+				continue
+			end
+
+			local winName = savedWnd.windowName
+
+			for savedTabIdx, savedTab in pairs( savedWnd.Tabs ) do
+				if ( savedTabIdx > savedWnd.numTabs ) then
+					continue
+				end
+
+				local savedFilter = savedTab.Filters and savedTab.Filters[ channelId ]
+				local enabled = channelData.isOnAlways or ( savedFilter == nil ) or savedFilter
+				LogDisplaySetFilterState( winName .. "ChatLogDisplay", logName, channelId, enabled )
+			end
+		end
 	end
 
 	-- チャットフィルター設定画面に反映させる
