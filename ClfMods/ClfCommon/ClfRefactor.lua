@@ -20,6 +20,8 @@ ClfRefactor.objectHandleWindowOnUpdate_org = nil
 ClfRefactor.massOrganizerStart_org = nil
 -- デフォルトのVacuum用onUpdateメソッドを保持： 現状使用しないが一応。
 ClfRefactor.massOrganizer_org = nil
+-- Interface.ClearWindowData を保持
+ClfRefactor.interface_ClearWindowData_org = nil
 
 
 function ClfRefactor.initialize()
@@ -30,6 +32,11 @@ function ClfRefactor.initialize()
 
 	local ObjectHandleWindow = ObjectHandleWindow
 	local Actions = Actions
+
+	if ( not ClfRefactor.interface_ClearWindowData_org ) then
+		ClfRefactor.interface_ClearWindowData_org = Interface.ClearWindowData
+		Interface.ClearWindowData = ClfRefactor.clearWindowData
+	end
 
 	if ( not ClfRefactor.createObjectHandles_org ) then
 		-- オブハン表示用メソッドをオーバーライド
@@ -67,6 +74,62 @@ local CONST = {
 
 -- オブハン表示時に、オブジェクトのIDを保持するテーブル
 ClfRefactor.FieldObjectIds = {}
+
+
+local CleanDataDelta = 0
+
+-- Interface.ClearWindowData をオーバーライドする
+function ClfRefactor.clearWindowData( timePassed )
+	CleanDataDelta = CleanDataDelta + timePassed
+
+	if ( CleanDataDelta < 3 ) then
+		return
+	end
+	CleanDataDelta = 0
+
+	local GetDistanceFromPlayer = GetDistanceFromPlayer
+	local UnregisterWindowData = UnregisterWindowData
+	local IsObjectIdPet = IsObjectIdPet
+	local type = type
+
+	local WD_MobileName_Type = WindowData.MobileName.Type
+	local PlayerId = WindowData.PlayerStatus.PlayerId
+	local I_CurrentHonor = Interface.CurrentHonor
+	local PHB_PartyMembers = PartyHealthBar.PartyMembers or {}
+	local MHB_hasWindow = MobileHealthBar.hasWindow or {}
+	local MHB_RegisterTime = MobileHealthBar.RegisterTime or {}
+
+	local limit = Interface.TimeSinceLogin + 30
+
+	for mobileId, data in pairs( WindowData.MobileName ) do
+		if ( type( mobileId ) ~= "number" ) then
+			continue
+		end
+		if (
+				mobileId == PlayerId
+				or mobileId == I_CurrentHonor
+				or PHB_PartyMembers[ mobileId ] ~= nil
+				or MHB_hasWindow[ mobileId ] ~= nil
+				or IsObjectIdPet( mobileId )
+			) then
+			continue
+		end
+
+		local registerTime = MHB_RegisterTime[ mobileId ]
+		if ( registerTime and registerTime < limit ) then
+			local noto = data.Notoriety or 0
+			if ( noto ~= 0  ) then
+				continue
+			end
+		end
+
+		local dist = GetDistanceFromPlayer( mobileId ) or 0
+		if ( dist < 0 or dist > 50 ) then
+			UnregisterWindowData( WD_MobileName_Type, mobileId )
+		end
+	end
+end
+
 
 -- Scavenger用アイテム判定に使うtable
 local ScvItemTypesHues = false

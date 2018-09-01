@@ -1,3 +1,4 @@
+
 LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfDamageMod", "ClfDamageWindow.xml", "ClfDamageWindow.xml" )
 
 ClfDamageMod = {}
@@ -25,6 +26,7 @@ ClfDamageMod.PrintChatEnable = true
 ClfDamageMod.SaveLogEnable = true
 ClfDamageMod.windowShow = true
 
+ClfDamageMod.EnableNumEffect = true
 
 ClfDamageMod.Damages = {}
 ClfDamageMod.DamagedMobCount = 0
@@ -35,22 +37,32 @@ ClfDamageMod.DamageInit_org = nil
 
 
 function ClfDamageMod.initialize()
-	ClfDamageMod.Enable = Interface.LoadBoolean( "ClfDamageModEnable", ClfDamageMod.Enable )
-	ClfDamageMod.PrintChatEnable = Interface.LoadBoolean( "ClfDamageModPrintChatEnable", ClfDamageMod.PrintChatEnable )
-	ClfDamageMod.SaveLogEnable = Interface.LoadBoolean( "ClfDamageModSaveLogEnable", ClfDamageMod.SaveLogEnable )
-	ClfDamageMod.windowShow = Interface.LoadBoolean( "ClfDamageModWindowShow", ClfDamageMod.windowShow )
+	local ClfDamageMod = ClfDamageMod
+	local LoadBoolean = Interface.LoadBoolean
+	ClfDamageMod.Enable          = LoadBoolean( "ClfDamageModEnable", ClfDamageMod.Enable )
+	ClfDamageMod.PrintChatEnable = LoadBoolean( "ClfDamageModPrintChatEnable", ClfDamageMod.PrintChatEnable )
+	ClfDamageMod.SaveLogEnable   = LoadBoolean( "ClfDamageModSaveLogEnable", ClfDamageMod.SaveLogEnable )
+	ClfDamageMod.windowShow      = LoadBoolean( "ClfDamageModWindowShow", ClfDamageMod.windowShow )
+	ClfDamageMod.EnableNumEffect = LoadBoolean( "ClfDamageNumEffect", ClfDamageMod.EnableNumEffect )
 
 	if ( not ClfDamageMod.DamageInit_org ) then
 		ClfDamageMod.DamageInit_org = DamageWindow.Init
+		DamageWindow.Init = ClfDamageMod.onDamageInit_enable
 	end
 
 	ClfDamageMod.setEnable( ClfDamageMod.Enable )
 
 	ClfDamageMod.DamagedMobCount = 0
 
-	if ( ClfDamageMod.Enable and ClfDamageMod.windowShow ) then
+	if ( ClfDamageMod.windowShow ) then
 		ClfDamageWindow.showWindow()
 	end
+
+	DamageWindow.OverheadAlive = -150
+	DamageWindow.OverheadMove = 2
+	DamageWindow.ShiftYAmount = 16
+	DamageWindow.MaxAnchorYOverlap = 15
+	DamageWindow.OverheadMoveHalf = 1
 end
 
 
@@ -71,10 +83,7 @@ function ClfDamageMod.setEnable( enable )
 	local onOffStr = L"OFF"
 
 	if ( enable ) then
-		DamageWindow.Init = ClfDamageMod.onDamageInit_enable
 		onOffStr = L"ON"
-	else
-		DamageWindow.Init = ClfDamageMod.onDamageInit_disable
 	end
 
 	if ( ClfDamageWindow ) then
@@ -157,6 +166,24 @@ function ClfDamageMod.toggleSaveLog( silent )
 end
 
 
+-- ダメージテキストアニメーションの切り替え
+function ClfDamageMod.toggleNumEffect( silent )
+	local enable = not ClfDamageMod.EnableNumEffect
+	ClfDamageMod.EnableNumEffect = enable
+	Interface.SaveBoolean( "ClfDamageNumEffect", enable )
+
+	if ( not silent ) then
+		local onOffStr = L"OFF"
+		local hue = 150
+		if ( enable ) then
+			onOffStr = L"ON"
+			hue = 1152
+		end
+		WindowUtils.SendOverheadText( L"Damage Num Effect: " .. onOffStr, hue, true )
+	end
+end
+
+
 ClfDamageMod.LogExportDelta = 0
 ClfDamageMod.CleanDataDelta = 0
 
@@ -179,7 +206,7 @@ function ClfDamageMod.onUpdate( timepassed )
 			T.CleanDataDelta = 0
 		end
 
-		pcall( ClfDamageWindow.onUpdate, timepassed )
+		ClfDamageWindow.onUpdate( timepassed )
 	end
 
 end
@@ -190,111 +217,175 @@ function ClfDamageMod.onDamageInit_disable()
 end
 
 function ClfDamageMod.onDamageInit_enable()
-	local T = ClfDamageMod
+	local ClfDamageMod = ClfDamageMod
+	local Damage = Damage
+	local mobileId = Damage and Damage.mobileId
+	if ( not mobileId ) then
+		return
+	end
 
-	-- オリジナルの DamageWindow.Init を実行
-	T.DamageInit_org()
+	local DamageWindow = DamageWindow
+	local Interface = Interface
+	local WindowData = WindowData
+	local PlayerId = WindowData.PlayerStatus.PlayerId
 
-	if ( Damage and Damage.mobileId and Damage.damageNumber ) then
-		local id = Damage.mobileId
-		local damageNum = Damage.damageNumber
+	-- // start Original DamageWindow.Init
+	if ( DamageWindow.waitSpecialDamage ) then
+		DamageWindow.AddText( mobileId, DamageWindow.waitSpecialDamage )
+		DamageWindow.waitSpecialDamage = nil
+		DamageWindow.lastSpecialWaiting = nil
+	end
 
-		if ( damageNum >= T.MIN_DAMAGE_TO_LOG ) then
-			local damObj = T.Damages[ id ]
-			local mobileData = Interface.GetMobileData( id, false )
-			local time = Interface.Clock.Timestamp
+	local damageNum = Damage.damageNumber
 
-			if ( not damObj ) then
-				-- 最初のダメージ
-				local isPet = nil
-				local isPlayer = nil
-				local count
-				local mobData = WindowData.MobileName[ id ]
-				local isUnknown = false
-				local name = mobData and mobData.MobName or mobileData and mobileData.MobName
-				if ( name and wstring.len( name ) > 0 ) then
-					name = wstring.gsub( name, L"^%s*", L"" )
-					name = wstring.lower( name )
-				else
-					isUnknown = true
-					name = L"???"
-				end
+	local numWindow = DamageWindow.GetNextId()
+	local windowName = "DamageWindow" .. numWindow
+	local labelName = windowName .. "Text"
+	local DW_DefaultAnchorY = DamageWindow.DefaultAnchorY
+	local color
+	local isPet = IsObjectIdPet( mobileId )
+	if ( isPet ) then
+		color = DamageWindow.PETGETDAMAGE_COLOR
+	elseif ( mobileId == PlayerId ) then
+		color = DamageWindow.YOUGETAMAGE_COLOR
+	else
+		color = DamageWindow.OTHERGETDAMAGE_COLOR
+	end
 
-				mobileData = mobileData or Interface.GetMobileData( id, true )
+	CreateWindowFromTemplateShow( windowName, "ClfDamageNumTemplate", "Root", false )
 
-				if ( mobileData and mobileData.MyPet ) then
-					isPet = true
-					count = 0
-				elseif ( id == WindowData.PlayerStatus.PlayerId ) then
-					isPlayer = true
-					count = 0
-				else
-					count = T.DamagedMobCount + 1
-					T.DamagedMobCount = count
-				end
+	WindowAddAnchor( labelName, "bottom", windowName, "bottom", 0, DW_DefaultAnchorY )
+	WindowSetScale( windowName, Interface.OverhedTextSize )
 
-				damObj = {
-					name = name,
-					id = id,
-					totalDamage = damageNum,
-					lastDamage = damageNum,
-					maxDamage = damageNum,
-					isPlayer = isPlayer,
-					isDead = false,
-					start = time,
-					update = time,
-					count = count,
-					hit = 1,
-					isUnknown = isUnknown,
-					pets = T.getPetsName(),
-				}
+	if ( color ~= nil ) then
+		LabelSetTextColor( labelName, color.r, color.g, color.b )
+	else
+		LabelSetTextColor( labelName, Damage.red, Damage.green, Damage.blue )
+	end
 
-				if ( mobileData ) then
-					damObj.isPet = isPet
-					damObj.isDead = mobileData.IsDead
-					damObj.CurrentHealth = mobileData.CurrentHealth
-					damObj.MaxHealth = mobileData.MaxHealth
-				end
+	--Shifts the previous damage numbers up if its too close to the new damage numbers
+	--this way the damage numbers would not cover each other up
+	DamageWindow.ShiftYWindowUp()
 
-				T.Damages[ id ] = damObj
+	DamageWindow.AttachedId[ numWindow ] = mobileId
+	DamageWindow.AnchorY[ numWindow ] = DW_DefaultAnchorY
+	LabelSetFont( labelName, FontSelector.Fonts[ OverheadText.DamageFontIndex ].fontName, 20 )
+	AttachWindowToWorldObject( mobileId, windowName )
+
+	if ( ClfDamageMod.EnableNumEffect and damageNum > 50 ) then
+		local labelScale = 1 + ( damageNum - 50 ) * 0.003
+		labelScale = ( labelScale > 1.6 ) and 1.6 or labelScale
+		WindowStartScaleAnimation( labelName, Window.AnimationType.EASE_OUT, labelScale, 1, 0.45, false, 0, 0 )
+	end
+
+	LabelSetText( labelName, towstring( damageNum ) )
+
+	local now = Interface.TimeSinceLogin
+	Interface.IsFighting = true
+	Interface.IsFightingLastTime = now + 10
+	Interface.CanLogout = now + 120
+
+	PaperdollWindow.GotDamage =  true
+	-- // End Original DamageWindow.Init
+
+	if ( ClfDamageMod.Enable and damageNum and damageNum >= ClfDamageMod.MIN_DAMAGE_TO_LOG ) then
+		local damObj = ClfDamageMod.Damages[ mobileId ]
+		local mobileData = WindowData.MobileStatus[ mobileId ]
+		if ( not mobileData ) then
+			RegisterWindowData( WindowData.MobileStatus.Type, mobileId )
+			mobileData = WindowData.MobileStatus[ mobileId ]
+		end
+
+		local time = Interface.Clock.Timestamp or 0
+
+		if ( not damObj ) then
+			-- 最初のダメージ
+			local isPlayer
+			local count
+			local mobData = WindowData.MobileName[ mobileId ]
+			local isUnknown = false
+			local name = mobData and mobData.MobName or mobileData and mobileData.MobName
+			if ( name and name ~= L"" ) then
+				name = wstring.gsub( name, L"^%s*", L"" )
+				name = wstring.lower( name )
 			else
-				-- 2回目以降
-				local name = damObj.name
-				if ( not name or name == L"???" ) then
-					local mobData = WindowData.MobileName[ id ]
+				isUnknown = true
+				name = L"???"
+			end
 
-					name = mobData and mobData.MobName or mobileData and mobileData.MobName
-					if ( not name or wstring.len( name ) <= 0 ) then
-						local md = Interface.GetMobileData( id, true )
-						name = md and md.MobName
-					end
-					name = name and wstring.lower( wstring.gsub( name, L"^%s*", L"" ) ) or L"???"
+			mobileData = mobileData or Interface.GetMobileData( mobileId, true )
+
+			if ( isPet ) then
+				count = 0
+			elseif ( mobileId == PlayerId ) then
+				isPlayer = true
+				count = 0
+			else
+				count = ClfDamageMod.DamagedMobCount + 1
+				ClfDamageMod.DamagedMobCount = count
+			end
+
+			damObj = {
+				name        = name,
+				id          = mobileId,
+				totalDamage = damageNum,
+				lastDamage  = damageNum,
+				maxDamage   = damageNum,
+				isPet       = isPet,
+				isPlayer    = isPlayer,
+				isDead      = false,
+				start       = time,
+				update      = time,
+				count       = count,
+				hit         = 1,
+				isUnknown   = isUnknown,
+				pets        = ClfDamageMod.getPetsName(),
+			}
+
+			if ( mobileData ) then
+				damObj.isDead         = mobileData.IsDead
+				damObj.CurrentHealth  = mobileData.CurrentHealth
+				damObj.MaxHealth      = mobileData.MaxHealth
+			end
+
+			ClfDamageMod.Damages[ mobileId ] = damObj
+		else
+			-- 2回目以降
+			local name = damObj.name
+			if ( not name or name == L"???" ) then
+				local mobData = WindowData.MobileName[ mobileId ]
+
+				name = mobData and mobData.MobName or mobileData and mobileData.MobName
+				if ( not name or name == L"" ) then
+					local md = Interface.GetMobileData( mobileId, true )
+					name = md and md.MobName
 				end
-				if ( not damObj.start or damObj.start < 1 ) then
-					damObj.start = time - 1
-				end
+				name = name and wstring.lower( wstring.gsub( name, L"^%s*", L"" ) ) or L"???"
 				damObj.name = name
-				damObj.totalDamage = damObj.totalDamage + damageNum
-				damObj.lastDamage = damageNum
-				damObj.update = time
-				damObj.hit = damObj.hit + 1
+			end
+			if ( damObj.start == 0 ) then
+				damObj.start = time - 1
+			end
+			damObj.totalDamage = damObj.totalDamage + damageNum
+			damObj.lastDamage  = damageNum
+			damObj.update      = time
+			damObj.hit         = damObj.hit + 1
+			damObj.isPet       = isPet
 
-				if ( damageNum > damObj.maxDamage ) then
-					damObj.maxDamage = damageNum
-				end
-
-				if ( mobileData ) then
-					damObj.isPet = mobileData.MyPet
-					damObj.isDead = mobileData.IsDead
-					damObj.CurrentHealth = mobileData.CurrentHealth
-					damObj.MaxHealth = mobileData.MaxHealth
-				end
+			if ( damageNum > damObj.maxDamage ) then
+				damObj.maxDamage = damageNum
 			end
 
-			T.LastUpdate = time
-			if ( ClfDamageMod.PrintChatEnable ) then
-				T.printChat( damObj )
+			if ( mobileData ) then
+				damObj.isDead         = mobileData.IsDead
+				damObj.CurrentHealth  = mobileData.CurrentHealth
+				damObj.MaxHealth      = mobileData.MaxHealth
 			end
+		end
+
+		ClfDamageMod.LastUpdate = time
+		if ( ClfDamageMod.PrintChatEnable ) then
+			ClfDamageMod.printChat( damObj )
 		end
 	end
 end
@@ -370,11 +461,12 @@ end
 
 -- ダメージのデータを整理する（不要になったデータを間引く）
 function ClfDamageMod.cleanData()
+	local ClfDamageMod = ClfDamageMod
 	local time = Interface.Clock.Timestamp
 	local damages = ClfDamageMod.Damages
 
 	-- 整理した後に残すデータ数の最小値
-	local minLen = ClfDamageWindow and ClfDamageWindow.LIST_ROW_MAX or 10
+	local minLen = ClfDamageWindow.LIST_ROW_MAX or 10
 	-- 現在のデータ長
 	local dataLen = ClfUtil.tableElemn( damages )
 	if ( dataLen <= minLen ) then
@@ -384,15 +476,15 @@ function ClfDamageMod.cleanData()
 	ClfDamageMod.autoExportDamages()
 	ClfDamageMod.LogExportDelta = 0
 
-	local timeLimit = ClfDamageMod.DAMAGE_DATA_CACHE_TIME
+	local WD_MobileStatus = WindowData.MobileStatus
 	local PlayerId = WindowData.PlayerStatus.PlayerId
-	local removeRow = ClfDamageWindow and ClfDamageWindow.removeListRow or function() end
-	local ListRowIds = ClfDamageWindow and ClfDamageWindow.ListRowIds or {}
+	local timeLimit = ClfDamageMod.DAMAGE_DATA_CACHE_TIME
+	local removeRow = ClfDamageWindow.removeListRow or _void
+	local ListRowIds = ClfDamageWindow.ListRowIds or {}
 	local listWindowActive = false
-	if ( ClfDamageWindow and ClfDamageWindow.CurrentWindowSize ~= "min" ) then
+	if ( ClfDamageWindow.CurrentWindowSize ~= "min" ) then
 		listWindowActive = true
 	end
-	local GetMobileData = Interface.GetMobileData
 	local GetDistanceFromPlayer = GetDistanceFromPlayer
 	local pairsByTime = ClfDamageMod.pairsByTime
 
@@ -403,10 +495,10 @@ function ClfDamageMod.cleanData()
 				break
 			end
 		elseif (
-				not ( ListRowIds[ id ] and listWindowActive )
-				and not damObj.sticky
-				and time - damObj.update >= timeLimit
-			) then
+			not ( ListRowIds[ id ] and listWindowActive )
+			and not damObj.sticky
+			and time - damObj.update >= timeLimit
+		) then
 
 			if ( damObj.isDead ) then
 				removeRow( id )
@@ -416,7 +508,11 @@ function ClfDamageMod.cleanData()
 					break
 				end
 			else
-				local mobileData = GetMobileData( id, false )
+				local mobileData = WD_MobileStatus[ id ]
+				if ( not mobileData ) then
+					RegisterWindowData( WD_MobileStatus.Type, id )
+					mobileData = WD_MobileStatus[ id ]
+				end
 				if ( not mobileData or ( not mobileData.MyPet and mobileData.IsDead ) ) then
 					removeRow( id )
 					damages[ id ] = nil
@@ -425,8 +521,8 @@ function ClfDamageMod.cleanData()
 						break
 					end
 				else
-					local dist = GetDistanceFromPlayer( id )
-					if ( not dist or dist < 0 ) then
+					local dist = GetDistanceFromPlayer( id ) or -1
+					if ( dist < 0 ) then
 						removeRow( id )
 						damages[ id ] = nil
 						dataLen = dataLen - 1
@@ -497,7 +593,7 @@ function ClfDamageMod.initDamageLog()
 	if ( ClfDamageMod.SaveLogEnable ) then
 		if ( not ClfDamageMod.DamageLogFile ) then
 			local format = string.format
-			local timestamp, YYYY, MM, DD, h, m, s  = GetCurrentDateTime()
+			local timestamp, YYYY, MM, DD, h, m, s = GetCurrentDateTime()
 			YYYY = 1900 + YYYY
 			MM = 1 + MM
 			local dateStr = YYYY .. format( "%02d", MM ) .. format( "%02d", DD ) .. "-" .. format( "%02d", h ) .. format( "%02d", m ) .. format( "%02d", s )
@@ -509,7 +605,7 @@ function ClfDamageMod.initDamageLog()
 					local playerName = WindowData.MobileName[ playerId ]
 					playerName = playerName and playerName.MobName
 					if ( playerName and wstring.len( playerName ) > 1 ) then
-						playerName = string.gsub( tostring( playerName ) , "^%s*(.-)%s*$", "%1" )
+						playerName = string.gsub( tostring( playerName ), "^%s*(.-)%s*$", "%1" )
 						op = L"\r\n\r\nPlayer: " .. towstring( playerName ) .. L"\r\n\r\n"
 						playerName = string.gsub( playerName, "^Lord ", "" )
 						playerName = string.gsub( playerName, "^Lady ", "" )
@@ -539,11 +635,12 @@ ClfDamageMod.LastExportTime = 0
 
 -- ダメージ情報をログに追加
 function ClfDamageMod.addEntryDamageLog()
+	local ClfDamageMod = ClfDamageMod
 	local damages = ClfDamageMod.Damages
 	local op = L"\r\n\r\n"
 	local time = Interface.Clock.Timestamp
 
-	local GetMobileData = Interface.GetMobileData
+	local WD_MobileStatus = WindowData.MobileStatus
 	local mathMax = math.max
 	local mathMin = math.min
 	local mathFloor = math.floor
@@ -569,7 +666,12 @@ function ClfDamageMod.addEntryDamageLog()
 
 		i = i + 1
 
-		local mobileData = GetMobileData( id, false )
+		local mobileData = WD_MobileStatus[ id ]
+		if ( not mobileData ) then
+			RegisterWindowData( WD_MobileStatus.Type, id )
+			mobileData = WD_MobileStatus[ id ]
+		end
+
 		local name = damObj.name
 		local count = towstring( damObj.count )
 		local hit = mathMax( 1, damObj.hit )
@@ -601,7 +703,7 @@ function ClfDamageMod.addEntryDamageLog()
 
 		if ( isUnknown ) then
 			health = L"---"
-		elseif ( isDead or maxHealth == 0  ) then
+		elseif ( isDead or maxHealth == 0 ) then
 			health = L"0%"
 		else
 			health = towstring( mathCeil( 100 * mathMin( 1, curHealth / maxHealth ) ) ) .. L"%"
@@ -662,9 +764,124 @@ end
 
 
 function ClfDamageMod.autoExportDamages()
+	local ClfDamageMod = ClfDamageMod
 	if ( ClfDamageMod.SaveLogEnable and ClfDamageMod.LastUpdate >= ClfDamageMod.LastExportTime ) then
 		ClfDamageMod.addEntryDamageLog()
 	end
 end
 
+
+function DamageWindow.GetNextId()
+	local numWindow = 1
+	local DW_AttachedId = DamageWindow.AttachedId
+	local DoesWindowExist = DoesWindowExist
+	while (
+		DW_AttachedId[ numWindow ] ~= nil
+		or DoesWindowExist( "DamageWindow" .. numWindow ) == true
+	) do
+		numWindow = numWindow + 1
+	end
+	return numWindow
+end
+
+
+function DamageWindow.ShiftYWindowUp()
+	if ( DamageWindow.IsOverlap() ) then
+		local DamageWindow = DamageWindow
+		local DW_AnchorY = DamageWindow.AnchorY
+		local DW_ShiftYAmount = DamageWindow.ShiftYAmount
+
+		local WindowClearAnchors = WindowClearAnchors
+		local WindowAddAnchor = WindowAddAnchor
+		for i in pairs( DamageWindow.AttachedId ) do
+			local ancY = DW_AnchorY[ i ] - DW_ShiftYAmount
+			local windowName = "DamageWindow" .. i
+			local labelName = windowName .. "Text"
+			WindowClearAnchors( labelName )
+			WindowAddAnchor( labelName, "bottomleft", windowName, "bottomleft", 0, ancY )
+			DW_AnchorY[ i ] = ancY
+		end
+	end
+end
+
+
+function DamageWindow.IsOverlap()
+	local DamageWindow = DamageWindow
+	local DW_AnchorY = DamageWindow.AnchorY
+	local DW_MaxAnchorYOverlap = DamageWindow.MaxAnchorYOverlap
+
+	for i in pairs( DamageWindow.AttachedId ) do
+		if ( DW_AnchorY[ i ] > DW_MaxAnchorYOverlap ) then
+			return true
+		end
+	end
+	return false
+end
+
+
+function DamageWindow.UpdateTime()
+	if ( next( DamageWindow.AttachedId ) ~= nil ) then
+		local DamageWindow        = DamageWindow
+		local DW_AnchorY          = DamageWindow.AnchorY
+		local DW_AttachedId       = DamageWindow.AttachedId
+		local DW_OverheadAlive    = DamageWindow.OverheadAlive
+		local DW_OverheadMove     = DamageWindow.OverheadMove
+		local DW_OverheadMoveHalf = DamageWindow.OverheadMoveHalf
+
+		local _windowGetFontAlpha
+		local _windowSetFontAlpha
+		local WindowClearAnchors = WindowClearAnchors
+		local WindowAddAnchor = WindowAddAnchor
+		local DestroyWindow = DestroyWindow
+
+		local onWindowAlivedTop
+		if ( ClfDamageMod.EnableNumEffect ) then
+			_windowGetFontAlpha = WindowGetFontAlpha
+			_windowSetFontAlpha = WindowSetFontAlpha
+			onWindowAlivedTop = function( i, windowName, ancY )
+				local alpha = _windowGetFontAlpha( windowName )
+				alpha = alpha - ( 1.6 - alpha ) * 0.04
+				if ( alpha <= 0 ) then
+					DestroyWindow( windowName )
+					DW_AnchorY[ i ] = 0
+					DW_AttachedId[ i ] = nil
+				else
+					local labelName = windowName .. "Text"
+					ancY = ancY - DW_OverheadMoveHalf
+					_windowSetFontAlpha( windowName, alpha )
+					WindowClearAnchors( labelName )
+					WindowAddAnchor( labelName, "bottom", windowName ,"bottom", 0, ancY )
+					DW_AnchorY[ i ] = ancY
+				end
+			end
+		else
+			onWindowAlivedTop = function( i, windowName, ancY )
+				DestroyWindow( windowName )
+				DW_AnchorY[ i ] = 0
+				DW_AttachedId[ i ] = nil
+			end
+		end
+
+		local count = 0
+		for i in pairs( DW_AttachedId ) do
+			local ancY = DW_AnchorY[ i ] - DW_OverheadMove
+
+			local windowName = "DamageWindow" .. i
+			if ( ancY < DW_OverheadAlive ) then
+				onWindowAlivedTop( i, windowName, ancY )
+			else
+				local labelName = windowName .. "Text"
+				WindowClearAnchors( labelName )
+				WindowAddAnchor( labelName, "bottom", windowName ,"bottom", 0, ancY )
+				DW_AnchorY[ i ] = ancY
+			end
+			count = count + 1
+		end
+
+		--If count is zero reset the numWindow to 1
+		if ( count == 0 ) then
+			Damage.numWindow = 0
+		end
+	end
+end
 

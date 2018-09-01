@@ -132,6 +132,8 @@ function ClfTextParse.overheadTextOnUpdateName( mobileId )
 		return
 	end
 
+	WindowSetShowing( windowName, false )
+
 	if ( ClfUtil.filterMobileNameData( WindowData.MobileName[ mobileId ], mobileId, true ) ) then
 		ClfTextParse.overheadTextUpdateNameCheked( mobileId )
 		return

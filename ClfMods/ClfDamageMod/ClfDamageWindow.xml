@@ -3,14 +3,14 @@
 	<Windows>
 
 		<!-- ListRow Template: Default size -->
-		<Window name="ClfDamageListRowTemplate_default" movable="false">
+		<Window name="ClfDamageListRowTemplate_default" movable="false" savesettings="false">
 			<Size>
 				<AbsPoint x="560" y="29" />
 			</Size>
 
 			<Windows>
 
-				<FullResizeImage name="$parentBg" alpha="0.25" inherits="UO_Simple_Black_Background"  layer="background">
+				<FullResizeImage name="$parentBg" alpha="0.25" inherits="UO_Simple_Black_Background" layer="background">
 					<Anchors>
 						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent"/>
 						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="$parent"/>
@@ -118,7 +118,7 @@
 
 
 		<!-- ListRow Template: Middle size -->
-		<Window name="ClfDamageListRowTemplate_middle" movable="false">
+		<Window name="ClfDamageListRowTemplate_middle" movable="false" savesettings="false">
 			<Size>
 				<AbsPoint x="365" y="29" />
 			</Size>
@@ -199,7 +199,7 @@
 
 
 		<!-- CheckBox Template -->
-		<Window name="ClfDamageWindowCheckTemplate" layer="popup">
+		<Window name="ClfDamageWindowCheckTemplate" layer="popup" savesettings="false">
 			<Size>
 				<AbsPoint x="170" y="20"/>
 			</Size>
@@ -237,7 +237,7 @@
 
 
 		<!-- MAIN WINDOW -->
-		<Window name="ClfDamageWindow" movable="true">
+		<Window name="ClfDamageWindow" movable="true" savesettings="false">
 			<Size>
 				<AbsPoint x="560" y="410"/>
 			</Size>
@@ -401,6 +401,21 @@
 
 			</Windows>
 		</Window><!-- /ClfDamageWindow -->
+
+		<!-- Template: OverHead Damage Text -->
+		<Window name="ClfDamageNumTemplate" layer="default" handleinput="false" savesettings="false">
+			<Size>
+				<AbsPoint x="50" y="20" />
+			</Size>
+			<Windows>
+				<Label name="$parentText" sticky="false" font="UO_Overhead_Chat" maxchars="100" textalign="bottom" autoresize="false" wordwrap="true" handleinput ="false" linespacing="20" >
+					<Size>
+						<AbsPoint x="200" y="20" />
+					</Size>
+					<color r="255" g="255" b="255" a="255" />
+				</Label>
+			</Windows>
+		</Window>
 
 	</Windows>
 </Interface>

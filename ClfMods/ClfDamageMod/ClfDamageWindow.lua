@@ -362,6 +362,7 @@ end
 
 function ClfDamageWindow.updateList( forceUpdate, size )
 	local T = ClfDamageWindow
+	local ClfDamageMod = ClfDamageMod
 
 	if (
 			not forceUpdate
@@ -389,7 +390,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 
 	local pairs = pairs
 
-	function pairsByTime( t, f )
+	local pairsByTime = function( t, f )
 		local tmp = {}
 		for id, damObj in pairs( t ) do
 			tmp[ #tmp + 1 ] = { key = id, v = damObj }
@@ -443,6 +444,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 	local fontColorFarAway = T.fontColorFarAway
 	local listRowMax = T.LIST_ROW_MAX
 	local ListRowIds = T.ListRowIds
+	local DAY_IN_SECONDS = ClfUtil.DAY_IN_SECONDS
 
 	local mathMax = math.max
 	local mathMin = math.min
@@ -457,19 +459,29 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 	local LabelSetTextColor = LabelSetTextColor
 	local WindowClearAnchors = WindowClearAnchors
 	local WindowAddAnchor = WindowAddAnchor
-	local GetMobileData = Interface.GetMobileData
+	local RegisterWindowData = RegisterWindowData
 	local GetDistanceFromPlayer = GetDistanceFromPlayer
 	local FitTextToLabel = WindowUtils.FitTextToLabel
 	local HealthBarColor = WindowData.HealthBarColor
 	local createListRow = T.createListRow
 	local removeListRow = T.removeListRow
 
+	local WD_MobileStatus = WindowData.MobileStatus
+	local GetMobileData = function( id )
+		local mobileData = WD_MobileStatus[ id ]
+		if ( not mobileData ) then
+			RegisterWindowData( WD_MobileStatus.Type, id )
+			mobileData = WD_MobileStatus[ id ]
+		end
+		return mobileData
+	end
+
 	local listRowFunc
 
 	if ( "middle" == size ) then
 		listRowFunc = function( id, damObj, i )
 			local window = "ClfDamageListRow" .. id
-			local mobileData = GetMobileData( id, false )
+			local mobileData = GetMobileData( id )
 			local odd = i % 2
 			local color = colors[ odd + 1 ]
 			local disColor = color
@@ -485,8 +497,8 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 					ClfDamageMod.addDamageData( id, { isDead = isDead } )
 				end
 				if ( not isDead ) then
-					local dist = GetDistanceFromPlayer( id )
-					if ( not dist or dist < 0 ) then
+					local dist = GetDistanceFromPlayer( id ) or -1
+					if ( dist < 0 ) then
 						isFarAway = true
 					end
 				end
@@ -514,7 +526,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 			end
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
-			local sec = mathMin( ClfUtil.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then
@@ -559,10 +571,11 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 				disColor = visualStatecolors[ visualStateId ]
 			end
 
+			local r, g, b = color.r, color.g, color.b
 			LabelSetTextColor( window .. "Count",   disColor.r, disColor.g, disColor.b )
-			LabelSetTextColor( window .. "Name",    color.r, color.g, color.b )
-			LabelSetTextColor( window .. "Minutes", color.r, color.g, color.b )
-			LabelSetTextColor( window .. "Total",   color.r, color.g, color.b )
+			LabelSetTextColor( window .. "Name",    r, g, b )
+			LabelSetTextColor( window .. "Minutes", r, g, b )
+			LabelSetTextColor( window .. "Total",   r, g, b )
 
 			WindowClearAnchors( window )
 			local y = 29 * ( i - 1) + 33
@@ -572,7 +585,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 	else
 		listRowFunc = function( id, damObj, i )
 			local window = "ClfDamageListRow" .. id
-			local mobileData = GetMobileData( id, false )
+			local mobileData = GetMobileData( id )
 			local odd = i % 2
 			local color = colors[ odd + 1 ]
 			local disColor = color
@@ -592,8 +605,8 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 					ClfDamageMod.addDamageData( id, { isDead = isDead } )
 				end
 				if ( not isDead ) then
-					local dist = GetDistanceFromPlayer( id )
-					if ( not dist or dist < 0 ) then
+					local dist = GetDistanceFromPlayer( id ) or -1
+					if ( dist < 0 ) then
 						isFarAway = true
 					end
 				end
@@ -628,7 +641,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
 
-			local sec = mathMin( ClfUtil.DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then
@@ -691,13 +704,14 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 				disColor = visualStatecolors[ visualStateId ]
 			end
 
+			local r, g, b = color.r, color.g, color.b
 			LabelSetTextColor( window .. "Count",   disColor.r, disColor.g, disColor.b )
-			LabelSetTextColor( window .. "Name",    color.r, color.g, color.b )
+			LabelSetTextColor( window .. "Name",    r, g, b )
 			LabelSetTextColor( window .. "Health",  disColor.r, disColor.g, disColor.b )
-			LabelSetTextColor( window .. "Hit",     color.r, color.g, color.b )
-			LabelSetTextColor( window .. "Minutes", color.r, color.g, color.b )
-			LabelSetTextColor( window .. "Avg",     color.r, color.g, color.b )
-			LabelSetTextColor( window .. "Total",   color.r, color.g, color.b )
+			LabelSetTextColor( window .. "Hit",     r, g, b )
+			LabelSetTextColor( window .. "Minutes", r, g, b )
+			LabelSetTextColor( window .. "Avg",     r, g, b )
+			LabelSetTextColor( window .. "Total",   r, g, b )
 
 			WindowClearAnchors( window )
 			local y = 29 * ( i - 1) + 33
