@@ -1,0 +1,89 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- Template: Course Map Zoom buttons -->
+		<Window name="ClfTmapZoomBtnTemplate" savesettings="false">
+			<EventHandlers>
+				<EventHandler event="OnMouseWheel" function="ClfCourseMap.onMouseWheel" />
+			</EventHandlers>
+			<Windows>
+				<Button name="$parentZoomIn" inherits="UO_Default_Plus_Button" texturescale="1.0" layer="overlay">
+					<Size>
+						<AbsPoint x="23" y="23" />
+					</Size>
+					<Anchors>
+						<Anchor point="topright" relativePoint="topright" relativeTo="">
+							<AbsPoint x="-10" y="0" />
+						</Anchor>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfCourseMap.zoomBtnOnLButtonUp" />
+					</EventHandlers>
+				</Button>
+
+				<Button name="$parentZoomOut" inherits="UO_Default_Minus_Button" texturescale="1.0" layer="overlay">
+					<Size>
+						<AbsPoint x="23" y="23" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottom" relativePoint="top" relativeTo="$parentZoomIn">
+							<AbsPoint x="0" y="0" />
+						</Anchor>
+					</Anchors>
+					<EventHandlers>
+						<EventHandler event="OnLButtonUp" function="ClfCourseMap.zoomBtnOnLButtonUp" />
+					</EventHandlers>
+				</Button>
+
+				<Button name="$parentMapName" maxchars="255" wordwrap="false" font="Classic_std_18" textalign="leftcenter" backgroundtexture="">
+					<Size>
+						<AbsPoint x="460" y="40" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="bottomleft" relativeTo="">
+							<AbsPoint x="15" y="0" />
+						</Anchor>
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="">
+							<AbsPoint x="-5" y="0" />
+						</Anchor>
+					</Anchors>
+					<TextColors>
+						<Normal             r="55"  g="49"  b="34"  />
+						<NormalHighlit      r="10"  g="80"  b="140" />
+						<Pressed            r="10"  g="80"  b="140" />
+						<PressedHighlit     r="10"  g="120" b="180" />
+						<Disabled           r="119" g="111" b="98"  />
+						<DisabledPressed    r="119" g="111" b="98"  />
+					</TextColors>
+					<EventHandlers>
+						<EventHandler event="OnMouseOver" function="ClfCourseMap.onMapNameOver"/>
+						<EventHandler event="OnMouseOverEnd" function="ClfCourseMap.onMapNameOverEnd"/>
+						<EventHandler event="OnLButtonUp" function="ClfCourseMap.onMapNameOnBtnLUp" />
+						<EventHandler event="OnRButtonUp" function="ClfCourseMap.onMapNameOnBtnRUp" />
+					</EventHandlers>
+				</Button>
+			</Windows>
+		</Window>
+		<!-- /ClfTmapZoom -->
+
+
+		<!-- Template: Course Map Point Icon -->
+		<DynamicImage name="ClfMapPointImage" texture="ClfTexMapX" savesettings="false">
+			<Size>
+				<AbsPoint x="20" y="20"/>
+			</Size>
+			<Anchors>
+				<Anchor point="center" relativePoint="center" relativeTo="">
+					<AbsPoint x="0" y="0" />
+				</Anchor>
+			</Anchors>
+			<TexCoords x="0" y="0"/>
+			<TexDims x="40" y="40" />
+			<EventHandlers>
+				<EventHandler event="OnLButtonDown" function="CourseMapWindow.MapPoint_OnLButtonDown" />
+			</EventHandlers>
+		</DynamicImage>
+		<!-- /ClfMapPointImage -->
+
+	</Windows>
+</Interface>

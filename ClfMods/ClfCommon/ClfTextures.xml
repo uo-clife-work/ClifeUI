@@ -3,6 +3,7 @@
 	<Assets>
 		<!-- ClifeUI 追加テクスチャ -->
 		<Texture name="ClfTexMonotoneGradient" file="Textures/shade.dds" />
+		<Texture name="ClfTexMapX" file="Textures/mapX.dds" />
 
 	</Assets>
 </Interface>
