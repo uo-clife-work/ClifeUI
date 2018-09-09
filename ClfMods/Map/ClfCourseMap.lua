@@ -1,5 +1,4 @@
 
---LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfCourseMap", "ClfCourseMap.xml", "ClfCourseMap.xml" )
 
 ClfCourseMap = {}
 

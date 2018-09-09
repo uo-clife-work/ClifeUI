@@ -10,7 +10,8 @@
 		</Dependencies>
 
 		<Files>
-			<File name="ClfCourseMap/ClfCourseMap.lua" />
+			<File name="Map/ClfMapCommon.lua" />
+			<File name="Map/ClfCourseMap.lua" />
 			<File name="ClfSubModules.lua" />
 		</Files>
 
