@@ -7,15 +7,16 @@ tId,key,subkey,superSlayer,opposite,note,@CRLF
 1060473,slayer,reptile,1,1060458,特効: 爬虫類,@
 1060479,slayer,undead,1,1060472,特効: アンデッド族,@
 1070855,slayer,fey,1,1060460,特効: 妖精族,@
-1072504,slayer,bear,1,,特効: ベア,@
-1072505,slayer,mage,1,,特効: ネズミ,@
-1072506,slayer,bat,1,,特効: コウモリ,@
-1072508,slayer,beetle,1,,特効: ビートル,@
-1072509,slayer,bird,1,,特効: バード,@
-1072510,slayer,ice,1,,特効: アイス,@
-1072511,slayer,flame,1,,特効: フレイム,@
-1072512,slayer,bovine,1,,特効: ウシ類,@
-1075462,slayer,wolf,1,,特効: ウルフ,@
+1072504,slayer,bear,1,1060479,特効: ベア,@
+1072505,slayer,vermin,1,1060479,特効: ネズミ,@
+1072506,slayer,bat,1,1060479,特効: コウモリ,@
+1072507,slayer,mage,1,1060479,特効: メイジ,@
+1072508,slayer,beetle,1,1060479,特効: ビートル,@
+1072509,slayer,bird,1,1060479,特効: バード,@
+1072510,slayer,ice,1,1060479,特効: アイス,@
+1072511,slayer,flame,1,1060479,特効: フレイム,@
+1072512,slayer,bovine,1,1060479,特効: ウシ類,@
+1075462,slayer,wolf,1,1060479,特効: ウルフ,@
 1156126,slayer,eodon,1,,イオドーン特効,@
 1156345,slayer,dinosaur,1,1156346,ディノサウルス特効,@
 1156346,slayer,myrmidex,1,,ミュルミデックス特効,@
