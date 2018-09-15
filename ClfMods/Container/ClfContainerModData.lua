@@ -398,6 +398,10 @@ local CONST_DATA = {
 				key = "dci", priority = 17, hue = nil,
 				minVal =   15, useRawText = nil, prefix = "DCI:", suffix = "%", doBreak = nil, color = nil,
 			},
+			{ 	-- マナ回復
+				key = "manaRegene", priority = 5, hue = nil,
+				minVal =   4, useRawText = nil, prefix = "MnR:", suffix =  "", doBreak = nil, color = nil,
+			},
 		},
 
 		Equip = {	-- その他の装備品の時に判定するプロパティ
@@ -416,6 +420,10 @@ local CONST_DATA = {
 			{ 	-- 回避
 				key = "dci", priority = 17, hue = nil,
 				minVal =   4, useRawText = nil, prefix = "DCI:", suffix = "%", doBreak = nil, color = nil,
+			},
+			{ 	-- マナ回復
+				key = "manaRegene", priority = 5, hue = nil,
+				minVal =   4, useRawText = nil, prefix = "MnR:", suffix =  "", doBreak = nil, color = nil,
 			},
 		},
 
