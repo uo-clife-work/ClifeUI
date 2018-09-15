@@ -10,8 +10,10 @@
 			<File name="ClfTexts.lua" />
 			<File name="ClfSettings.lua" />
 			<File name="ClfUtility.lua" />
+			<File name="Data/ClfDATA.lua" />
 			<File name="ClfRefActionsWindow.lua" />
 			<File name="ClfRefactor.lua" />
+			<File name="ClfSearchWindow.lua" />
 		</Files>
 
 		<OnInitialize>

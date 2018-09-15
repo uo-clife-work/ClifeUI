@@ -1,0 +1,7 @@
+tId,key,note,@CRLF
+1060403,damageTypePh,物理ダメージ,@
+1060404,damageTypeCo,冷気ダメージ,@
+1060405,damageTypeFi,炎ダメージ,@
+1060406,damageTypePo,毒ダメージ,@
+1060407,damageTypeEn,エネルギーダメージ,@
+1072846,damageTypeCa,カオスダメージ,@

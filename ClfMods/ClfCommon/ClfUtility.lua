@@ -218,6 +218,26 @@ function ClfUtil.explode( div, str, usePattern, numStrToNum )
 end
 
 
+-- php の empty と同じ様な感じでvalを判定
+function ClfUtil.isEmpty( val )
+	local notVal = not val
+	if (
+			notVal == true
+			or val == 0
+			or val == ""
+			or val == L""
+			or val == "0"
+			or val == L"0"
+		) then
+		return true
+	end
+	if ( type( val ) == "table" ) then
+		return ( next( val ) == nil )
+	end
+	return notVal
+end
+
+
 -- rgb値の連想配列から明度を求める
 function ClfUtil.rgbIMax( rgb )
 	if ( type( rgb ) ~= "table" ) then
@@ -283,6 +303,31 @@ function ClfUtil.getTimeArrByTimestamp( timestamp )
 end
 
 
+function ClfUtil.getClockString( sep, dSep, tSep, force )
+	local Clock = Interface.Clock
+	local Timestamp, YYYY, MM, DD, h, m, s
+	local isEmpty = ClfUtil.isEmpty
+	if ( not force and Clock and isEmpty( Clock.Timestamp ) == false and isEmpty( Clock.YYYY ) == false ) then
+		YYYY, MM, DD, h, m, s = Clock.YYYY, Clock.MM, Clock.DD, Clock.h, Clock.m, Clock.s
+	else
+		Timestamp, YYYY, MM, DD, h, m, s = GetCurrentDateTime()
+		YYYY = 1900 + YYYY
+		MM = MM + 1
+	end
+
+	local tostring = tostring
+	local format = string.format
+
+	sep = sep and tostring( sep ) or "-"
+	dSep = dSep and tostring( dSep ) or ""
+	tSep = tSep and tostring( tSep ) or ""
+
+	local clockstring = YYYY .. dSep .. format( "%02d", MM ) .. dSep .. format( "%02d", DD ) .. sep .. format( "%02d", h ) .. tSep .. format( "%02d", m ) .. tSep .. format( "%02d", s )
+
+	return clockstring
+end
+
+
 -- str文字列をlogディレクトリ内にテキストファイルとして出力する
 function ClfUtil.exportStr( str, fileName, suffix, dir, silent )
 
@@ -297,18 +342,11 @@ function ClfUtil.exportStr( str, fileName, suffix, dir, silent )
 	suffix = suffix and tostring( suffix ) or ""
 	dir = dir and tostring( dir ) .. "/" or ClfUtil.LOG_EXPORT_DIR
 
-	local format = string.format
-
 	if ( type( str ) == "string" ) then
 		str = StringToWString( str )
 	end
 
-	local Clock = Interface.Clock
-
-	local clockstring = Clock.YYYY .. format( "%02d", Clock.MM ) .. format( "%02d", Clock.DD ) .. "-" .. format( "%02d", Clock.h ) .. format( "%02d", Clock.m ) .. format( "%02d", Clock.s )
-
-	local filePath =  "logs/" .. dir ..fileName .. "_[" .. clockstring .. "]" .. suffix .. ".txt"
-
+	local filePath =  "logs/" .. dir ..fileName .. "_[" .. ClfUtil.getClockString() .. "]" .. suffix .. ".txt"
 	local logName = "clfExportStr"
 
 	TextLogCreate( logName, 1 )
@@ -635,4 +673,459 @@ end
 
 
 
+-- テキストファイルを読み込み（BOMがあればBOMを削除して）テキストを返す
+function ClfUtil.loadTextFile( filePath )
+	if ( not filePath ) then
+		return
+	end
+	local txt = LoadTextFile( filePath )
+	if ( not txt or type( txt ) ~= "wstring" ) then
+		-- txtが取得出来なかった
+		Debug.PrintToDebugConsole( L"ERROR: " .. towstring( filePath ) .. L"  can't load" )
+		return
+	end
+	if ( txt == L"" ) then
+		Debug.PrintToDebugConsole( L"ERROR: " .. towstring( filePath ) .. L"  is Empty" )
+		return
+	end
+
+	local fe
+	local wstring_sub = wstring.sub
+
+	-- BOMのチェック。BOM付きなら取り除く
+	local bom_utf8 = L"\239\187\191"
+	--	local bom_utf16le = L"\255\254"
+	if ( wstring_sub( txt, 1, 3 ) == bom_utf8 ) then
+		Debug.PrintToDebugConsole( L"TEXT has UTF-8 BOM: " .. towstring( filePath ) )
+		txt = wstring_sub( txt, 4 )
+		fe = 'utf-8'
+--	elseif ( wstring_sub( txt, 1, 2 ) == bom_utf16le ) then
+--		-- BOMのチェックは可能だが、テキストを正常に取得出来ない様なのでヤメ
+--		Debug.PrintToDebugConsole( L"TEXT has UTF-16LE BOM: " .. towstring( filePath ) )
+--		txt = wstring_sub( txt, 3 )
+--		fe = 'utf-16-le'
+	end
+
+	return txt, fe
+end
+
+
+-- CSVの読み込み
+-- ** 注意：csvの標準書式とは若干異なり、以下の制限がある。
+-- *  行頭、行末、カンマ前後、の空白文字は無視する（空白文字は無くても良い）
+-- *  ダブルコーテーション内であっても値の中で改行、半角カンマは許可しない（正常に展開出来ない）
+-- *  行末は1バイト文字で終了する事（2バイト文字+改行だと、正常に展開出来ない場合がある）
+-- *  エンコードはutf-8のみ（BOMの有無は問わないが、無い方が良いかも）。
+-- *  改行コードはCRLFのみ。
+function ClfUtil.loadCSVtoArray( filePath )
+
+	--	local csv = LoadTextFile( filePath )
+	local csv = ClfUtil.loadTextFile( filePath )
+	if ( not csv ) then
+		-- csvが取得出来なかった
+		--		Debug.PrintToChat( L"ERROR: " .. towstring( filePath ) .. L" - can't load" )
+		return
+	end
+
+	local tbl = {}
+
+	local type = type
+	local gsub = wstring.gsub
+	local explode = ClfUtil.explode
+
+	--	 -- 空白行を削除
+	--	csv = gsub( csv, L"^%s*\r\n", L"" )
+	-- 一旦、各行毎の配列を作る
+	local csvLines = explode( L"\r\n", csv )
+	local diviser = L"[\"']?%s*,%s*[\"']?"
+	for i = 1, #csvLines do
+		local line = csvLines[ i ]
+		-- 行頭の空白（およびダブルコーテーション）を削除
+		line = gsub( line, L"^%s*[\"]?", L"" )
+		if ( type( line ) == "wstring" and line ~= L"" ) then
+			-- 行末の空白（およびダブルコーテーション）を削除
+			--			line = gsub( line, L"^%s*[\"']?", L"" )
+			line = gsub( line, L"[\"']?%s*$", L"" )
+			-- 行を diviser で分割した配列にする
+			tbl[ #tbl + 1 ] =  explode( diviser, line, true, true )
+		end
+	end
+
+	return tbl
+end
+
+
+
+--[[
+* CSVの読み込み： 各行の1列目の値をキーにしたテーブルを返す。子のテーブル内の各値にはcsv1行目の各キーを割り当てる
+* 注意：csvの標準書式とは若干異なり、以下の制限がある。
+*   行頭、行末、カンマ前後、の空白文字は無視する （空白文字は無くても良い）
+*   ダブルコーテーション内であっても値の中で改行、半角カンマは許可しない （正常に展開出来ない）
+*   行末は1バイト文字で終了する事 （2バイト文字+改行だと、正常に展開出来ない場合がある）
+*   エンコードは UTF-8のみ（BOMの有無は問わないが、無い方が良いかも）。
+*   改行コードはCRLFのみ。
+*
+* @param  {string} filePath              読み込むファイルへのパス
+* @param  {array}  [requireKeys = nil]   オプション - csvから取得するデータのキーを列挙した配列。 1列目のキーは指定しなくてもOK。
+*                                        これを指定すると、指定したキーに対応した値のみテーブルにセットする。
+* @param  {table}  [opt         = {}]    オプション - 下記の各オプションを設定するテーブル
+*                  e.g. opt = {
+*                     toStrKeys   = { "keyName1", ... },
+*                     numOnlyKeys = { "keyName2", ... },
+*                     nilOrTrueKeys = { "keyName3", ... },
+*                  }
+*            {array}  [opt.toStrKeys   = nil]   取得した値を string型に変換するキーを列挙した配列
+*            {array}  [opt.numOnlyKeys = nil]   number型のみ許可するキーを列挙した配列。
+*                                               指定したキーの値がカラ文字や数字以外の時はnilにする。（0にはしない）
+*            {array}  [opt.nilOrTrueKeys = nil]
+*
+* @return {table|nil}  csvからデータを取得出来た時は下記の様なテーブルが返る。 有効なデータが無いor正常に取得出来なかった時は nil
+*            e.g. ret = {
+*               [ col2_row1 ] = { csvhead_row2 = c2_r2, csvhead_row3 = c2_r3, ... },
+*               [ col3_row1 ] = { csvhead_row2 = c3_r2, csvhead_row3 = c3_r3, ...  },
+*               ...
+*            }
+]]
+function ClfUtil.loadCSVtoTable( filePath, requireKeys, opt )
+
+	--	local csv = LoadTextFile( filePath )
+	local csv = ClfUtil.loadTextFile( filePath )
+	if ( not csv ) then
+		-- csvが取得出来なかった
+		--		Debug.PrintToChat( L"ERROR: " .. towstring( filePath ) .. L" - can't load" )
+		return
+	end
+
+	local type = type
+	local gsub = wstring.gsub
+	local explode = ClfUtil.explode
+
+	--	-- 空白行を削除
+	--	csv = gsub( csv, L"^%s*\r\n", L"" )
+	-- 一旦、各行毎の配列を作る
+	local csvLines = explode( L"\r\n", csv )
+	-- 各行の文字列を区切るパターン
+	local diviser = L"[\"]?%s*,%s*[\"]?"
+
+	local tostring = tostring
+	local tonumber = tonumber
+
+	-- データ用デーブルに必要なキーが指定されていれば判定用のテーブルを作る
+	local reqKeys
+	if ( type( requireKeys ) == "table" and #requireKeys ~= 0 ) then
+		reqKeys = {}
+		for i = 1, #requireKeys do
+			reqKeys[ requireKeys[ i ] ] = true
+		end
+	end
+
+	-- ヘッダー行からキーの取得開始
+	local csvHeader		-- ヘッダ行内の各列名を保持する（各行のデータ用テーブルのキーとして使用する）
+	local headerCol = 1	-- ヘッダ行のインデックスを保持する: 通常なら1のままになるはず（先頭行がカラのCSVでもデータを取得出来る様にしている）
+	local headerNum = 0	-- ヘッダ行の列数を保持する
+	for i = headerCol, #csvLines do
+		local line = csvLines[ i ]
+		if ( line == L"" ) then
+			continue
+		end
+		-- 行頭の空白（およびダブルコーテーション）を削除
+		line = gsub( line, L"^%s*[\"]?", L"" )
+		if ( type( line ) ~= "wstring" or line == L"" ) then
+			continue
+		end
+		-- 行末の空白（およびダブルコーテーション）を削除
+		line = gsub( line, L"[\"]?%s*$", L"" )
+		-- 行を diviserで分割した配列にする
+		local arr = explode( diviser, line, true, false )
+		headerNum = arr and #arr or 0
+		if ( headerNum > 1 ) then
+			csvHeader = arr
+			for j = 1, #csvHeader do
+				-- 各キーは"string"型にする
+				local keyName = tostring( csvHeader[ j ] )
+				if ( not keyName or keyName == "" ) then
+					-- キー名がカラならfalseとして保持
+					keyName = false
+				end
+				if ( j ~= 1 and reqKeys and not reqKeys[ keyName ] ) then
+					-- 必要なキーが指定されていれば、それ以外のキーはfalseとして保持
+					-- 1列目は返却するテーブルのキーにするので必ず登録（falseにしない）
+					keyName = false
+				end
+				csvHeader[ j ] = keyName
+			end
+			headerCol = i
+			break
+		end
+	end
+
+	if ( not csvHeader or headerNum < 2 or #csvLines <= headerCol ) then
+		-- キーとなる配列が取得出来なかった or キーが1個以下だった（データのテーブル用キーが無い） or ヘッダ行のみのcsvだった
+		Debug.PrintToChat( L"ERROR: " .. towstring( filePath ) .. L" - empty data" )
+		return
+	end
+
+	opt = ( type( opt ) == "table" ) and opt or {}
+	local toStrKeys   = opt.toStrKeys
+	local numOnlyKeys = opt.numOnlyKeys
+	local nilOrTrueKeys = opt.nilOrTrueKeys
+
+	-- 返却するテーブル
+	local retTbl = {}
+
+	-- string型にする値のキー判定用テーブルを作る
+	local stringDataKeys = {}
+	if ( type( toStrKeys ) == "table" ) then
+		for i = 1, #toStrKeys do
+			stringDataKeys[ toStrKeys[ i ] ] = true
+		end
+	end
+
+	-- number型以外は許可しない値のキー判定用テーブルを作る
+	local numberDataKeys = {}
+	if ( type( numOnlyKeys ) == "table" ) then
+		for i = 1, #numOnlyKeys do
+			numberDataKeys[ numOnlyKeys[ i ] ] = true
+		end
+	end
+
+	-- nilかtrueにする値のキー判定用テーブルを作る
+	local boolDataKeys = {}
+	if ( type( nilOrTrueKeys ) == "table" ) then
+		for i = 1, #nilOrTrueKeys do
+			boolDataKeys[ nilOrTrueKeys[ i ] ] = true
+		end
+	end
+
+	local next = next
+
+	-- データをnumber型に変換するメソッド
+	local convToNum = function( data )
+		if ( type( data ) == "number" ) then
+			return data
+		end
+		if ( not data or data == L"" or data == "" ) then
+			-- 値がカラならnil
+			return nil
+		end
+		-- wstringをtonumberすると、数字文字列以外でもnilにならない事が多いのでstring型にしてから
+		return tonumber( tostring( data ) )
+	end
+
+	-- データをtrueに変換するメソッド（falseの場合はnil）
+	local convToBool = function( data )
+		local notData = not data
+		if ( notData or data == L"" or data == "" or data == 0 or data == L"0" or data == "0" or data == 0 ) then
+			-- 値がカラならnil
+			return nil
+		end
+		return not notData
+	end
+
+	local headerKey1 = csvHeader[1]
+	-- データのキーを変換するメソッド
+	local sanitizeDataKey
+	if ( numberDataKeys[ headerKey1 ] ) then
+		sanitizeDataKey = function( k )
+			return convToNum( k )
+		end
+	elseif ( stringDataKeys[ headerKey1 ] ) then
+		sanitizeDataKey = function( k )
+			k = k and tostring( k )
+			return k
+		end
+	else
+		sanitizeDataKey = function( k )
+			return k
+		end
+	end
+
+	-- 各行のデータ取得開始
+	for i = headerCol + 1, #csvLines do
+		local line = csvLines[ i ]
+		if ( line == L"" ) then
+			continue
+		end
+		-- 行頭の空白（およびダブルコーテーション）を削除
+		line = gsub( line, L"^%s*[\"]?", L"" )
+		if ( type( line ) ~= "wstring" or line == L"" ) then
+			-- wstring.gsubの結果文字列がカラになると（？）string型になってしまうようなので、タイプチェックもする
+			continue
+		end
+		-- 行末の空白（およびダブルコーテーション）を削除
+		line = gsub( line, L"[\"]?%s*$", L"" )
+		-- 行を diviser で分割した配列にする
+		local arr = explode( diviser, line, true, true )
+		if ( #arr <= 1 ) then
+			continue
+		end
+
+		-- データのキーを取得： 行の1列目
+		local key = sanitizeDataKey( arr[ 1 ] )
+		if ( not key or key == "" or key == L"" ) then
+			continue
+		end
+
+		-- 行のデータ用テーブルを生成： 1列目はキーになるので2列目から
+		local tbl = {}
+		for idx = 2, headerNum do
+			local cKey = csvHeader[ idx ]
+			if ( not cKey ) then
+				continue
+			end
+
+			local data = arr[ idx ]
+			if ( data ~= nil ) then
+				if ( boolDataKeys[ cKey ] ) then
+					data = convToBool( data )
+				elseif ( numberDataKeys[ cKey ] ) then
+					data = convToNum( data )
+				elseif ( stringDataKeys[ cKey ] ) then
+					data = tostring( data )
+				end
+
+				tbl[ cKey ] = data
+			end
+		end
+
+		if ( not next( tbl ) ) then
+			-- データ用テーブルが空： 何もしないでループ継続
+			continue
+		end
+
+		-- DEBUG用
+--		tbl.csvRow = i
+
+		-- 返却用テーブルにデータを保持
+		retTbl[ key ] = tbl
+	end
+
+	if ( not next( retTbl ) ) then
+		-- 返却用テーブルがカラ： nil を返す
+		return nil
+	end
+	return retTbl
+end
+
+
+local ContextMenuItems = {}
+
+local CleanContextMenuDelta = 0
+
+local function CleanContextMenuItems()
+	local now = ClfCommon.TimeSinceLogin
+	if ( CleanContextMenuDelta >= now ) then
+		return
+	end
+
+	local ContextMenuItems = ContextMenuItems
+	for objectId, data in pairs( ContextMenuItems ) do
+		local time = data and data.time or 0
+		if ( time < now ) then
+			ContextMenuItems[ objectId ] = nil
+		end
+	end
+	CleanContextMenuDelta = now + 60
+end
+
+
+function ClfUtil.requestContextMenuItemData( objectId, callback )
+	if ( not objectId or objectId == 0 ) then
+		return
+	end
+
+	callback = ( type( callback ) == "function" ) and callback or nil
+
+	local ret
+	local now = ClfCommon.TimeSinceLogin
+	local cache = ContextMenuItems[ objectId ]
+	if ( cache ) then
+		if ( cache.time >= now and cache.menuItems ) then
+			ret = cache.menuItems
+		else
+			ContextMenuItems[ objectId ] = nil
+		end
+	end
+
+	if ( not ret ) then
+		if ( WindowData.ContextMenu ) then
+			WindowData.ContextMenu.objectId = nil
+			WindowData.ContextMenu.menuItems = nil
+			WindowData.ContextMenu.hideMenu = 1
+		end
+
+		-- // MEMO: RequestContextMenu は activeWindowが無い時に呼び出すと（動作はするが）エラーが出る
+		-- RequestContextMenu( objectId, false )
+		Interface.org_RequestContextMenu( objectId )
+
+		local menuItems = ClfUtil._getContextItems( objectId )
+		if ( not menuItems or next( menuItems ) == nil ) then
+			ClfCommon.addCheckListener( "ContextMenuItemCheck" .. objectId, {
+					check  = function()
+						local WD_ContextMenu = WindowData.ContextMenu
+						if ( WD_ContextMenu and WD_ContextMenu.menuItems and #WD_ContextMenu.menuItems ~= 0 ) then
+							local menuItems = ClfUtil._getContextItems( objectId )
+							return ( menuItems and #menuItems > 0 )
+						end
+						return false
+					end,
+					done = function()
+						if ( callback ) then
+							callback( ClfUtil._getContextItems( objectId ), objectId )
+						end
+					end,
+					fail = function()
+						if ( callback ) then
+							callback( false, objectId )
+						end
+					end,
+					limit  = ClfCommon.TimeSinceLogin + 1,
+					remove = true,
+				} )
+		else
+			ret = menuItems
+		end
+	end
+
+	if ( ret and callback ) then
+		callback( ret, objectId )
+	end
+
+	CleanContextMenuItems()
+	return ret
+end
+
+
+
+function ClfUtil._getContextItems( objectId )
+	local cache = ContextMenuItems[ objectId ]
+	local now = ClfCommon.TimeSinceLogin
+	if ( cache ) then
+		if ( cache.time >= now and cache.menuItems ) then
+			return cache.menuItems
+		else
+			ContextMenuItems[ objectId ] = nil
+		end
+	end
+
+	local ret
+	local data = WindowData.ContextMenu or {}
+	local menuItems = data.menuItems
+	if ( menuItems and data.objectId == objectId and  #menuItems > 0 ) then
+		if ( menuItems[1].returnCode or menuItems[1].tid ) then
+			ret = ClfUtil.mergeTable( {}, menuItems )
+		end
+		ContextMenuItems[ objectId ] = {
+			menuItems = ret,
+			time = now + 30,
+		}
+
+		ContextMenu.Hide()
+	end
+	return ret
+end
+
+
+
 -- EOF
+

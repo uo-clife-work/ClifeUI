@@ -1,0 +1,42 @@
+tId,key,note,@CRLF
+1060434,reagentCost,秘薬コスト,@
+1060433,manaCost,マナコスト,@
+1060413,fc,ファストキャスト,@
+1060412,cr,キャストリカバリ,@
+1060483,spellDamage,魔法ダメージ,@
+1060411,enhancePotions,ポーション強化,@
+1060486,ssi,速度増加,@
+1060402,damageInc,武器ダメージ増加,@
+1060415,hci,命中,@
+1060408,dci,回避,@
+1060427,manaLeach,マナリーチ,@
+1060422,lifeLeach,ライフリーチ,@
+1060430,staminaLeach,スタミナリーチ,@
+1113700,staminaDown,スタミナダウン,@
+1113699,manaDown,マナダウン,@
+1060425,hld,回避低下,@
+1060424,hla,命中低下,@
+1060438,mageWeapon,魔道武器,@
+1060482,spellChanneling,詠唱可,@
+1060485,str,STR,@
+1060431,hitPoint,ヒットポイント,@
+1060444,hitPointRegene,ヒットポイント回復,@
+1060409,dex,DEX,@
+1060484,stamina,スタミナ,@
+1060443,staminaRegene,スタミナ回復,@
+1060432,int,INT,@
+1060439,mana,マナ,@
+1060440,manaRegene,マナ回復,@
+1060436,luck,幸運,@
+1151780,durabilityInc,耐久性+,@
+1060441,nightSight,Night Sight,@
+1060442,reflectPhysicalDamage,物理ダメージ反射,@
+1113696,castingFocus,詠唱集中,@
+1113630,soulCharge,マナ変換,@
+1060435,lowerRequirements,装備条件軽減,@
+1113598,damageEater,ヒットポイント変換,@
+1113597,physicalEater,ヒットポイント変換(物理),@
+1113596,energyEater,ヒットポイント変換(エネルギー),@
+1112364,reactiveParalyze,麻痺カウンター,@
+1072394,craftBonus,タリスマン： 成功ボーナス,@
+1072395,craftBonusHq,タリスマン： 高品質ボーナス,@

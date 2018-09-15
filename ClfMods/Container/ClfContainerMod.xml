@@ -1,0 +1,195 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!-- Default Grid Template: ラベルのフォント・位置・サイズを調整した物 -->
+		<Button name="ClfGridViewSocketTemplate" inherits="GridViewSocketBaseTemplate" draganddrop="true">
+			<Windows>
+				<DynamicImage name="$parentIcon" texturescale="1.25" handleinput="false" layer="default">
+					<Size>
+						<AbsPoint x="48" y="48" />
+					</Size>
+					<Anchors>
+						<Anchor point="center" relativePoint="center" relativeTo="">
+							<AbsPoint x="0" y="0" />
+						</Anchor>
+					</Anchors>
+				</DynamicImage>
+				<DynamicImage name="$parentIconMulti" texturescale="1.125" handleinput="false" layer="secondary">
+					<Size>
+						<AbsPoint x="48" y="48" />
+					</Size>
+					<Anchors>
+						<Anchor point="center" relativePoint="center" relativeTo="$parentIcon">
+							<AbsPoint x="6" y="6" />
+						</Anchor>
+					</Anchors>
+				</DynamicImage>
+				<Label name="$parentQuantity" font="MyriadPro_13" maxchars="8" textalign="left" autoresize="false" wordwrap="false" textAutoFitMinScale="0.923" layer="popup" handleinput="false" warnOnTextCropped="false">
+					<Size>
+						<AbsPoint x="57" y="13" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="bottomleft">
+							<AbsPoint x="2" y="-7" />
+						</Anchor>
+					</Anchors>
+					<Color r="255" g="255" b="255" a="255" />
+				</Label>
+			</Windows>
+			<TexCoords>
+				<Normal         texture="hud_image" x="0" y="754" />
+				<NormalHighlit  texture="hud_image" x="50" y="754" />
+				<Disabled       texture="hud_image" x="0" y="754" />
+				<Pressed        texture="hud_image" x="0" y="754" />
+				<PressedHighlit texture="hud_image" x="50" y="754" />
+			</TexCoords>
+			<EventHandlers>
+				<EventHandler event="OnLButtonDown" function="ContainerWindow.OnItemClicked" />
+				<EventHandler event="OnLButtonDblClk" function="ContainerWindow.OnItemDblClicked" />
+				<EventHandler event="OnLButtonUp" function="ContainerWindow.OnItemRelease" />
+				<EventHandler event="OnMouseOver" function="ContainerWindow.ItemMouseOver" />
+				<EventHandler event="OnMouseOverEnd" function="ItemProperties.ClearMouseOverItem" />
+				<EventHandler event="OnRButtonDown" function="ContainerWindow.OnItemGet" />
+				<EventHandler event="OnRButtonUp" function="ContainerWindow.OnItemRButtonUp" />
+			</EventHandlers>
+		</Button><!-- /ClfGridViewSocketTemplate -->
+
+		<!-- Bright Background Grid Template: ラベルのフォント・位置・サイズを調整した物 -->
+		<Button name="ClfColoredGridViewSocketTemplate" inherits="ClfGridViewSocketTemplate" draganddrop="true">
+			<Size>
+				<AbsPoint x="54" y="54" />
+			</Size>
+			<TexCoords>
+				<Normal         texture="hud_image" x="412" y="971" />
+				<NormalHighlit  texture="hud_image" x="462" y="971" />
+				<Disabled       texture="hud_image" x="412" y="971" />
+				<Pressed        texture="hud_image" x="412" y="971" />
+				<PressedHighlit texture="hud_image" x="462" y="971" />
+			</TexCoords>
+		</Button><!-- /ClfColoredGridViewSocketTemplate -->
+
+		<!-- not EnableContainerGrid Template: ラベルのフォント・位置・サイズを調整した物 -->
+		<Button name="ClfClearGridViewSocketTemplate" inherits="ClfGridViewSocketTemplate" draganddrop="true">
+			<TexCoords>
+				<Normal         texture="" x="0"  y="0" />
+				<NormalHighlit  texture="" x="0"  y="0" />
+				<Disabled       texture="" x="0"  y="0" />
+				<Pressed        texture="" x="0"  y="0" />
+				<PressedHighlit texture="" x="0"  y="0" />
+			</TexCoords>
+		</Button><!-- /ClfClearGridViewSocketTemplate -->
+
+		<!-- ClifeUI White Grid Template -->
+		<Button name="ClfWhiteGridViewSocketTemplate" inherits="GridViewSocketBaseTemplate" texturescale="1" draganddrop="true">
+			<Windows>
+				<DynamicImage name="$parentIcon" texturescale="1.25" handleinput="false" layer="default">
+					<Size>
+						<AbsPoint x="48" y="48" />
+					</Size>
+					<Anchors>
+						<Anchor point="center" relativePoint="center" relativeTo="">
+							<AbsPoint x="0" y="0" />
+						</Anchor>
+					</Anchors>
+				</DynamicImage>
+				<DynamicImage name="$parentIconMulti" texturescale="1.125" handleinput="false" layer="secondary">
+					<Size>
+						<AbsPoint x="48" y="48" />
+					</Size>
+					<Anchors>
+						<Anchor point="center" relativePoint="center" relativeTo="$parentIcon">
+							<AbsPoint x="6" y="6" />
+						</Anchor>
+					</Anchors>
+				</DynamicImage>
+				<Label name="$parentQuantity" font="MyriadPro_13" maxchars="8" textalign="left" autoresize="false" wordwrap="false" textAutoFitMinScale="0.923" layer="popup" handleinput="false" warnOnTextCropped="false">
+					<Size>
+						<AbsPoint x="57" y="13" />
+					</Size>
+					<Anchors>
+						<Anchor point="bottomleft" relativePoint="bottomleft">
+							<AbsPoint x="2" y="-7" />
+						</Anchor>
+					</Anchors>
+					<Color r="0" g="15" b="70" a="255" />
+				</Label>
+			</Windows>
+			<TexCoords>
+				<Normal         texture="ClfTexContainerGridWh" x="0"  y="0" />
+				<NormalHighlit  texture="ClfTexContainerGridWh" x="56" y="0" />
+				<Disabled       texture="ClfTexContainerGridWh" x="0"  y="0" />
+				<Pressed        texture="ClfTexContainerGridWh" x="0"  y="0" />
+				<PressedHighlit texture="ClfTexContainerGridWh" x="56" y="56" />
+			</TexCoords>
+			<EventHandlers>
+				<EventHandler event="OnLButtonDown" function="ContainerWindow.OnItemClicked" />
+				<EventHandler event="OnLButtonDblClk" function="ContainerWindow.OnItemDblClicked" />
+				<EventHandler event="OnLButtonUp" function="ContainerWindow.OnItemRelease" />
+				<EventHandler event="OnMouseOver" function="ContainerWindow.ItemMouseOver" />
+				<EventHandler event="OnMouseOverEnd" function="ItemProperties.ClearMouseOverItem" />
+				<EventHandler event="OnRButtonDown" function="ContainerWindow.OnItemGet" />
+				<EventHandler event="OnRButtonUp" function="ContainerWindow.OnItemRButtonUp" />
+			</EventHandlers>
+		</Button><!-- /ClfWhiteGridViewSocketTemplate -->
+
+
+		<!-- 宝石箱内のアイテムのプロパティを表示するラベル用のテンプレート -->
+		<Window name ="ClfJewelryBoxProp" handleinput="false" savesettings="false" layer="popup">
+			<Size>
+				<AbsPoint x="52" y="52" />
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+				<Anchor point="bottomright" relativePoint="bottomright" />
+			</Anchors>
+			<Windows>
+
+				<Label name="$parentLabel" font="MyriadPro_10" maxchars="8" textalign="left" autoresize="true" wordwrap="false" layer="popup" handleinput="false">
+					<Size>
+						<AbsPoint x="53" y="10" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="2" y="0" />
+						</Anchor>
+					</Anchors>
+					<Color r="255" g="255" b="255" a="255" />
+				</Label>
+
+				<DynamicImage name="$parentBg" texture="CC_Widgets" layer="background" handleinput="false"  alpha="0.5">
+					<Size>
+						<AbsPoint x="49" y="18" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft">
+							<AbsPoint x="2" y="2" />
+						</Anchor>
+					</Anchors>
+					<TexCoords x="502" y="306" />
+					<TexDims   x="45" y="45" />
+					<TintColor r="0" g="0" b="0" />
+				</DynamicImage>
+
+			</Windows>
+		</Window><!-- /ClfJewelryBoxProp -->
+
+
+		<!-- 宝石箱フィルター アイテム背景 -->
+		<DynamicImage name="ClfJBoxFilterItemBG" texture="ClfTexJboxHighlight" texturescale="1" handleinput="false" layer="background" alpha="1" savesettings="false">
+			<Size>
+				<AbsPoint x="52" y="52" />
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft">
+					<AbsPoint x="1" y="1" />
+				</Anchor>
+				<Anchor point="bottomright" relativePoint="bottomright">
+					<AbsPoint x="-1" y="-1" />
+				</Anchor>
+			</Anchors>
+
+			<TexDims   x="52" y="52" />
+		</DynamicImage><!-- /ClfJBoxFilterItemBG -->
+
+	</Windows>
+</Interface>

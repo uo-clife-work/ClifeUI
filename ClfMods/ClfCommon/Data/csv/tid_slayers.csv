@@ -1,0 +1,42 @@
+tId,key,subkey,superSlayer,opposite,note,@CRLF
+1060458,slayer,arachnid,1,1060473,特効: 鋏角類,@
+1060460,slayer,demon,1,1060464,特効: 悪魔族,@
+1060461,slayer,demon,1,1060464,特効: 悪魔族,@
+1060464,slayer,elemental,1,1060460,特効: エレメンタル族,@
+1060472,slayer,repond,1,1060479,特効: 亜人種,@
+1060473,slayer,reptile,1,1060458,特効: 爬虫類,@
+1060479,slayer,undead,1,1060472,特効: アンデッド族,@
+1070855,slayer,fey,1,1060460,特効: 妖精族,@
+1072504,slayer,bear,1,,特効: ベア,@
+1072505,slayer,mage,1,,特効: ネズミ,@
+1072506,slayer,bat,1,,特効: コウモリ,@
+1072508,slayer,beetle,1,,特効: ビートル,@
+1072509,slayer,bird,1,,特効: バード,@
+1072510,slayer,ice,1,,特効: アイス,@
+1072511,slayer,flame,1,,特効: フレイム,@
+1072512,slayer,bovine,1,,特効: ウシ類,@
+1075462,slayer,wolf,1,,特効: ウルフ,@
+1156126,slayer,eodon,1,,イオドーン特効,@
+1156345,slayer,dinosaur,1,1156346,ディノサウルス特効,@
+1156346,slayer,myrmidex,1,,ミュルミデックス特効,@
+1156347,slayer,eodonTribe,1,,イオドーン部族特効,@
+1017396,slayer,balron,,1060464,Balron Damnation,@
+1060457,slayer,airElemental,,1060460,air elemental slayer,@
+1060459,slayer,bloodElemental,,1060460,特効: ブラッドエレメンタル,@
+1060462,slayer,dragon,,1060458,特効: ドラゴン,@
+1060463,slayer,earthElemental,,1060460,特効: アースエレメンタル,@
+1060465,slayer,fireElemental,,1060460,特効: ファイアエレメンタル,@
+1060466,slayer,gargoyle,,1060464,特効: ガーゴイル,@
+1060467,slayer,lizardman,,1060458,特効: リザードマン,@
+1060468,slayer,ogre,,1060479,特効: オーガ,@
+1060469,slayer,ophidian,,1060458,特効: オフィディアン,@
+1060470,slayer,orc,,1060479,特効: オーク,@
+1060471,slayer,poisonElemental,,1060460,特効: ポイズンエレメンタル,@
+1060474,slayer,scorpion,,1060473,特効: スコーピオン,@
+1060475,slayer,snake,,1060458,特効: スネーク,@
+1060476,slayer,snowElemental,,1060460,特効: スノーエレメンタル,@
+1060477,slayer,spider,,1060473,特効: スパイダー,@
+1060478,slayer,terathan,,1060473,特効: テラサン,@
+1060480,slayer,troll,,1060479,特効: トロル,@
+1060481,slayer,waterElemental,,1060460,特効: ウォーターエレメンタル,@
+1095010,slayer,goblin,,1060479,特効: ゴブリン,@

@@ -4,6 +4,8 @@
 		<!-- ClifeUI 追加テクスチャ -->
 		<Texture name="ClfTexMonotoneGradient" file="Textures/shade.dds" />
 		<Texture name="ClfTexMapX" file="Textures/mapX.dds" />
+		<Texture name="ClfTexContainerGridWh" file="Textures/container_grid_white.dds" />
+		<Texture name="ClfTexJboxHighlight" file="Textures/JboxFilterItemBg.dds" />
 
 	</Assets>
 </Interface>

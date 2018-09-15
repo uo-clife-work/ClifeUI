@@ -92,19 +92,21 @@ end
 
 -- オリジナルの GGManager.GGParseData をオーバーライドするメソッド
 function ClfGGMod.GGParseData()
-	if ( ClfGGMod.DEBUG ) then
-		pcall( ClfGGMod.dumpGumpData, GumpData )
-	end
-
 	pcall( ClfGGMod.gumpDataParse, GumpData )
 
 	ClfGGMod.GGManagerGGParseData_org()
+
+	pcall( ClfjewelryBox.gumParse, GumpData )
 end
 
 
 function ClfGGMod.gumpDataParse( gumpData )
 	if ( not gumpData or not gumpData.Gumps ) then
 		return
+	end
+
+	if ( ClfGGMod.DEBUG ) then
+		pcall( ClfGGMod.dumpGumpData, GumpData )
 	end
 
 	if ( ClfALGump.Enable ) then
@@ -188,10 +190,54 @@ end
 
 
 
+-- ガンプ内の全てのアイテムプロパティを得る
+function ClfGGMod.getItemPropsInGump( gumpId )
+	local GumpData = GumpData
+	if ( not GumpData ) then
+		return
+	end
+	local gump = GumpData.Gumps[ gumpId ]
+	if ( not gump or not gump.Buttons ) then
+		return
+	end
+
+	local itemPropDatas = {}
+	local windows = {}
+	local WD_ItemProperties = WindowData.ItemProperties
+	local WDI_Type = WD_ItemProperties.Type
+
+	local RegisterWindowData = RegisterWindowData
+	local GenericGumpGetItemPropertiesId = GenericGumpGetItemPropertiesId
+
+	local getItemProps = function( id )
+		local data = WD_ItemProperties[ id ]
+		if ( not data ) then
+			RegisterWindowData( WDI_Type, id )
+			data = WD_ItemProperties[ id ]
+		end
+		return data
+	end
+
+	for id, btn in pairs( gump.Buttons ) do
+		local objectId = GenericGumpGetItemPropertiesId( WindowGetId( btn ), btn )
+		if ( not objectId or objectId == 0 ) then
+			continue
+		end
+		local prop = getItemProps( objectId )
+		if ( prop ) then
+			itemPropDatas[ objectId ] = prop
+			windows[ objectId ] = btn
+		end
+	end
+
+	return itemPropDatas, windows
+end
+
+
 -- **** デバッグ用 ****
 function ClfGGMod.dumpGumpData( gumpData )
 
-	if ( not ClfDebug or not ClfUtil ) then
+	if ( not ClfDebug ) then
 		return
 	end
 
@@ -202,7 +248,14 @@ function ClfGGMod.dumpGumpData( gumpData )
 		for gumpId, data in pairs( gumps ) do
 
 			local argName = "GumpData.Gumps[" .. tostring( gumpId ) .. "]"
-			local op = ClfDebug.DumpToConsole( argName, data, nil, true )
+			local op = ClfDebug.DumpToConsole( argName, data, nil, true, true )
+
+			local itemProps = ClfGGMod.getItemPropsInGump( gumpId )
+			if ( itemProps ) then
+				op = op .. L"\r\n\r\n---------- Item property ----------\r\n\r\n"
+				op = op .. ClfDebug.DumpToConsole( "ItemProperties", itemProps, nil, true, true )
+				op = op .. L"\r\n"
+			end
 
 			local labels = data.Labels
 			if ( labels and #labels > 0 ) then
@@ -247,10 +300,10 @@ function ClfGGMod.dumpGumpData( gumpData )
 		end
 	end
 
-	if ( WindowData.GG_Core ) then
-		local op = ClfDebug.DumpToConsole( "WindowData.GG_Core", WindowData.GG_Core, nil, true )
-		ClfUtil.exportStr( L"\r\n\r\n" .. op, "ggdump__WindowData.GG_Core", nil, "x_ggdbug" )
-	end
+--	if ( WindowData.GG_Core ) then
+--		local op = ClfDebug.DumpToConsole( "WindowData.GG_Core", WindowData.GG_Core, nil, true )
+--		ClfUtil.exportStr( L"\r\n\r\n" .. op, "ggdump__WindowData.GG_Core", nil, "x_ggdbug" )
+--	end
 
 end
 

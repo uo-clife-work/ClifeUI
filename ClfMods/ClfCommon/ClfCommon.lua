@@ -1,7 +1,7 @@
 
 LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfCommon", "ClfIcons.xml", "ClfIcons.xml" )
 LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfCommon", "ClfTextures.xml", "ClfTextures.xml" )
-
+LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfCommon", "ClfWindowTemplate.xml", "ClfWindowTemplate.xml" )
 
 
 ClfCommon = {}
@@ -22,6 +22,7 @@ function ClfCommon.initialize()
 
 	ClfUtil.initialize()
 	ClfSettings.initialize()
+	ClfDataFuncs.initialize()
 	ClfReActionsWindow.initialize()
 	ClfRefactor.initialize()
 end
@@ -40,9 +41,11 @@ end
 
 
 local CheckListeners = {}
-
+local TimeoutListeners = {}
 
 function ClfCommon.processListenersCheck()
+	local pairs = pairs
+	local pcall = pcall
 	local CheckListeners = CheckListeners
 	local now = ClfCommon.TimeSinceLogin
 	for name, listener in pairs( CheckListeners ) do
@@ -65,6 +68,15 @@ function ClfCommon.processListenersCheck()
 			CheckListeners[ name ] = nil
 		end
 	end
+
+	local TimeoutListeners = TimeoutListeners
+	for name, listener in pairs( TimeoutListeners ) do
+		if ( listener.timeout > now ) then
+			continue
+		end
+		pcall( listener.done, name )
+		TimeoutListeners[ name ] = nil
+	end
 end
 
 
@@ -79,7 +91,7 @@ end
 *                 fail   = function() something end,			-- limit までに判定が完了しなかった時に実行
 *                 begin  = ClfCommon.TimeSinceLogin + 1,		-- いつから判定開始するか。指定しなければ次のプロセスから
 *                 limit  = ClfCommon.TimeSinceLogin + 10,	-- いつまで判定するか。指定しなければ 10秒後まで
-*                 remove = true,										-- 判定完了時に取り除く。指定しなければ true
+*                 remove = false,									-- 判定完了時に取り除くか。指定しなければ true
 *              }
 ]]
 function ClfCommon.addCheckListener( name, listener )
@@ -91,7 +103,6 @@ function ClfCommon.addCheckListener( name, listener )
 		) then
 		return
 	end
-
 	listener.limit  = listener.limit or ClfCommon.TimeSinceLogin + 10
 	listener.remove = ( listener.remove == nil ) or not not listener.remove
 
@@ -100,5 +111,20 @@ end
 
 
 
+function ClfCommon.setTimeout( name, listener )
+	if ( not name
+			or TimeoutListeners[ name ]
+			or not listener
+			or not listener.done
+		) then
+		return
+	end
+	listener.timeout = listener.timeout or ClfCommon.TimeSinceLogin + 1
 
+	TimeoutListeners[ name ] = listener
+end
+
+
+
+-- EOF
 

@@ -111,7 +111,8 @@ local ANIMAL_TYPE_ARRAY = {
 	{ objectType = 10000244, name = "rune beetle", },	-- hueId 0
 	{ objectType = 10001291, name = "saurosaurus", },	-- hueId 0
 	{ objectType = 10001425, name = "ossein ram", },	-- hueId 0
-	{ objectType = 10000180, name = "white wyrm", },	-- hueId 0, 1150, ...
+	{ objectType = 10000049, name = "white wyrm", },	-- hueId 0, 1150,
+	{ objectType = 10000180, name = "white wyrm", },	-- hueId 0, 1150, 1154, ...
 	{ objectType = 10000243, name = "lesser hiryu", },	-- 普通の飛龍も同じIDだけど、まぁいいか。。。
 	{ objectType = 10000060, name = "cold drake",   excHueId = { 0, }, },	-- hueId 1317, 1350,
 	{ objectType = 10000060, name = "drake",        hueId = { 0, }, },

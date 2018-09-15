@@ -1,0 +1,27 @@
+<Interface xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<Window name="ClfEmptyWindow" movable="false" handleinput="false" layer="background" savesettings="false">
+			<Size>
+				<AbsPoint x="0" y="0"/>
+			</Size>
+			<Anchors>
+				<Anchor point="topleft" relativePoint="topleft" />
+			</Anchors>
+		</Window>
+
+		<Button name="Clf_arrow_down_button" backgroundtexture="arrowdown" highlighttexture="arrowdown">
+			<Size>
+				<AbsPoint x="24" y="24" />
+			</Size>
+			<TexCoords>
+				<Normal x="0" y="0" />
+				<NormalHighlit x="24" y="0" />
+				<Pressed x="0" y="0" />
+				<PressedHighlit x="24" y="0" />
+				<Disabled x="0" y="0" />
+			</TexCoords>
+		</Button>
+
+	</Windows>
+</Interface>

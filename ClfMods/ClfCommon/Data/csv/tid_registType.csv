@@ -1,0 +1,7 @@
+tId,key,nqMax,note,@CRLF
+MEMO,,NQ品の最大値（ドラ鱗鎧を除く）,,@
+1060448,registTypePh,8,物理抵抗,@
+1060447,registTypeFi,9,炎抵抗,@
+1060445,registTypeCo,9,冷気抵抗,@
+1060449,registTypePo,10,毒抵抗,@
+1060446,registTypeEn,8,エネルギー抵抗,@

@@ -1,0 +1,54 @@
+tId,key,note,@CRLF
+1151488,magicLower,マジックアイテム（低級,@
+1151489,magicMid,マジックアイテム（中級,@
+1151490,magicUpper,マジックアイテム（上級,@
+1151491,magicHighest,マジックアイテム（最上級,@
+1151492,artifactLower,アーティファクト（低級,@
+1151493,artifactMid,アーティファクト（中級,@
+1151494,artifactUpper,アーティファクト（上級,@
+1151495,artifactLegend,アーティファクト（伝説級,@
+1061078,rarity,レアリティ,@
+1038021,blessed,Blessed,@
+1061682,insured,保険,@
+1116209,brittle,補強不可,@
+1151782,cannotBeRepaired,修理不可,@
+1049643,cursed,Cursed,@
+1154910,prized,Prized,@
+1152714,antique,短命,@
+1060639,durability,耐久性,@
+1060584,charge,チャージ,@
+1075086,elvesOnly,エルフ専用,@
+1111709,gargoylesOnly,ガーゴイル専用,@
+1060437,meditationable,瞑想可,@
+1078597,needOption,条件：～～（未踏の航路で確認）,@
+1094732,needUOSA,必要条件：ステイジアンアビス,@
+1156140,needUOTOL,TOL拡張パックが必要です,@
+1061170,wearableStr,装備STR,@
+1072788,weight,重量,@
+1072225,weight,重量 ※重量：1 の時っぽい？,@
+1061824,oneHand,片手武器,@
+1061171,twoHand,両手武器,@
+1061168,baseDamage,基礎ダメージ,@
+1061167,swingSpeed,振り速度,@
+1061169,shootRange,射程,@
+1061172,weponSkillSword,必要スキル 剣術,@
+1061173,weponSkillMace,必要スキル 棍術,@
+1061174,weponSkillFencing,必要スキル 槍術,@
+1061175,weponSkillArchery,必要スキル 弓術,@
+1112075,weponSkillThrowing,必要スキル 投擲,@
+1073841,contentsNum,バッグの内容物個数,@
+1072241,contentsNum,バッグ（自分のバックパック内、矢筒等）の内容物個数,@
+1075265,contentsNumArrow,矢筒の矢弾数 (矢),@
+1075266,contentsNumXbow,矢筒の矢弾数 (クロスボウボルト),@
+1041503,mapfacetTrammel,地図： ファセット : トランメル,@
+1041502,mapfacetFelucca,地図： ファセット : フェルッカ,@
+1060850,mapfacetIlshenar,地図： ファセット : イルシェナー,@
+1060851,mapfacetMalas,地図： ファセット : マラス,@
+1115645,mapfacetTokuno,地図： ファセット : 徳之諸島,@
+1115646,mapfacetTermur,地図： ファセット : テルマー,@
+1041507,excavator,地図の発掘者（発掘者： ～～）,@
+1072305,carvedSeal,刻印（コンテナの刻印のみ確認済み）,@
+1072378,fullSetProp,フルセット装備時,@
+1042886,numOfSpell,呪文数,@
+502695,switchOn,［ON］,@
+502696,switchOff,［OFF］,@

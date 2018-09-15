@@ -469,3 +469,4 @@ function ClfSettings.toggleCleanContScroll( silent )
 end
 
 
+-- EOF
