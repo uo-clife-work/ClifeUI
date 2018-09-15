@@ -2,11 +2,6 @@
 ClfUtil = {}
 
 
--- UI初期化時のタイムスタンプ：未使用
-ClfUtil.InitialTimeStamp = 0
--- UIを初期化してからの経過時間：未使用
---ClfUtil.TimePassed = 0
-
 ClfUtil.HOUR_IN_SECONDS = 60 * 60
 ClfUtil.DAY_IN_SECONDS = ClfUtil.HOUR_IN_SECONDS * 24
 ClfUtil.GAP_JST = ClfUtil.HOUR_IN_SECONDS * 9
@@ -29,7 +24,6 @@ local CONST = {
 
 
 function ClfUtil.initialize()
-	ClfUtil.InitialTimeStamp = GetCurrentDateTime()
 	BuffDebuff.ShouldCreateNewBuff()
 
 	-- WorkerMobileTids を生成
@@ -266,7 +260,7 @@ function ClfUtil.rgbSV( rgb )
 	if ( iMax <= 0 ) then
 		sv.s = 0
 	else
-	sv.s = ( iMax - iMin ) / iMax
+		sv.s = ( iMax - iMin ) / iMax
 	end
 	return sv
 end
@@ -437,7 +431,7 @@ function ClfUtil.isNeutralMobileName( mobileId, mobName )
 		mobName = ClfUtil.getMobName( mobileId )
 	end
 
-	if ( mobName and type( mobName )  == "wstring" and mobName ~= L"" ) then
+	if ( mobName and type( mobName ) == "wstring" and mobName ~= L"" ) then
 		mobName = wstring.lower( mobName )
 		if ( NeutralMobNames[ mobName ] == true ) then
 			return true
@@ -640,3 +634,5 @@ function ClfUtil.isWorkerMobile( mobileId, mobileType )
 end
 
 
+
+-- EOF

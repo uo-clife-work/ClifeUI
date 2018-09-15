@@ -67,8 +67,8 @@ function ClfActions.initialize()
 				end,
 				done = ClfActions.cleanContScrollVars,
 				fail = ClfActions.cleanContScrollVars,
-				begin  = Interface.TimeSinceLogin + 5,
-				limit  = Interface.TimeSinceLogin + 20,
+				begin  = ClfCommon.TimeSinceLogin + 5,
+				limit  = ClfCommon.TimeSinceLogin + 20,
 			} )
 	end
 end

@@ -151,7 +151,7 @@ function ClfTextParse.overheadTextOnUpdateName( mobileId )
 					ClfTextParse.overheadTextUpdateNameCheked( mobileId )
 				end,
 				begin = false,
-				limit = Interface.TimeSinceLogin + 8
+				limit = ClfCommon.TimeSinceLogin + 8
 			}
 		)
 	end

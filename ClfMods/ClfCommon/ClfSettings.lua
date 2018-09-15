@@ -173,7 +173,7 @@ function ClfSettings.initExtChatFilterKeys()
 				end,
 				done   = ClfSettings.setupExtChatChannelColor,
 				begin  = false,
-				limit  = Interface.TimeSinceLogin + 100,
+				limit  = ClfCommon.TimeSinceLogin + 100,
 			} )
 	end
 end

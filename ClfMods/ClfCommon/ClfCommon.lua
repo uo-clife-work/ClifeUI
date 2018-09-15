@@ -1,6 +1,7 @@
 
-LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfCommon", "ClfIcons.xml", "ClfIcons.xml" )
-LoadResources( "./UserInterface/"..SystemData.Settings.Interface.customUiName.."/ClfMods/ClfCommon", "ClfTextures.xml", "ClfTextures.xml" )
+LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfCommon", "ClfIcons.xml", "ClfIcons.xml" )
+LoadResources( "./UserInterface/" .. SystemData.Settings.Interface.customUiName .. "/ClfMods/ClfCommon", "ClfTextures.xml", "ClfTextures.xml" )
+
 
 
 ClfCommon = {}
@@ -11,8 +12,14 @@ function _return_false() return false end
 
 function _return_true() return true end
 
+-- UIåˆæœŸåŒ–æ™‚ã®ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ï¼šæœªä½¿ç”¨
+ClfCommon.InitialTimeStamp = 0
+ClfCommon.TimeSinceLogin = 0
 
 function ClfCommon.initialize()
+	ClfCommon.InitialTimeStamp = GetCurrentDateTime()
+	ClfCommon.TimeSinceLogin = Interface.TimeSinceLogin
+
 	ClfUtil.initialize()
 	ClfSettings.initialize()
 	ClfReActionsWindow.initialize()
@@ -21,6 +28,8 @@ end
 
 
 function ClfCommon.onUpdate( timePassed )
+	ClfCommon.TimeSinceLogin = ClfCommon.TimeSinceLogin + timePassed
+
 	local pcall = pcall
 	pcall( ClfActions.onUpdate, timePassed )
 	pcall( ClfDamageMod.onUpdate, timePassed )
@@ -35,7 +44,7 @@ local CheckListeners = {}
 
 function ClfCommon.processListenersCheck()
 	local CheckListeners = CheckListeners
-	local now = Interface.TimeSinceLogin
+	local now = ClfCommon.TimeSinceLogin
 	for name, listener in pairs( CheckListeners ) do
 		if ( listener.begin and listener.begin > now ) then
 			continue
@@ -60,17 +69,17 @@ end
 
 
 --[[
-** onUpdate‚²‚Æ‚É”»’è‚·‚éƒIƒuƒWƒFƒNƒg‚ğ“o˜^
-* @param  {string} name      •K{FƒIƒuƒWƒFƒNƒg‚ÌƒL[‚É‚È‚é–¼‘O
-* @param  {table}  listener  •K{F
-*         ”»’èAŠ®—¹A¸”s‚ÉÀs‚·‚éŠÖ”‚âAI—¹‚ÉƒIƒuƒWƒFƒNƒg‚ğæ‚èœ‚­‚©A”»’è‚Ì’x‰„AƒŠƒ~ƒbƒgŠÔi•bj‚ğŠÜ‚ß‚½table
+** onUpdateã”ã¨ã«åˆ¤å®šã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç™»éŒ²
+* @param  {string} name      å¿…é ˆï¼šã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚­ãƒ¼ã«ãªã‚‹åå‰
+* @param  {table}  listener  å¿…é ˆï¼š
+*         åˆ¤å®šã€å®Œäº†ã€å¤±æ•—æ™‚ã«å®Ÿè¡Œã™ã‚‹é–¢æ•°ã‚„ã€çµ‚äº†æ™‚ã«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–ã‚Šé™¤ãã‹ã€åˆ¤å®šã®é…å»¶ã€ãƒªãƒŸãƒƒãƒˆæ™‚é–“ï¼ˆç§’ï¼‰ã‚’å«ã‚ãŸtable
 *         e.g. listener = {
-*                 check  = function() { return exp },			-- •K{F”»’è—pŠÖ”
-*                 done   = function() {  },						-- •K{F”»’è—pŠÖ”‚©‚ç^‚ª•Ô‚Á‚½‚çÀs‚·‚éŠÖ”
-*                 fail   = function() {  },						-- limit ‚Ü‚Å‚É”»’è‚ªŠ®—¹‚µ‚È‚©‚Á‚½‚ÉÀs
-*                 begin  = Interface.TimeSinceLogin + 1,		-- ‚¢‚Â‚©‚ç”»’èŠJn‚·‚é‚©Bw’è‚µ‚È‚¯‚ê‚ÎŸ‚ÌƒvƒƒZƒX‚©‚ç
-*                 limit  = Interface.TimeSinceLogin + 10,	-- ‚¢‚Â‚Ü‚Å”»’è‚·‚é‚©Bw’è‚µ‚È‚¯‚ê‚Î 10•bŒã‚Ü‚Å
-*                 remove = true,										-- ”»’èŠ®—¹‚Éæ‚èœ‚­Bw’è‚µ‚È‚¯‚ê‚Î true
+*                 check  = function() return exp end,			-- å¿…é ˆï¼šåˆ¤å®šç”¨é–¢æ•°
+*                 done   = function() something end,			-- å¿…é ˆï¼šåˆ¤å®šç”¨é–¢æ•°ã‹ã‚‰çœŸãŒè¿”ã£ãŸã‚‰å®Ÿè¡Œã™ã‚‹é–¢æ•°
+*                 fail   = function() something end,			-- limit ã¾ã§ã«åˆ¤å®šãŒå®Œäº†ã—ãªã‹ã£ãŸæ™‚ã«å®Ÿè¡Œ
+*                 begin  = ClfCommon.TimeSinceLogin + 1,		-- ã„ã¤ã‹ã‚‰åˆ¤å®šé–‹å§‹ã™ã‚‹ã‹ã€‚æŒ‡å®šã—ãªã‘ã‚Œã°æ¬¡ã®ãƒ—ãƒ­ã‚»ã‚¹ã‹ã‚‰
+*                 limit  = ClfCommon.TimeSinceLogin + 10,	-- ã„ã¤ã¾ã§åˆ¤å®šã™ã‚‹ã‹ã€‚æŒ‡å®šã—ãªã‘ã‚Œã° 10ç§’å¾Œã¾ã§
+*                 remove = true,										-- åˆ¤å®šå®Œäº†æ™‚ã«å–ã‚Šé™¤ãã€‚æŒ‡å®šã—ãªã‘ã‚Œã° true
 *              }
 ]]
 function ClfCommon.addCheckListener( name, listener )
@@ -83,7 +92,7 @@ function ClfCommon.addCheckListener( name, listener )
 		return
 	end
 
-	listener.limit  = listener.limit or Interface.TimeSinceLogin + 10
+	listener.limit  = listener.limit or ClfCommon.TimeSinceLogin + 10
 	listener.remove = ( listener.remove == nil ) or not not listener.remove
 
 	CheckListeners[ name ] = listener
