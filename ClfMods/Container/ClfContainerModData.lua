@@ -290,6 +290,27 @@ local CONST_DATA = {
 				minVal =   nil, useRawText = true, prefix = "", suffix =  "", doBreak = nil, color = nil,
 			},
 
+			{ 	-- スキル グループ1 （魔法、音楽、メイス、ソード、フェンシング）
+				key = "skillGroup1", priority = 101, hue = nil,
+				minVal = 10, useRawText = true, prefix =  "", suffix =  "", doBreak = nil, color = nil,
+			},
+			{ 	-- スキル グループ2 （Tac、テイム、格闘、扇動、霊話）
+				key = "skillGroup2", priority = 102, hue = nil,
+				minVal = 10, useRawText = true, prefix =  "", suffix =  "", doBreak = nil, color = nil,
+			},
+			{ 	-- スキル グループ3 （受け流し、瞑想、動物学、フォーカス、ステルス、不調和）
+				key = "skillGroup3", priority = 103, hue = nil,
+				minVal = 10, useRawText = true, prefix =  "", suffix =  "", doBreak = nil, color = nil,
+			},
+			{ 	-- スキル グループ4 （武士道、獣医学、EI、アナトミ、ネクロ、窃盗、神秘）
+				key = "skillGroup4", priority = 104, hue = nil,
+				minVal = 10, useRawText = true, prefix =  "", suffix =  "", doBreak = nil, color = nil,
+			},
+			{ 	-- スキル グループ5 （騎士道、忍術、沈静化、包帯、弓術、投擲、耐性）
+				key = "skillGroup5", priority = 100, hue = nil,
+				minVal = 10, useRawText = true, prefix =  "", suffix =  "", doBreak = nil, color = nil,
+			},
+
 		},
 
 		OneHand = {	-- 武器（片手用）の時に判定するプロパティ

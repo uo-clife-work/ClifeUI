@@ -654,13 +654,15 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 				end
 			end
 
-			local RefMagicPropTids = ClfD.MagicTids or {}
-			local RefSkillGroupTids = ClfD.SkillGroupTids or {}
-			local RefNoMagicTids = ClfD.NonMagicTids or {}
-			local RefRegistPropTids = ClfD.RegistTypeTids or {}
-			local RefDamagePropTids = ClfD.DamageTypeTids or {}
-			local RefUniqueNameTids = ClfD.UniqueNameTids or {}
-			local RefSlayerTids = ClfD.SlayerTids or {}
+			local _clfd = ClfD
+			local RefMagicPropTids = _clfd.MagicTids or {}
+			local RefSkillGroupTids = _clfd.SkillGroupTids or {}
+			local RefNoMagicTids = _clfd.NonMagicTids or {}
+			local RefRegistPropTids = _clfd.RegistTypeTids or {}
+			local RefDamagePropTids = _clfd.DamageTypeTids or {}
+			local RefUniqueNameTids = _clfd.UniqueNameTids or {}
+			local RefSlayerTids = _clfd.SlayerTids or {}
+			_clfd = nil
 
 			local registPropLen = 0
 			local magicPropLen = -1	-- アイテム名もプロパティとしてカウントされるので -1 から開始
@@ -681,6 +683,7 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 					local key = RefSkillGroupTids[ tId ].key
 					vals.text = ClfContnrWin.fixSkillName( vals.text )
 					itemPropKeys[ key ] = vals
+					magicPropLen = magicPropLen + 1
 				elseif ( RefNoMagicTids[ tId ] ~= nil ) then
 					local key = RefNoMagicTids[ tId ].key
 					itemPropKeys[ key ] = vals
@@ -710,46 +713,60 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 
 			if ( isTalis and ( itemPropKeys.craftBonusHq or itemPropKeys.craftBonus ) ) then
 				-- タリスマンで生産ボーナスがある場合は通常と異なる表示をさせる（チャージ数より優先）
-				-- どちらかのボーナスが minVal 以上の時のみ表示
-				local talisProps = {}
-				local minVal = 15
+				-- ※ 他に表示すべきプロパティがある時はそちらを優先する
+				local hasOtherProp = false
+				local talisCond = ClfContnrWin.DisplayCondTable.Talis or {}
+				local skipKeys = { ["craftBonusHq"] = true, ["craftBonus"] = true, }
+				for i = 1, #talisCond do
+					local key = talisCond[ i ].key
+					if ( itemPropKeys[ key ] ~= nil and skipKeys[ key ] == nil ) then
+						hasOtherProp = true
+						break
+					end
+				end
 
-				if ( itemPropKeys.craftBonusHq ) then
-					local vals = itemPropKeys.craftBonusHq
-					local str = L""
-					talisProps.hqNum = vals.num
-					if ( vals.childTid ) then
-						local skillName = GetStringFromTid( vals.childTid )
-						skillName = wstring_gsub( skillName, L"^[^[]+%[", L"" )
-						skillName = wstring_gsub( skillName, L"%].*$", L"" )
-						talisProps.skillName = skillName
+				if ( hasOtherProp == false ) then
+					-- 生産ボーナスが minVal 以上の時のみ表示
+					local talisProps = {}
+					local minVal = 15
+
+					if ( itemPropKeys.craftBonusHq ) then
+						local vals = itemPropKeys.craftBonusHq
+						local str = L""
+						talisProps.hqNum = vals.num
+						if ( vals.childTid ) then
+							local skillName = GetStringFromTid( vals.childTid )
+							skillName = wstring_gsub( skillName, L"^[^[]+%[", L"" )
+							skillName = wstring_gsub( skillName, L"%].*$", L"" )
+							talisProps.skillName = skillName
+						end
 					end
-				end
-				if ( itemPropKeys.craftBonus ) then
-					local vals = itemPropKeys.craftBonus
-					local str = L""
-					talisProps.boNum = vals.num
-					if ( vals.childTid ) then
-						local skillName = GetStringFromTid( vals.childTid )
-						skillName = wstring_gsub( skillName, L"^[^[]+%[", L"" )
-						skillName = wstring_gsub( skillName, L"%].*$", L"" )
-						talisProps.skillName = skillName
+					if ( itemPropKeys.craftBonus ) then
+						local vals = itemPropKeys.craftBonus
+						local str = L""
+						talisProps.boNum = vals.num
+						if ( vals.childTid ) then
+							local skillName = GetStringFromTid( vals.childTid )
+							skillName = wstring_gsub( skillName, L"^[^[]+%[", L"" )
+							skillName = wstring_gsub( skillName, L"%].*$", L"" )
+							talisProps.skillName = skillName
+						end
 					end
-				end
-				if ( talisProps.skillName ) then
-					local hqNum = talisProps.hqNum or 0
-					local boNum = talisProps.boNum or 0
-					if ( hqNum >= minVal or boNum >= minVal ) then
-						-- どちらかのボーナスがminVal以上
-						local text = towstring( talisProps.skillName ) .. L":" .. towstring( hqNum ) .. L"-" .. towstring( boNum )
-						local obj = {
-							text = text,
-							color = "note",
-						}
-						return ClfContnrWin.cacheingItemProp( id, obj, force )
+					if ( talisProps.skillName ) then
+						local hqNum = talisProps.hqNum or 0
+						local boNum = talisProps.boNum or 0
+						if ( hqNum >= minVal or boNum >= minVal ) then
+							-- どちらかのボーナスがminVal以上
+							local text = towstring( talisProps.skillName ) .. L":" .. towstring( hqNum ) .. L"-" .. towstring( boNum )
+							local obj = {
+								text = text,
+								color = "note",
+							}
+							return ClfContnrWin.cacheingItemProp( id, obj, force )
+						end
 					end
+					-- END タリスマン生産ボーナス表示
 				end
-				-- END タリスマン生産ボーナス表示
 			end
 
 			-- 矢筒かをチェック
@@ -847,6 +864,7 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 
 			-- tIDの有無だけで判定するプロパティ
 			local uniqueCondTable = ClfContnrWin.UniqueCondTable or {}
+			local RefRelationTable = ClfContnrWin.RelationTable
 			for i = 1, #uniqueCondTable, 1 do
 				local cond = uniqueCondTable[ i ]
 				local key = cond.key
@@ -854,12 +872,16 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 					local text = cond.text
 					-- 関連情報の設定をチェック
 					local relation = cond.relation
-					if ( relation and ClfContnrWin.RelationTable[ relation ] ) then
-						local relTbl = ClfContnrWin.RelationTable[ relation ]
+					if ( relation and RefRelationTable[ relation ] ~= nil ) then
+						local relTbl = RefRelationTable[ relation ]
 						for r = 1, #relTbl, 1 do
 							local rCond = relTbl[ r ]
 							if ( itemPropKeys[ rCond.key ] ) then
-								text = text .. " -" .. rCond.text
+								if ( text ~= nil ) then
+									text = text .. " -" .. rCond.text
+								else
+									text = rCond.text
+								end
 								break
 							end
 						end
