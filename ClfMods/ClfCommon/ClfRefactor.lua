@@ -123,7 +123,7 @@ function ClfRefactor.clearWindowData( timePassed )
 			end
 		end
 
-		local dist = GetDistanceFromPlayer( mobileId ) or 0
+		local dist = GetDistanceFromPlayer( mobileId ) or -1
 		if ( dist < 0 or dist > 50 ) then
 			UnregisterWindowData( WD_MobileName_Type, mobileId )
 		end
@@ -598,12 +598,6 @@ function ClfRefactor.onVacuumStart()
 			DoesVacuumAlert = not ClfSettings.EnableVacuumMsg
 			Actions.MassOrganize = true
 		end
---	else
---		Actions.MassOrganize = false
---		Actions.VacuumObjects = {}
---		if ( ClfSettings.EnableVacuumMsg ) then
---			WindowUtils.SendOverheadText( L"=== Stop Vacuum ===" , 46, true )
---		end
 	end
 end
 
@@ -819,3 +813,5 @@ function ClfRefactor.onMassOrganizer( timePassed )
 	end
 end
 
+
+-- EOF

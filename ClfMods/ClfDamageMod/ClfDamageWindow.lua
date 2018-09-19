@@ -405,10 +405,9 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 				local bStick = b.sticky or -1
 				-- 後から固定表示を設定した方を前にする
 				return ( aStick > bStick )
-
-			elseif ( a.update ~= b.update ) then
+			elseif ( a.lastSec ~= b.lastSec ) then
 				-- ダメージ更新が新しい順にする
-				return ( a.update > b.update )
+				return ( a.lastSec > b.lastSec )
 			end
 			-- ダメージ更新時間が同じ
 
@@ -526,7 +525,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 			end
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
-			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.lastSec - damObj.startSec ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then
@@ -549,7 +548,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 					FitTextToLabel( window .."Name", damObj.name )
 				end
 
-				LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , mathFloor( sec % 60 * 100 ) / 100 ) )
+				LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , sec % 60 ) )
 				LabelSetText( window .. "Total", towstring( total ) )
 			elseif ( OldLastUpdate - damObj.update >= 4 ) then
 				-- 前回更新から4秒以上なら、再描画
@@ -558,7 +557,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 				elseif ( isDead ) then
 					disColor = fontColorDead
 				else
-					LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , mathFloor( sec % 60 * 100 ) / 100 ) )
+					LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , sec % 60 ) )
 					if ( isFarAway ) then
 						disColor = fontColorFarAway
 					elseif ( visualStatecolors[ visualStateId ] ) then
@@ -641,7 +640,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 
 			WindowSetAlpha( window .. "Bg", ( 1 - odd ) * 0.3 )
 
-			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+			local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.lastSec - damObj.startSec ) )
 			local total = damObj.totalDamage
 
 			if ( creating or damObj.update >= OldLastUpdate ) then
@@ -675,7 +674,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 
 				LabelSetText( window .. "Health", health)
 				LabelSetText( window .. "Hit", towstring( damObj.hit ) )
-				LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , mathFloor( sec % 60 * 100 ) / 100 ) )
+				LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , sec % 60 ) )
 				LabelSetText( window .. "Avg", wstringFormat( L"%.2f", dps ))
 				LabelSetText( window .. "Total", towstring( total ) )
 			elseif ( OldLastUpdate - damObj.update >= 4 ) then
@@ -689,7 +688,7 @@ function ClfDamageWindow.updateList( forceUpdate, size )
 				else
 					local health = towstring( mathCeil( 100 * curHealth / maxHealth ) ) .. L"%"
 					LabelSetText( window .. "Health", towstring( health ) )
-					LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , mathFloor( sec % 60 * 100 ) / 100 ) )
+					LabelSetText( window .. "Minutes", wstringFormat( L"%d:%02d", mathFloor( sec / 60 ) , sec % 60 ) )
 					if ( isFarAway ) then
 						disColor = fontColorFarAway
 					elseif ( visualStatecolors[ visualStateId ] ) then
@@ -819,7 +818,7 @@ function ClfDamageWindow.onMobileNameBtnOver()
 	local parent = WindowGetParent( SystemData.ActiveWindow.name )
 	local mobileId = WindowGetId( parent )
 
-	if( mobileId and mobileId > 0 and not MobileHealthBar.windowDisabled[ mobileId ] and MobileHealthBar.hasWindow[ mobileId ] ) then
+	if ( mobileId and mobileId > 0 and not MobileHealthBar.windowDisabled[ mobileId ] and MobileHealthBar.hasWindow[ mobileId ] ) then
 		MobileHealthBar.mouseOverId = mobileId
 		local itemData = {
 			windowName = SystemData.ActiveWindow.name,

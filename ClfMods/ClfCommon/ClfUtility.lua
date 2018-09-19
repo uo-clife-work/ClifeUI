@@ -8,6 +8,8 @@ ClfUtil.GAP_JST = ClfUtil.HOUR_IN_SECONDS * 9
 
 ClfUtil.LOG_EXPORT_DIR = "clfExport/"
 
+ClfUtil.IsHardcoreShard = false
+
 
 -- プレイヤーが使役しているmobのプロパティに使われるtId
 local WorkerMobileTids = {}
@@ -39,6 +41,12 @@ function ClfUtil.initialize()
 			end
 		end
 	end
+
+	local hardcoreShards = {
+		[12] = true,	-- Siege Perilous
+		[18] = true,	-- Mugen
+	}
+	ClfUtil.IsHardcoreShard = ( hardcoreShards[ UserData.Settings.Login.lastShardSelected ] ~= nil )
 end
 
 
@@ -1057,6 +1065,10 @@ function ClfUtil.requestContextMenuItemData( objectId, callback )
 		-- // MEMO: RequestContextMenu は activeWindowが無い時に呼び出すと（動作はするが）エラーが出る
 		-- RequestContextMenu( objectId, false )
 		Interface.org_RequestContextMenu( objectId )
+		if ( DoesWindowExist( "ContextMenu" ) ) then
+			WindowSetOffsetFromParent("ContextMenu", -9999, -9999 )
+			WindowSetShowing( "ContextMenu", false )
+		end
 
 		local menuItems = ClfUtil._getContextItems( objectId )
 		if ( not menuItems or next( menuItems ) == nil ) then
@@ -1107,9 +1119,8 @@ function ClfUtil._getContextItems( objectId )
 			ContextMenuItems[ objectId ] = nil
 		end
 	end
-
-	local ret
 	local data = WindowData.ContextMenu or {}
+	local ret
 	local menuItems = data.menuItems
 	if ( menuItems and data.objectId == objectId and  #menuItems > 0 ) then
 		if ( menuItems[1].returnCode or menuItems[1].tid ) then

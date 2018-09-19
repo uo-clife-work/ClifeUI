@@ -217,13 +217,12 @@ function ClfDamageMod.onDamageInit_disable()
 end
 
 function ClfDamageMod.onDamageInit_enable()
-	local ClfDamageMod = ClfDamageMod
 	local Damage = Damage
 	local mobileId = Damage and Damage.mobileId
-	if ( not mobileId ) then
+	if ( mobileId == nil ) then
 		return
 	end
-
+	local ClfDamageMod = ClfDamageMod
 	local DamageWindow = DamageWindow
 	local Interface = Interface
 	local WindowData = WindowData
@@ -276,6 +275,14 @@ function ClfDamageMod.onDamageInit_enable()
 		local labelScale = 1 + ( damageNum - 50 ) * 0.003
 		labelScale = ( labelScale > 1.6 ) and 1.6 or labelScale
 		WindowStartScaleAnimation( labelName, Window.AnimationType.EASE_OUT, labelScale, 1, 0.45, false, 0, 0 )
+		ClfCommon.setTimeout( "DamagePop_" .. labelName , {
+				done = function()
+					if ( DoesWindowExist( labelName ) ) then
+						WindowStopScaleAnimation( labelName )
+					end
+				end,
+				timeout = ClfCommon.TimeSinceLogin + 0.5,
+			} )
 	end
 
 	LabelSetText( labelName, towstring( damageNum ) )
@@ -297,6 +304,7 @@ function ClfDamageMod.onDamageInit_enable()
 		end
 
 		local time = Interface.Clock.Timestamp or 0
+		local sec  = ClfCommon.TimeSinceLogin
 
 		if ( not damObj ) then
 			-- 最初のダメージ
@@ -336,6 +344,8 @@ function ClfDamageMod.onDamageInit_enable()
 				isDead      = false,
 				start       = time,
 				update      = time,
+				startSec    = sec,
+				lastSec     = sec,
 				count       = count,
 				hit         = 1,
 				isUnknown   = isUnknown,
@@ -371,6 +381,7 @@ function ClfDamageMod.onDamageInit_enable()
 			damObj.update      = time
 			damObj.hit         = damObj.hit + 1
 			damObj.isPet       = isPet
+			damObj.lastSec     = sec
 
 			if ( damageNum > damObj.maxDamage ) then
 				damObj.maxDamage = damageNum
@@ -566,9 +577,9 @@ function ClfDamageMod.pairsByTime( t, f )
 	f = f or function( t1, t2 )
 		local a = t1.v
 		local b = t2.v
-		if ( a.update ~= b.update ) then
+		if ( a.lastSec ~= b.lastSec ) then
 			-- ダメージ更新が古い順にする
-			return ( a.update < b.update )
+			return ( a.lastSec < b.lastSec )
 		end
 		return ( a.count < b.count )
 	end
@@ -695,7 +706,7 @@ function ClfDamageMod.addEntryDamageLog()
 			isDead = damObj.isDead
 		end
 
-		local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.update - damObj.start ) )
+		local sec = mathMin( DAY_IN_SECONDS, mathMax( 1, damObj.lastSec - damObj.startSec ) )
 		local total = damObj.totalDamage
 		local dps = total / sec
 		local dph = total / hit
@@ -742,7 +753,7 @@ function ClfDamageMod.addEntryDamageLog()
 		L"\tDamage/hit: " .. wstringFormat( L"%.2f", dph ) .. L"\r\n" ..
 		L"\tMax Damage: " .. towstring( damObj.maxDamage ) .. L"\r\n" ..
 		L"\tHit: " .. towstring( hit ) .. L"\r\n" ..
-		L"\tSec: " .. wstringFormat( L"%d:%02d", mathFloor( sec / 60 ), mathFloor( sec % 60 * 100 ) / 100 ) .. L"\r\n" ..
+		L"\tSec: " .. wstringFormat( L"%d:%06.3f", mathFloor( sec / 60 ), sec % 60 ) .. L"\r\n" ..
 		L"\tHealth: " .. health .. L"\r\n"
 
 		if ( damObj.pets ) then

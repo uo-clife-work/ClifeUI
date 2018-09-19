@@ -13,12 +13,12 @@ function _return_false() return false end
 function _return_true() return true end
 
 -- UI初期化時のタイムスタンプ：未使用
-ClfCommon.InitialTimeStamp = 0
-ClfCommon.TimeSinceLogin = 0
+ClfCommon.InitialTimeStamp = GetCurrentDateTime() or 0
+ClfCommon.TimeSinceLogin = Interface.TimeSinceLogin or 0
 
 function ClfCommon.initialize()
-	ClfCommon.InitialTimeStamp = GetCurrentDateTime()
-	ClfCommon.TimeSinceLogin = Interface.TimeSinceLogin
+	ClfCommon.InitialTimeStamp = ( ClfCommon.InitialTimeStamp ~= 0 ) and ClfCommon.InitialTimeStamp or GetCurrentDateTime()
+--	ClfCommon.TimeSinceLogin = Interface.TimeSinceLogin
 
 	ClfUtil.initialize()
 	ClfSettings.initialize()
@@ -29,6 +29,7 @@ end
 
 
 function ClfCommon.onUpdate( timePassed )
+	local ClfCommon = ClfCommon
 	ClfCommon.TimeSinceLogin = ClfCommon.TimeSinceLogin + timePassed
 
 	local pcall = pcall
