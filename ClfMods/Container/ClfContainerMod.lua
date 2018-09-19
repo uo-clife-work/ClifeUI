@@ -55,6 +55,8 @@ ClfContnrWin.Initialize_org = nil
 ClfContnrWin.OnItemGet_org = nil
 
 
+ClfContnrWin.InitializingWindows = {}
+
 
 function ClfContnrWin.initialize()
 	local ClfContnrWin = ClfContnrWin
@@ -381,16 +383,22 @@ function ClfContnrWin.fixSkillName_Other( str )
 end
 
 
-function ClfContnrWin.labelSetOptProp_disble( labelName, itemID, elementIcon, item, viewMode, prefix, charge )
+function ClfContnrWin.labelSetOptProp_disble( containerId, labelName, itemID, elementIcon, item, viewMode, prefix, charge )
 	charge = charge or L""
 	LabelSetText( labelName, charge )
 end
 
 
 -- アイテムプロパティの追加表示を行う
-function ClfContnrWin.labelSetOptProp_enable( labelName, itemID, elementIcon, item, viewMode, prefix, charge )
+function ClfContnrWin.labelSetOptProp_enable( containerId, labelName, itemID, elementIcon, item, viewMode, prefix, charge )
+	local ClfContnrWin = ClfContnrWin
+	if ( ClfContnrWin.InitializingWindows[ containerId ] ~= nil ) then
+		-- ウィンドウの初期化中はプロパティ表示を行わない
+		ClfContnrWin.labelSetOptProp_disble( containerId, labelName, itemID, elementIcon, item, viewMode, prefix, charge )
+		return
+	end
+
 	if ( labelName ~= nil and itemID ~= nil ) then
-		local ClfContnrWin = ClfContnrWin
 		local propObj = ClfContnrWin.getInterestPropObj( itemID, charge )
 		local colorTbl = ClfContnrWin.ColorTbl
 		local defColor = colorTbl.default or DefaultTxtColor
@@ -1245,7 +1253,7 @@ function ClfContnrWin.updateObject( windowName, updateId )
 		local viewMode = ContainerWindow.ViewModes[containerId]
 		local gridIndex
 		-- if this object is in my container
-		if( containerId == WindowGetId( windowName ) ) then
+		if ( containerId == WindowGetId( windowName ) ) then
 			-- find the slot index
 			local containedItems = WindowData.ContainerWindow[ containerId ].ContainedItems
 			local numItems = WindowData.ContainerWindow[ containerId ].numItems
@@ -1324,17 +1332,17 @@ function ClfContnrWin.updateObject( windowName, updateId )
 					local uses = ContainerWindow.GetUses( updateId, containerId )
 					if ( uses ~= nil ) then
 						local charge = FormatProperly( name .. L"\n  " .. uses[1] )
-						ClfContnrWin.labelSetOptProp( ElementName, updateId, nil, item, "list", nil, charge )
+						ClfContnrWin.labelSetOptProp( containerId, ElementName, updateId, nil, item, "list", nil, charge )
 					else
 						local prefix = name .. L"\n  "
-						ClfContnrWin.labelSetOptProp( ElementName, updateId, nil, item, "list", prefix )
+						ClfContnrWin.labelSetOptProp( containerId, ElementName, updateId, nil, item, "list", prefix )
 					end
 					WindowSetShowing( ElementName, true )
 				end
 
 				-- Icon
 				local elementIcon = windowName .. "ListViewScrollChildItem" .. listIndex .. "Icon"
-				if( item.iconName ~= "" ) then
+				if ( item.iconName ~= "" ) then
 					if ( Interface.TrapBoxID == 0 and Interface.oldTrapBoxID == updateId ) then
 						Interface.oldTrapBoxID = 0
 					end
@@ -1373,9 +1381,9 @@ function ClfContnrWin.updateObject( windowName, updateId )
 						ItemProperties.GetCharges( updateId )
 						local uses = ContainerWindow.GetUses( updateId, containerId )
 						if ( uses ~= nil ) then
-							ClfContnrWin.labelSetOptProp( gridViewItemLabel, updateId, elementIcon, item, "grid", nil, Knumber( uses[2] ) )
+							ClfContnrWin.labelSetOptProp( containerId, gridViewItemLabel, updateId, elementIcon, item, "grid", nil, Knumber( uses[2] ) )
 						else
-							ClfContnrWin.labelSetOptProp( gridViewItemLabel, updateId, elementIcon, item, "grid" )
+							ClfContnrWin.labelSetOptProp( containerId, gridViewItemLabel, updateId, elementIcon, item, "grid" )
 						end
 					end
 				end
@@ -1650,9 +1658,12 @@ function ClfContnrWin.onWindowInitialize()
 	if ( not containerId ) then
 		return
 	end
+	local ClfContnrWin = ClfContnrWin
+	ClfContnrWin.InitializingWindows[ containerId ] = true
 	ClfContnrWin.setupContent( containerId )
 	-- オリジナルの ContainerWindow.Initialize を実行
 	ClfContnrWin.Initialize_org()
+	ClfContnrWin.InitializingWindows[ containerId ] = nil
 
 	-- トレハンの箱か判定開始
 	ClfContnrWin.checkIsTreasureBox( containerId )
