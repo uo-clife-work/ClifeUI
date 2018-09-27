@@ -80,6 +80,9 @@ local CONST_DATA = {
 		{ 	-- ブラックソンAFのアイテム名用tID
 			key = "blackthornAF", text = "BlackthornAF", priority = 0, doBreak = true, color = "note",
 		},
+		{ 	-- カルトAF（2018 Khaldunイベント交換用AF）のアイテム名用tID
+			key = "cultAF", text = "CultAF", priority = 0, doBreak = true, color = "note",
+		},
 		{ 	-- 特殊ヘアカラーのアイテム名用tID
 			key = "splHairDye", text = nil, priority = 0, doBreak = true, useRawText = true, color = "note",
 		},

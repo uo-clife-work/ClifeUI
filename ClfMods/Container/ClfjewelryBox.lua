@@ -44,7 +44,18 @@ function ClfjewelryBox.gumParse( gumpData )
 					check = function()
 						return ( true == ClfjewelryBox.dispItemProp() )
 					end,
-					done = function() end,
+					done = function()
+						ClfjewelryBox.searchJewelryBox( searchObj )
+					end,
+				} )
+		else
+			-- キャッシュにより一部だけ取得出来ている場合もあるので、一度だけ再実行してみる
+			ClfCommon.setTimeout( "PropDisp" .. JewelryBoxWin, {
+					timeout = ClfCommon.TimeSinceLogin + 0.2,
+					done = function()
+						ClfjewelryBox.dispItemProp()
+						ClfjewelryBox.searchJewelryBox( searchObj )
+					end,
 				} )
 		end
 	end
