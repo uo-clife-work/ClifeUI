@@ -86,6 +86,10 @@ local CONST_DATA = {
 		{ 	-- 特殊ヘアカラーのアイテム名用tID
 			key = "splHairDye", text = nil, priority = 0, doBreak = true, useRawText = true, color = "note",
 		},
+		{ 	-- コスチュームのアイテム名用tID
+			key = "costume", useRawText = true, priority = 0, doBreak = true, color = "note",
+			useChildTid = true,
+		},
 
 		{	-- トレハン地図 Lv.1（解読前）
 			key = "mapLv1", text = "L.1", priority = 0, doBreak = true, relation = "MapFacet", color = "note",

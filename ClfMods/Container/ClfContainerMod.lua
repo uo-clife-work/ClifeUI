@@ -901,7 +901,16 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 						text = text,
 						color = cond.color,
 					}
-					if ( cond.useRawText ) then
+					if ( cond.useChildTid ) then
+						local cTid = itemPropKeys[ key ].childTid
+						if ( cTid ) then
+							local str = GetStringFromTid( cTid )
+							if ( str and str ~= L"" and str ~= L"MISSING STRING" ) then
+								obj.rawText = str
+							end
+						end
+					end
+					if ( cond.useRawText and obj.rawText == nil ) then
 						local valTbl = itemPropKeys[ key ]
 						obj.rawText = valTbl.text
 					end
@@ -945,7 +954,16 @@ function ClfContnrWin.getInterestPropObj( id, charge, force )
 								priority = priority,
 								text = text,
 							}
-							if ( cond.useRawText ) then
+							if ( cond.useChildTid ) then
+								local cTid = itemPropKeys[ key ].childTid
+								if ( cTid ) then
+									local str = GetStringFromTid( cTid )
+									if ( str and str ~= L"" and str ~= L"MISSING STRING" ) then
+										obj.rawText = str
+									end
+								end
+							end
+							if ( cond.useRawText and obj.rawText == nil ) then
 								obj.rawText = valTbl.text
 							end
 							retObjs[ #retObjs + 1 ] = obj
