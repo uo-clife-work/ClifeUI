@@ -6,6 +6,7 @@ ClfCourseMap = {}
 ClfCourseMap.EnableArrowX = false
 
 ClfCourseMap.mapWindowInitialize_org = nil
+ClfCourseMap.mapWindowShutdown_org = nil
 ClfCourseMap.mapWindowUpdateState_org = nil
 ClfCourseMap.mapWindowUpdatePoints_org = nil
 
@@ -41,6 +42,19 @@ local CONST = {
 		[1115646] = true,	-- ファセット : テルマー
 	},
 	TID_COMPLETED = 1041507,	-- 発掘者 : ~1_val~
+	MAP_TIDS = {
+		-- Pub.105 以降の地図名称 tid
+		[1158975] = 1,	-- ~1_TYPE~のへそくりのぼろぼろの宝の地図 (レベル1)
+		[1158976] = 2,	-- ~1_TYPE~の配給品のぼろぼろの宝の地図 (レベル2)
+		[1158977] = 3,	-- ~1_TYPE~の貯蔵品のぼろぼろの宝の地図 (レベル3)
+		[1158978] = 4,	-- ~1_TYPE~の秘蔵品のぼろぼろの宝の地図 (レベル4)
+		[1158979] = 5,	-- ~1_TYPE~の埋蔵品のぼろぼろの宝の地図 (レベル5)
+		[1158980] = 1,	-- ~1_TYPE~のへそくりの宝の地図 (レベル1)
+		[1158981] = 2,	-- ~1_TYPE~の配給品の宝の地図 (レベル2)
+		[1158982] = 3,	-- ~1_TYPE~の貯蔵品の宝の地図 (レベル3)
+		[1158983] = 4,	-- ~1_TYPE~の秘蔵品の宝の地図 (レベル4)
+		[1158984] = 5,	-- ~1_TYPE~の埋蔵品の宝の地図 (レベル5)
+	},
 }
 
 
@@ -52,6 +66,10 @@ function ClfCourseMap.initialize()
 	if ( not ClfCourseMap.mapWindowInitialize_org ) then
 		ClfCourseMap.mapWindowInitialize_org = CourseMapWindow.Initialize
 		CourseMapWindow.Initialize = ClfCourseMap.onMapWindowInitialize
+	end
+	if ( not ClfCourseMap.mapWindowShutdown_org ) then
+		ClfCourseMap.mapWindowShutdown_org = CourseMapWindow.Shutdown
+		CourseMapWindow.Shutdown = ClfCourseMap.onMapWindowShutdown
 	end
 	if ( not ClfCourseMap.mapWindowUpdateState_org ) then
 		ClfCourseMap.mapWindowUpdateState_org = CourseMapWindow.UpdateState
@@ -81,6 +99,12 @@ function ClfCourseMap.initialize()
 		ClfCourseMap.mapWindowMapPoint_OnLButtonDown_org = CourseMapWindow.MapPoint_OnLButtonDown
 		CourseMapWindow.MapPoint_OnLButtonDown = ClfCourseMap.onMapPoint_OnLButtonDown
 	end
+
+	for k in pairs( CONST.MAP_TIDS ) do
+		if ( nil == CourseMapWindow.TreasureMaps[ k ] ) then
+			CourseMapWindow.TreasureMaps[ k ] = true
+		end
+	end
 end
 
 
@@ -106,10 +130,13 @@ end
 
 
 function ClfCourseMap.onMapWindowInitialize()
+	local mapId = SystemData.ActiveObject.Id
+
 	ClfCourseMap.mapWindowInitialize_org()
 
-	if ( CourseMapWindow.isTmap ) then
-		local mapId = SystemData.ActiveObject.Id
+	if ( CourseMapWindow.isTmap or ClfCourseMap.isTmapByTid( mapId ) ) then
+		WindowUtils.RestoreWindowPosition( SystemData.ActiveWindow.name )
+		CourseMapWindow.isTmap = true
 		MapScales[ mapId ] = ClfCourseMap.getZoom( mapId )
 
 		local windowName = "CourseMapWindow" .. mapId
@@ -185,6 +212,16 @@ function ClfCourseMap.onMapWindowInitialize()
 end
 
 
+function ClfCourseMap.onMapWindowShutdown()
+	if ( CourseMapWindow.isTmap ) then
+		local win = SystemData.ActiveWindow.name
+		local mapId = WindowGetId( win )
+		WindowUtils.SaveWindowPosition( win )
+	end
+	ClfCourseMap.mapWindowShutdown_org()
+end
+
+
 function ClfCourseMap.onUpdatePoints()
 	local mapId = SystemData.ActiveObject.Id
 	local ClfCourseMap = ClfCourseMap
@@ -253,6 +290,21 @@ end
 
 function ClfCourseMap.isTmapId( mapId )
 	return ( MapScales[ mapId ] ~= nil )
+end
+
+
+function ClfCourseMap.isTmapByTid( mapId )
+	local WindowData_ItemProperties = WindowData.ItemProperties
+	if ( not WindowData_ItemProperties[ mapId ] ) then
+		RegisterWindowData( WindowData_ItemProperties.Type, mapId )
+	end
+	if ( WindowData_ItemProperties[ mapId ] and WindowData_ItemProperties[ mapId ].PropertiesTids ) then
+		local tid = WindowData.ItemProperties[ mapId ].PropertiesTids[1]
+		if ( CONST.MAP_TIDS[ tid ] ) then
+			return true
+		end
+	end
+	return false
 end
 
 
