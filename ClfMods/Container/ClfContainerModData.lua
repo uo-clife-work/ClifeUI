@@ -101,13 +101,13 @@ local CONST_DATA = {
 			key = "mapLv3", text = "L.3", priority = 0, doBreak = true, relation = "MapFacet", color = "note",
 		},
 		{	-- トレハン地図 Lv.4（解読前）
-			key = "mapLv4", text = "L.4", priority = 0, doBreak = true, relation = "MapFacet", color = "note",
+			key = "mapLv4", text = "L.4", priority = 0, doBreak = true, relation = "MapFacet", color = "artifLow",
 		},
 		{	-- トレハン地図 Lv.5（解読前）
-			key = "mapLv5", text = "L.5", priority = 0, doBreak = true, relation = "MapFacet", color = "note",
+			key = "mapLv5", text = "L.5", priority = 0, doBreak = true, relation = "MapFacet", color = "artifact",
 		},
 		{	-- トレハン地図 Lv.6（解読前）
-			key = "mapLv6", text = "L.6", priority = 0, doBreak = true, relation = "MapFacet", color = "artifLow",
+			key = "mapLv6", text = "L.6", priority = 0, doBreak = true, relation = "MapFacet", color = "artifact",
 		},
 		{	-- トレハン地図 Lv.7（解読前）
 			key = "mapLv7", text = "L.7", priority = 0, doBreak = true, relation = "MapFacet", color = "artifact",
