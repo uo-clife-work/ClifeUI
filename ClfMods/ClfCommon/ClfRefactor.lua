@@ -154,7 +154,8 @@ function ClfRefactor.createObjectHandles()
 		local RegisterWindowData = RegisterWindowData
 		local UnregisterWindowData = UnregisterWindowData
 		local wLower = wstring.lower
-		local wFind =  wstring.find
+		local wFind  = wstring.find
+		local wSub   = wstring.sub
 		local ItemProperties_GetObjectPropertiesArray = ItemProperties.GetObjectPropertiesArray
 		local CreateWindowFromTemplateShow = CreateWindowFromTemplateShow
 		local WindowSetScale = WindowSetScale
@@ -203,31 +204,73 @@ function ClfRefactor.createObjectHandles()
 			end
 		end
 
-		-- 文字フィルターの配列
-		local filterStrings
+		-- フィルター文字を納める配列用
+		local filterOR, filterAND, filterNOT
 		-- 文字フィルターチェック用関数： 通常（文字フィルターが無い時）は必ず true を返す
 		local isNamePassedFilter = _return_true
 
-		if ( type( ObjectHandleWindow_CurrentFilter ) == "wstring" and ObjectHandleWindow_CurrentFilter ~= L"" ) then
-			filterStrings = {}
+		if ( "wstring" == type( ObjectHandleWindow_CurrentFilter ) and L"" ~= ObjectHandleWindow_CurrentFilter ) then
+			filterOR  = {}
+			filterAND = {}
+			filterNOT = {}
+
 			for cf in wstring.gmatch( ObjectHandleWindow_CurrentFilter, L"[^|]+" ) do
 				local cfFix = wLower( cf )
-				if ( cfFix ~= L"" and type( cfFix ) == "wstring" ) then
-					filterStrings[ #filterStrings + 1 ] = cfFix
+				if ( L"" ~= cfFix and "wstring" == type( cfFix ) ) then
+					local prefix = wSub( cfFix, 1, 1 )
+					if ( L"-" == prefix ) then
+						local txt = wSub( cfFix, 2 );
+						if ( L"" ~= txt and "wstring" == type( txt ) ) then
+							-- NOT検索用
+							filterNOT[ #filterNOT + 1 ] = txt
+						end
+					elseif ( L"+" == prefix ) then
+						local txt = wSub( cfFix, 2 );
+						if ( L"" ~= txt and "wstring" == type( txt ) ) then
+							-- AND検索用
+							filterAND[ #filterAND + 1 ] = txt
+						end
+					elseif ( L"\\" == prefix and 1 == wFind( cfFix, L"^\\[%-%+]" ) ) then
+						-- OR検索用： 文字の先頭が \- , \+ の場合は2文字目（-,+）からワードを保持（入力時に、先頭の -,+ をエスケープ出来る様に）
+						filterOR[ #filterOR + 1 ] = wSub( cfFix, 2 )
+					else
+						-- OR検索用
+						filterOR[ #filterOR + 1 ] = cfFix
+					end
 				end
 			end
-			if ( #filterStrings ~= 0 ) then
+
+			if ( 0 ~= #filterOR or 0 ~= #filterAND or 0 ~= #filterNOT ) then
+				-- 正常な文字フィルターのワードが取得出来たので、チェック用関数をセット
 				isNamePassedFilter = function( name )
 					if ( type( name ) == "wstring" ) then
 						local nameFix = wLower( name )
-						for k = 1, #filterStrings do
-							if ( wFind( nameFix, filterStrings[ k ] ) ) then
+						for k = 1, #filterNOT do
+							if ( wFind( nameFix, filterNOT[ k ] ) ) then
+								-- NOT検索ワードにマッチした： 除外
+								return false
+							end
+						end
+						for k = 1, #filterAND do
+							if ( nil == wFind( nameFix, filterAND[ k ] ) ) then
+								-- AND検索ワードにマッチしない： 除外
+								return false
+							end
+						end
+						if ( 0 == #filterOR ) then
+							-- ここまで来て OR検索ワードの指定が無ければOK
+							return true;
+						end
+						for k = 1, #filterOR do
+							if ( wFind( nameFix, filterOR[ k ] ) ) then
+								-- OR検索ワードにマッチした： OK
 								return true
 							end
 						end
 					end
 					return false
-				end
+				end	-- END of isNamePassedFilter function
+
 			end
 		end
 
@@ -582,16 +625,18 @@ function ClfRefactor.onVacuumStart()
 				local organizeItemTypesHues = OrganizeItemTypesHues
 				local organizeItemIds = OrganizeItemIds
 				local activeOrganizerItemNum = Organizer.Organizers_Items[ Organizer_ActiveOrganizer ]
-				for j = 1, activeOrganizerItemNum do
-					local itemL = activeOrganizerItemDatas[ j ]
-					local itemL_type = itemL.type
-					if ( itemL_type > 0 ) then
-						if ( organizeItemTypesHues[ itemL_type ] == nil ) then
-							organizeItemTypesHues[ itemL_type ] = {}
+				if ( activeOrganizerItemNum > 0 ) then
+					for j = 1, activeOrganizerItemNum do
+						local itemL = activeOrganizerItemDatas[ j ]
+						local itemL_type = itemL.type
+						if ( itemL_type > 0 ) then
+							if ( organizeItemTypesHues[ itemL_type ] == nil ) then
+								organizeItemTypesHues[ itemL_type ] = {}
+							end
+							organizeItemTypesHues[ itemL_type ][ itemL.hue ] = true
+						elseif ( itemL.id > 0 ) then
+							organizeItemIds[ itemL.id ] = true
 						end
-						organizeItemTypesHues[ itemL_type ][ itemL.hue ] = true
-					elseif ( itemL.id > 0 ) then
-						organizeItemIds[ itemL.id ] = true
 					end
 				end
 			end
@@ -640,7 +685,8 @@ function ClfRefactor.onMassOrganizer( timePassed )
 					if ( not itemData ) then
 						return false
 					end
-					if ( organizeItemTypesHues[ itemData.objectType ] and organizeItemTypesHues[ itemData.objectType ][ itemData.hueId ] ) then
+					local organizeItem = organizeItemTypesHues[ itemData.objectType ]
+					if ( organizeItem ~= nil and organizeItem[ itemData.hueId ] == true ) then
 						Actions_VacuumObjects[ #Actions_VacuumObjects + 1 ] = objectId
 						return true
 					elseif ( organizeItemIds[ objectId ] == true ) then
