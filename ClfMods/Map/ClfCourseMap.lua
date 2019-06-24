@@ -164,6 +164,8 @@ function ClfCourseMap.onMapWindowInitialize()
 			WindowSetId( zoomBtns .. "ZoomOut", -1 )
 
 			local facetStr
+			local lvStr
+			local themeStr
 			local completed = false
 
 			local WD_ItemProperties = WindowData.ItemProperties
@@ -173,37 +175,83 @@ function ClfCourseMap.onMapWindowInitialize()
 				RegisterWindowData( WD_ItemProperties.Type, mapId )
 				itemProps = WD_ItemProperties[ mapId ]
 			end
+
 			if ( itemProps and itemProps.PropertiesTids and itemProps.PropertiesList ) then
-				local FACET_TIDS = CONST.FACET_TIDS
-				local TID_COMPLETED = CONST.TID_COMPLETED
-				for idx, tid in pairs( itemProps.PropertiesTids ) do
-					if ( FACET_TIDS[ tid ] ) then
-						facetStr = itemProps.PropertiesList[ idx ]
-					elseif ( tid == TID_COMPLETED ) then
-						completed = true
+				local currentMapTid
+
+				if ( itemProps.PropertiesTids and itemProps.PropertiesList ) then
+					local MAP_TIDS = CONST.MAP_TIDS
+					local FACET_TIDS = CONST.FACET_TIDS
+					local TID_COMPLETED = CONST.TID_COMPLETED
+
+					for idx, tid in pairs( itemProps.PropertiesTids ) do
+						if ( MAP_TIDS[ tid ] ) then
+							currentMapTid = tid
+							lvStr = towstring( 'Lv.' .. MAP_TIDS[ tid ] )
+						elseif ( FACET_TIDS[ tid ] ) then
+							facetStr = itemProps.PropertiesList[ idx ]
+						elseif ( tid == TID_COMPLETED ) then
+							completed = true
+						end
 					end
 				end
+
+				if ( currentMapTid and itemProps.PropertiesTidsParams ) then
+					local wSub = wstring.sub
+
+					local PropTidsParams = itemProps.PropertiesTidsParams
+					local mapTidParam = towstring( '@' .. currentMapTid )
+
+					for idx, tidParam in pairs( PropTidsParams ) do
+						if ( mapTidParam == tidParam ) then
+							local subTidParam = PropTidsParams[ 1 + idx ]
+							if ( "wstring" == type( subTidParam ) ) then
+								local prefix = wSub( subTidParam, 1, 1 )
+								if ( L"#" == prefix ) then
+									local fixTid = tonumber( tostring( wSub( subTidParam, 2 ) ) )
+									if ( fixTid and fixTid > 0 ) then
+										local str = GetStringFromTid( fixTid )
+										if ( "wstring" == type( str ) and L"MISSING STRING" ~= str and L"" ~= str ) then
+											themeStr = str
+											break
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+
 			end
 
-			local WD_ObjectInfo = WindowData.ObjectInfo
-			RegisterWindowData( WD_ObjectInfo.Type, mapId, true )
-			local itemData = WD_ObjectInfo[ mapId ]
-			if ( not itemData ) then
-				RegisterWindowData( WD_ObjectInfo.Type, mapId )
-				itemData = WD_ObjectInfo[ mapId ]
-			end
-			local mapName = itemData and itemData.name
 			local mapNamBtn = zoomBtns .. "MapName"
 
 			ButtonSetDisabledFlag( mapNamBtn, completed )
 			local labelStr
-			if ( type( facetStr ) == "wstring" and facetStr ~= L"" ) then
+			if ( "wstring" == type( facetStr )  and L"" ~= facetStr  ) then
 				labelStr = facetStr
 			end
-			if ( type( mapName ) == "wstring" and mapName ~= L"" ) then
+			if ( "wstring" == type( lvStr ) and L"" ~= lvStr ) then
 				local prefix = labelStr and labelStr .. L" - " or L""
-				labelStr = prefix .. mapName
+				labelStr = prefix .. lvStr
+				if ( "wstring" ==type( themeStr ) and  L"" ~= themeStr ) then
+					labelStr = labelStr .. L' [' .. themeStr .. L']'
+				end
+			else
+				local WD_ObjectInfo = WindowData.ObjectInfo
+				RegisterWindowData( WD_ObjectInfo.Type, mapId, true )
+				local itemData = WD_ObjectInfo[ mapId ]
+				if ( not itemData ) then
+					RegisterWindowData( WD_ObjectInfo.Type, mapId )
+					itemData = WD_ObjectInfo[ mapId ]
+				end
+				local mapName = itemData and itemData.name
+				if ( "wstring" == type( mapName ) and  L"" ~= mapName ) then
+					local prefix = labelStr and labelStr .. L" - " or L""
+					labelStr = prefix .. mapName
+				end
 			end
+
 			labelStr = labelStr or L"(Unknown Map)"
 			ButtonSetText( mapNamBtn, labelStr )
 			WindowSetId( mapNamBtn, mapId )
